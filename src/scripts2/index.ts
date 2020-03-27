@@ -73,21 +73,6 @@ class P5Scene {
             p.windowResized = function () {
                 centerCanvas();
             };
-
-            p.keyTyped = function () {
-                if (KeybindingHelper.ActiveKeybindingIterator != null) {
-                    var bind: KeybindingFunction = (currentBinding: number) => {
-                        var keybinding: Keybinding = { key: p.keyCode, binding: currentBinding };
-                        return keybinding;
-                    };
-
-                    var writeOut: SaveOnFinishFunction = (bindings: Keybindings) => {
-                        p.print(bindings);
-                    };
-
-                    KeybindingHelper.ActiveKeybindingIterator(bind, writeOut);
-                }
-            }
         });
     }
 }
@@ -378,5 +363,21 @@ function DrawQuickStartKeybindingsButton()
     setCenterPositionRelative(button, 0.5, 0.5);
     button.mousePressed(() => {
         KeybindingHelper.StartRebindingSequence(4);
+
+        // Bind this action to the "-1" key so that it happens on any key press
+        global.keyboardEventManager.bindKeyToAction(-1, () => {
+            if (KeybindingHelper.ActiveKeybindingIterator != null) {
+                var bind: KeybindingFunction = (currentBinding: number) => {
+                    var keybinding: Keybinding = { key: p.keyCode, binding: currentBinding };
+                    return keybinding;
+                };
+
+                var writeOut: SaveOnFinishFunction = (bindings: Keybindings) => {
+                    p.print(bindings);
+                };
+
+                KeybindingHelper.ActiveKeybindingIterator(bind, writeOut);
+            }
+        });
     });
 }

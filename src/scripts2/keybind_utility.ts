@@ -32,7 +32,7 @@ export function BeginRebinding(bindingsToAcquire: number): ActiveKeybindingState
 export function ContinueRebinding(state: ActiveKeybindingState, bindingFunction: KeybindingFunction): boolean {
     console.debug("current:" + state.currentBinding);
     console.debug("totalBindings:" + state.totalBindings);
-    
+
     if (state.currentBinding < state.totalBindings) {
         state.bindings.push(bindingFunction(state.currentBinding))
         state.currentBinding++;

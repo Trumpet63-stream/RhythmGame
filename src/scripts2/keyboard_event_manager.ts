@@ -7,11 +7,19 @@ export class KeyboardEventManager {
         this.bindings = new Map();
 
         p.keyPressed = function() {
-            console.log("key down " + p.keyCode);
-            let actions = this.bindings.get(p.keyCode);
-            if (actions !== undefined) {
-                if (actions.keyDownAction !== undefined) {
-                    actions.keyDownAction();
+            // -1 is a special keyCode flag that means "any". This is especially useful for setting up key bindings.
+            let globalActions = this.bindings.get(-1);
+            if (globalActions !== undefined) {
+                if (globalActions.keyDownAction !== undefined) {
+                    globalActions.keyDownAction();
+                }
+            } else {
+                console.log("key down " + p.keyCode);
+                let actions = this.bindings.get(p.keyCode);
+                if (actions !== undefined) {
+                    if (actions.keyDownAction !== undefined) {
+                        actions.keyDownAction();
+                    }
                 }
             }
         }.bind(this);
@@ -29,5 +37,9 @@ export class KeyboardEventManager {
 
     bindKeyToAction(keyCode: number, keyDownAction: () => void, keyUpAction: () => void = undefined) {
         this.bindings.set(keyCode, {keyDownAction: keyDownAction, keyUpAction: keyUpAction});
+    }
+
+    unbindKey(keyCode: number) {
+        return this.bindings.delete(keyCode);
     }
 }
