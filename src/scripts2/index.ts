@@ -158,16 +158,56 @@ abstract class Scene2 {
             }
         });
 
-        let keyBinding0 = createKeyBindingInput(0, "track0Binding",15, 400, 240);
-        let keyBinding1 = createKeyBindingInput(1, "track1Binding",15, 400, 270);
-        let keyBinding2 = createKeyBindingInput(2, "track2Binding",15, 400, 300);
-        let keyBinding3 = createKeyBindingInput(3, "track3Binding",15, 400, 330);
+        if (global.previewNumTracks == undefined) {
+            global.previewNumTracks = 4;
+        }
+        let previewNumTracks = createLabelledInput("Number of Tracks", "previewNumTracksInput",
+            global.previewNumTracks.toString(), 15, 400, 240);
+        // @ts-ignore
+        previewNumTracks.input(() => {
+            let value: string | number = previewNumTracks.value();
+            if (typeof value === "string") {
+                value = parseInt(value);
+            }
+            if (!isNaN(value) && value > 0 && Number.isInteger(value)) {
+                removeOldBindingButtons(global.previewNumTracks);
+                global.previewNumTracks = value;
+            }
+        });
+
+        if (global.config.keyBindings.get(global.previewNumTracks) === undefined) {
+            initializeKeyBindings(global.previewNumTracks);
+        }
+        let bindingsStartY = 270;
+        for (let trackNumber = 0; trackNumber < global.previewNumTracks; trackNumber++) {
+            createKeyBindingInput(trackNumber, global.previewNumTracks, 15, 400, bindingsStartY + 30 * trackNumber);
+        }
 
         DrawQuickStartKeybindingsButton();
+
         global.previewDisplay.draw();
     }
 }
 
+function getKeyBindingUniqueId(trackNumber: number, numTracks: number) {
+    return "track" + trackNumber + "Of" + numTracks + "Binding";
+}
+
+function getKeyBindingInputId(trackNumber: number, numTracks: number) {
+    return getKeyBindingUniqueId(trackNumber, numTracks) + "Input";
+}
+
+function getKeyBindingButtonId(trackNumber: number, numTracks: number) {
+    return getKeyBindingUniqueId(trackNumber, numTracks) + "Button";
+}
+
+function removeOldBindingButtons(numTracks: number) {
+    for(let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
+        DOMWrapper.removeElementById(getKeyBindingButtonId(trackNumber, numTracks));
+    }
+}
+
+// Expects e to be an enum
 function enumToStringArray(e: any): string[] {
     return Object.values(e).filter((value) => typeof value === "string").map((value) => {
         return String(value)
@@ -233,18 +273,16 @@ function createLabelledSelect(labelString: string, uniqueId: string, optionsEnum
     return select;
 }
 
-function createKeyBindingInput(trackNumber: number, uniqueId: string, labelFontSize: number, labelX: number, labelY: number) {
+function createKeyBindingInput(trackNumber: number, numTracks: number, labelFontSize: number, labelX: number, labelY: number) {
     let p: p5 = global.p5Scene.sketchInstance;
     p.push();
     p.textSize(labelFontSize);
     let labelString = "Track " + (trackNumber + 1);
-    if (trackNumber == 0) {
-        labelString += " (Leftmost)";
-    }
     labelString += ":";
     p.text(labelString, labelX, labelY);
 
-    let keyString = "LShift";
+    let trackBindingInfo = findBindingInfoForTrack(trackNumber, global.config.keyBindings.get(numTracks));
+    let keyString = trackBindingInfo.string;
     let labelToKeyRelativeSpacing = 1.0;
     let keyStringX = labelX + p.textWidth(labelString) + labelToKeyRelativeSpacing * labelFontSize;
     p.text(keyString, keyStringX, labelY);
@@ -253,10 +291,15 @@ function createKeyBindingInput(trackNumber: number, uniqueId: string, labelFontS
     let canvasPosition: { x: number, y: number } = p._renderer.position();
     let button = DOMWrapper.create(() => {
         return p.createButton("Set");
-    }, uniqueId + "Button").element;
+    }, getKeyBindingButtonId(trackNumber, numTracks)).element;
 
     button.mousePressed(() => {
-        console.log("Hello World!");
+        global.keyboardEventManager.bindKeyToAction(-1, () => {
+            let bindingIndex = getIndexOfTrackNumberBinding(trackNumber, global.config.keyBindings.get(numTracks));
+            global.config.keyBindings.get(numTracks)[bindingIndex] =
+                {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)};
+            global.keyboardEventManager.unbindKey(-1);
+        });
     });
 
     let inputFontSize = labelFontSize * 0.9;
@@ -265,12 +308,55 @@ function createKeyBindingInput(trackNumber: number, uniqueId: string, labelFontS
     button.style("font-size", inputFontSize + "px");
     button.size(inputRelativeLength * inputFontSize);
     let inputSize: { width?: number, height?: number } = button.size();
-    let minimumKeyStringSpace = p.textWidth("LShift");
+    let minimumKeyStringSpace = p.textWidth("LShift"); // Nothing special about LShift here, just seems like a good long string
     let inputX = canvasPosition.x + keyStringX + Math.max(minimumKeyStringSpace, p.textWidth(keyString)) + relativeSpacing * labelFontSize;
     let inputY = canvasPosition.y + labelY - (inputSize.height / 2) - (p.textAscent() * 0.35);
     button.position(inputX, inputY);
     p.pop();
     return button;
+}
+
+function getKeyString(p: p5) {
+    return p.key.length == 1 ? p.key.toUpperCase() : p.key;
+}
+
+function findBindingInfoForTrack(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
+    for(let i = 0; i < bindings.length; i++) {
+        if (bindings[i].trackNumber === trackNumber) {
+            return bindings[i];
+        }
+    }
+    return undefined;
+}
+
+function getIndexOfTrackNumberBinding(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
+    for(let i = 0; i < bindings.length; i++) {
+        if (bindings[i].trackNumber === trackNumber) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function initializeKeyBindings(numTracks: number) {
+    let mapping: { trackNumber: number, keyCode: number, string: string }[] = [];
+
+    if (numTracks <= 9) {
+        let keySequence = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
+        for (let i = 0; i < numTracks; i++) {
+            let keyString = keySequence[i];
+            mapping.push({trackNumber: i, keyCode: keyString.charCodeAt(0), string: keyString});
+        }
+    } else if (numTracks > 9 && numTracks <= 26) {
+        for (let i = 0; i < numTracks; i++) {
+            let characterCode = "A".charCodeAt(0) + i; // This is an ASCII character code
+            mapping.push({trackNumber: i, keyCode: characterCode, string: String.fromCharCode(characterCode)});
+        }
+    } else {
+        throw new Error("Couldn't generate default key bindings for more than 26 tracks. Ran out of letters!");
+    }
+
+    global.config.keyBindings.set(numTracks, mapping);
 }
 
 function drawHeading() {
@@ -329,6 +415,17 @@ abstract class DOMWrapper {
         });
         this.registry.clear();
     }
+
+    // Returns true if remove was successful, otherwise returns false;
+    public static removeElementById(id: string) {
+        if (this.registry.has(id)) {
+            this.registry.get(id).remove();
+            this.registry.delete(id);
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 
@@ -354,13 +451,12 @@ global.previewNotes = [
     }]
 ];
 
-function DrawQuickStartKeybindingsButton()
-{
+function DrawQuickStartKeybindingsButton() {
     let p: p5 = global.p5Scene.sketchInstance;
     let button = DOMWrapper.create(() => {
         return p.createButton("KeyBindings Quickstart");
     }, "button").element;
-    setCenterPositionRelative(button, 0.5, 0.5);
+    setCenterPositionRelative(button, 0.4, 0.5);
     button.mousePressed(() => {
         KeybindingHelper.StartRebindingSequence(4);
 
@@ -368,7 +464,7 @@ function DrawQuickStartKeybindingsButton()
         global.keyboardEventManager.bindKeyToAction(-1, () => {
             if (KeybindingHelper.ActiveKeybindingIterator != null) {
                 var bind: KeybindingFunction = (currentBinding: number) => {
-                    var keybinding: Keybinding = { key: p.keyCode, binding: currentBinding };
+                    var keybinding: Keybinding = {key: p.keyCode, binding: currentBinding};
                     return keybinding;
                 };
 

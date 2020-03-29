@@ -12,7 +12,7 @@ export class Config {
     additionalOffsetInSeconds: number;
     accuracySettings: Accuracy[];
     pauseAtStartInSeconds: number;
-    keyBindings: Map<number, BiDirectionalMap<number, number>>;
+    keyBindings: Map<number, {trackNumber: number, keyCode: number, string: string}[]>;
     gameAreaHeight: number;
     gameAreaWidth: number;
     noteSize: number;

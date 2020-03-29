@@ -14,7 +14,7 @@ export class KeyboardEventManager {
                     globalActions.keyDownAction();
                 }
             } else {
-                console.log("key down " + p.keyCode);
+                console.log("key down " + p.key);
                 let actions = this.bindings.get(p.keyCode);
                 if (actions !== undefined) {
                     if (actions.keyDownAction !== undefined) {
@@ -25,7 +25,7 @@ export class KeyboardEventManager {
         }.bind(this);
 
         p.keyReleased = function() {
-            console.log("key up " + p.keyCode);
+            console.log("key up " + p.key);
             let actions = this.bindings.get(p.keyCode);
             if (actions !== undefined) {
                 if (actions.keyUpAction !== undefined) {
