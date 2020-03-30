@@ -1,17 +1,20 @@
-export interface Keybinding {
-    key: number,
-    binding: number
+import {setConfigKeyBinding} from "./util";
+
+export interface KeyBinding {
+    trackNumber: number,
+    keyCode: number,
+    string: string
 }
 
 export interface KeybindingFunction {
-    (currentBinding: number): Keybinding;
+    (currentBinding: number): KeyBinding;
 }
 
 export interface SaveOnFinishFunction {
     (keybindings: Keybindings): void;
 }
 
-export type Keybindings = Keybinding[];
+export type Keybindings = KeyBinding[];
 
 export interface ActiveKeybindingState {
     currentBinding: number;
@@ -34,13 +37,9 @@ export function ContinueRebinding(state: ActiveKeybindingState, bindingFunction:
     console.debug("totalBindings:" + state.totalBindings);
 
     if (state.currentBinding < state.totalBindings) {
-        state.bindings.push(bindingFunction(state.currentBinding))
+        setConfigKeyBinding(state.currentBinding, state.totalBindings, bindingFunction(state.currentBinding));
         state.currentBinding++;
     }
 
     return state.currentBinding < state.totalBindings;
-}
-
-export function GetKeybindings(state: ActiveKeybindingState): Keybindings {
-    return state.bindings;
 }
