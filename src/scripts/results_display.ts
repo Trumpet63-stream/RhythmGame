@@ -1,7 +1,7 @@
 import * as p5 from "p5";
 import {drawAccuracyBars} from "./drawing_util";
 import {Accuracy, AccuracyManager} from "./accuracy_manager";
-import {Config} from "./config";
+import {Config} from "../scripts2/config";
 import {NoteManager} from "./note_manager";
 
 //TODO: take holds and releases into account

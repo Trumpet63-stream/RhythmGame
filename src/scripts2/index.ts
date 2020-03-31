@@ -4,6 +4,7 @@ import {PreviewDisplay} from "../scripts/preview_display";
 import {NoteState, NoteType} from "../scripts/parsing";
 import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PageManager} from "./page_manager";
+import {PlayingDisplay} from "../scripts/playing_display";
 
 let width = 720;
 let height = 480;
@@ -22,13 +23,10 @@ class P5Scene {
             p.setup = function () {
                 renderer = p.createCanvas(width, height);
                 global.keyboardEventManager = new KeyboardEventManager(p);
-                global.keyboardEventManager.bindKeyToAction(65, () => {
-                    console.log("A down");
-                });
                 global.previewDisplay = new PreviewDisplay(global.previewNotes, global.config, global.p5Scene);
+                global.playingDisplay = new PlayingDisplay(global.playingNotes, global.config, global.p5Scene);
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
                 centerCanvas();
-                console.log("Setup complete");
             };
 
             p.draw = function () {
@@ -64,4 +62,24 @@ global.previewNotes = [
         timeInSeconds: 0.55,
         state: NoteState.DEFAULT
     }]
+];
+global.playingNotes = [
+    [
+        {type: NoteType.NORMAL, timeInSeconds: 0.1, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 0.3, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 0.5, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 0.7, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 0.9, state: NoteState.DEFAULT},
+    ],
+    [
+        {type: NoteType.HOLD_HEAD, timeInSeconds: 1.2, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 1.5, state: NoteState.DEFAULT}
+    ],
+    [
+        {type: NoteType.MINE, timeInSeconds: 1.3, state: NoteState.DEFAULT}
+    ],
+    [
+        {type: NoteType.ROLL_HEAD, timeInSeconds: 1.4, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 1.55, state: NoteState.DEFAULT}
+    ]
 ];

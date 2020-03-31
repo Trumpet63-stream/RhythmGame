@@ -1,7 +1,8 @@
 import {TimeManager} from "./time_manager";
-import {Config} from "../scripts/config";
+import {Config} from "../scripts2/config";
+import {GameTimeSupplier} from "../scripts2/game_time_provider";
 
-export class ScrollManager {
+export class ScrollManager implements GameTimeSupplier {
     private config: Config;
     private systemTime: number;
     private timeManager: TimeManager;

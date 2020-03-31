@@ -1,6 +1,6 @@
 import {NoteManager} from "./note_manager";
 import {KeyState, PlayerKeyAction} from "./key_input_manager";
-import {Config} from "./config";
+import {Config} from "../scripts2/config";
 import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {HoldManager} from "./hold_manager";
 import {NoteState, NoteType} from "./parsing";

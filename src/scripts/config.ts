@@ -48,23 +48,23 @@ export class Config {
         this.gameAreaWidth = defaultIfUndefined(args.gameAreaWidth, DEFAULT_CONFIG.gameAreaWidth);
 
         this.pixelsPerSecond = defaultIfUndefined(args.secondsPerPixel, DEFAULT_CONFIG.pixelsPerSecond);
-        this.setSecondsPerPixel();
+        // this.setSecondsPerPixel();
 
         this.scrollDirection = defaultIfUndefined(args.scrollDirection, DEFAULT_CONFIG.scrollDirection);
-        this.setScrollDirection();
+        // this.setScrollDirection();
 
         // NOTE: Scroll direction and gameAreaHeight must be set BEFORE setting receptorYPosition
         this.receptorYPercent = defaultIfUndefined(args.receptorYPercent, DEFAULT_CONFIG.receptorYPercent);
-        this.setReceptorYPosition();
+        // this.setReceptorYPosition();
 
         this.additionalOffsetInSeconds = defaultIfUndefined(args.additionalOffsetInSeconds, DEFAULT_CONFIG.additionalOffsetInSeconds);
-        this.setAdditionalOffsetInSeconds();
+        // this.setAdditionalOffsetInSeconds();
 
         this.accuracySettings = defaultIfUndefined(args.accuracySettings, DEFAULT_CONFIG.accuracySettings);
-        this.setAccuracySettings();
+        // this.setAccuracySettings();
 
         this.pauseAtStartInSeconds = defaultIfUndefined(args.pauseAtStartInSeconds, DEFAULT_CONFIG.pauseAtStartInSeconds);
-        this.setPauseAtStartInSeconds();
+        // this.setPauseAtStartInSeconds();
 
         this.noteSize = defaultIfUndefined(args.noteSize, DEFAULT_CONFIG.noteSize);
 
@@ -190,16 +190,16 @@ export class Config {
         (<HTMLInputElement>document.getElementById("pause-at-start")).value = (this.pauseAtStartInSeconds * 1000).toString();
     }
 
-    public setPauseAtStartToDefault(noteManager: NoteManager): void {
-        let timeFromReceptorToScreenEdge: number = this.getTimeFromReceptorToScreenEdge();
-        let minimumPauseAtStart: number = Math.max(timeFromReceptorToScreenEdge,
-            this.getEarliestAccuracy() / 1000);
-        let currentNaturalPauseAtStart: number = noteManager.getEarliestNote().timeInSeconds - this.getInitalGameTime();
-        let defaultPauseAtStart = Math.max(0, minimumPauseAtStart - currentNaturalPauseAtStart) * 1000;
-        (<HTMLInputElement>document.getElementById("pause-at-start")).value =
-            Math.round(defaultPauseAtStart).toString();
-        this.updatePauseAtStart();
-    }
+    // public setPauseAtStartToDefault(noteManager: NoteManager): void {
+    //     let timeFromReceptorToScreenEdge: number = this.getTimeFromReceptorToScreenEdge();
+    //     let minimumPauseAtStart: number = Math.max(timeFromReceptorToScreenEdge,
+    //         this.getEarliestAccuracy() / 1000);
+    //     let currentNaturalPauseAtStart: number = noteManager.getEarliestNote().timeInSeconds - this.getInitalGameTime();
+    //     let defaultPauseAtStart = Math.max(0, minimumPauseAtStart - currentNaturalPauseAtStart) * 1000;
+    //     (<HTMLInputElement>document.getElementById("pause-at-start")).value =
+    //         Math.round(defaultPauseAtStart).toString();
+    //     this.updatePauseAtStart();
+    // }
 
     private getTimeFromReceptorToScreenEdge(): number {
         if (this.scrollDirection == ScrollDirection.Up) {
@@ -217,7 +217,7 @@ export class Config {
         }
     }
 
-    private getInitalGameTime(): number {
-        return new TimeManager(0, this).getGameTime(0) + this.getPauseAtStart();
-    }
+    // private getInitalGameTime(): number {
+    //     return new TimeManager(0, this).getGameTime(0) + this.getPauseAtStart();
+    // }
 }

@@ -1,5 +1,5 @@
-import {Config} from "./config";
 import {Note, NoteState, NoteType} from "./parsing";
+import {Config} from "../scripts2/config";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;

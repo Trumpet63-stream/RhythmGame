@@ -1,5 +1,5 @@
 import {NoteManager} from "./note_manager";
-import {Config} from "./config";
+import {Config} from "../scripts2/config";
 import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {getMissBoundary} from "./util";
 import {Note, NoteState, NoteType} from "./parsing";

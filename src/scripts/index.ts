@@ -126,14 +126,14 @@ export function modeSelected() {
     Globals.PARSED_NOTES = getFullParse(selectedMode, localStartedParse);
     setAllNotesToDefault(Globals.PARSED_NOTES);
     replaceNotYetImplementedNoteTypes(Globals.PARSED_NOTES);
-    Globals.CURRENT_GAME_AREA = new PreviewDisplay(Globals.PARSED_NOTES, config);
+    // Globals.CURRENT_GAME_AREA = new PreviewDisplay(Globals.PARSED_NOTES, config);
     updateSimfileState(SimfileState.SIMFILE_PARSED, Globals.PARSED_NOTES.length);
 }
 
 export function goToPrepareGameplay() {
     disablePlayButton();
     Globals.CURRENT_GAME_AREA.remove();
-    Globals.CURRENT_GAME_AREA = new PlayingDisplay(Globals.PARSED_NOTES, config);
+    // Globals.CURRENT_GAME_AREA = new PlayingDisplay(Globals.PARSED_NOTES, config);
 }
 
 export function bindingClicked(bindingIndex: number) {
@@ -165,5 +165,5 @@ export function configUpdated(configOptionCode: number) {
 }
 
 export function autoPauseAtStart() {
-    Globals.CURRENT_GAME_AREA.config.setPauseAtStartToDefault(Globals.CURRENT_GAME_AREA.noteManager);
+    // Globals.CURRENT_GAME_AREA.config.setPauseAtStartToDefault(Globals.CURRENT_GAME_AREA.noteManager);
 }

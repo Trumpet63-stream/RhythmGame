@@ -1,9 +1,9 @@
 import * as p5 from "p5";
 
-import {Config} from "../scripts/config";
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing";
+import {Config} from "../scripts2/config";
 
 class NoteDisplay {
     centerX: number;
