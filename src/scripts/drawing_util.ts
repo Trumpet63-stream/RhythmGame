@@ -24,7 +24,7 @@ function getNumAccuracyEvents(accuracyLabel: string, accuracyRecording: { time: 
                               accuracyManager: AccuracyManager) {
     return accuracyRecording.reduce((sum, trackRecording) =>
         sum + trackRecording.filter(accuracyEvent =>
-        accuracyManager.getAccuracyName(accuracyEvent.accuracy) === accuracyLabel).length, 0);
+        accuracyManager.getAccuracyEventName(accuracyEvent.accuracy) === accuracyLabel).length, 0);
 }
 
 function getMaxTextWidth(p: p5, textArray: string[], textSize: number) {

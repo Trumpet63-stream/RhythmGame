@@ -1,4 +1,4 @@
-import {setConfigKeyBinding} from "./util";
+import {setConfigKeyBinding} from "../scripts/util";
 
 export interface KeyBinding {
     trackNumber: number,

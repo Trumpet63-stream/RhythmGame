@@ -2,7 +2,7 @@ import * as p5 from "p5";
 import {ScrollDirection} from "../scripts/scroll_direction";
 import {global} from "./index";
 import {PageManager, PAGES} from "./page_manager";
-import {enumToStringArray, getKeyBindingButtonId, getKeyString, setConfigKeyBinding} from "./util";
+import {enumToStringArray, getKeyBindingButtonId, getKeyString, setConfigKeyBinding} from "../scripts/util";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;

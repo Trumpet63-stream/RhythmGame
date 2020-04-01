@@ -2,6 +2,8 @@ import * as p5 from "p5";
 import {DOMWrapper, drawHeading, setCenterPositionRelative} from "./ui_util";
 import {global} from "./index";
 
+let initialized = false;
+
 export abstract class Page1 {
     public static draw() {
         drawHeading();
@@ -14,6 +16,11 @@ export abstract class Page1 {
         button.mousePressed(() => {
             p.background(p.random(255));
         });
+
+        if (!initialized) {
+            global.playingDisplay.initialize();
+            initialized = true;
+        }
 
         global.playingDisplay.draw();
     }

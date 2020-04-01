@@ -65,21 +65,21 @@ global.previewNotes = [
 ];
 global.playingNotes = [
     [
-        {type: NoteType.NORMAL, timeInSeconds: 0.1, state: NoteState.DEFAULT},
-        {type: NoteType.NORMAL, timeInSeconds: 0.3, state: NoteState.DEFAULT},
-        {type: NoteType.NORMAL, timeInSeconds: 0.5, state: NoteState.DEFAULT},
-        {type: NoteType.NORMAL, timeInSeconds: 0.7, state: NoteState.DEFAULT},
-        {type: NoteType.NORMAL, timeInSeconds: 0.9, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.1, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.3, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.5, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.7, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.9, state: NoteState.DEFAULT},
     ],
     [
-        {type: NoteType.HOLD_HEAD, timeInSeconds: 1.2, state: NoteState.DEFAULT},
-        {type: NoteType.TAIL, timeInSeconds: 1.5, state: NoteState.DEFAULT}
+        {type: NoteType.HOLD_HEAD, timeInSeconds: 2.2, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 2.5, state: NoteState.DEFAULT}
     ],
     [
-        {type: NoteType.MINE, timeInSeconds: 1.3, state: NoteState.DEFAULT}
+        {type: NoteType.MINE, timeInSeconds: 2.3, state: NoteState.DEFAULT}
     ],
     [
-        {type: NoteType.ROLL_HEAD, timeInSeconds: 1.4, state: NoteState.DEFAULT},
-        {type: NoteType.TAIL, timeInSeconds: 1.55, state: NoteState.DEFAULT}
+        {type: NoteType.ROLL_HEAD, timeInSeconds: 2.4, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 2.55, state: NoteState.DEFAULT}
     ]
 ];

@@ -1,5 +1,3 @@
-import * as p5 from "p5";
-
 import {P5Scene} from "./p5_scene";
 import {DisplayManager} from "./display_manager";
 import {NoteManager} from "./note_manager";
@@ -9,24 +7,26 @@ import {AccuracyManager} from "./accuracy_manager";
 import {KeyHandler} from "./key_input_manager";
 import {ScrollManager} from "./scroll_manager";
 import {ResultsDisplay} from "./results_display";
-import {audioSource} from "./index";
-import {playAudio, stopAudio} from "./file_util";
+import {stopAudio} from "./file_util";
 import {Note} from "./parsing";
 import {HoldManager} from "./hold_manager";
 import {GameTimeSupplier} from "../scripts2/game_time_provider";
 import {Config} from "../scripts2/config";
+import {initializeKeyBindings} from "./util";
+import {global} from "../scripts2/index";
+import {KeyState, PlayerKeyAction} from "./player_key_action";
+import {KeyBinding} from "../scripts2/keybind_utility";
 
 export class PlayingDisplay {
     private scene: P5Scene;
     config: Config;
     noteManager: NoteManager;
     resultsDisplay: ResultsDisplay;
-    private scrollManager: ScrollManager;
     private displayManager: DisplayManager;
     private timeManager: GameTimeSupplier;
     private missManager: MissManager;
     private accuracyManager: AccuracyManager;
-    private holdManager: HoldManager;
+    // private holdManager: HoldManager;
     private keyHandler: KeyHandler;
     private gameEndTime: number;
     private showResultsScreen: boolean;
@@ -46,17 +46,16 @@ export class PlayingDisplay {
 
         this.noteManager = new NoteManager(tracks);
         this.accuracyRecording = this.getInitialAccuracyRecording(this.noteManager.tracks.length);
-        this.holdManager = new HoldManager(this.noteManager);
+        let holdManager = new HoldManager(this.noteManager.tracks.length);
 
         if (this.isDebugMode) {
-            this.scrollManager = new ScrollManager(this.config);
-            this.timeManager = this.scrollManager; // this way the KeyHandler gets the right time in debug mode
+            this.timeManager = new ScrollManager(this.config); // this way the KeyHandler gets the right time in debug mode
         }
 
         // this.gameEndTime = this.calculateGameEnd(audioSource.buffer.duration,
         //     this.noteManager.getLatestNote().timeInSeconds + this.getEarliestAccuracy(this.config) / 1000);
-        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, this.holdManager);
-        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager);
+        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
+        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
         this.keyHandler = new KeyHandler(this.config, this.timeManager, this.accuracyManager);
         document.addEventListener("keydown", this.keyHandler.keyDown.bind(this.keyHandler));
         document.addEventListener("keyup", this.keyHandler.keyUp.bind(this.keyHandler));
@@ -75,12 +74,7 @@ export class PlayingDisplay {
     }
 
     public draw() {
-        let currentTimeInSeconds;
-        if (this.isDebugMode) {
-            currentTimeInSeconds = this.scrollManager.getGameTime(); // Use this for debug mode
-        } else {
-            currentTimeInSeconds = this.timeManager.getGameTime(performance.now());
-        }
+        let currentTimeInSeconds = this.timeManager.getGameTime(performance.now());
         if (currentTimeInSeconds >= this.gameEndTime && !this.showResultsScreen) {
             this.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
                 this.scene.sketchInstance, this.accuracyRecording);
@@ -124,5 +118,29 @@ export class PlayingDisplay {
         this.scene.remove();
         document.removeEventListener("keydown", this.keyHandler.keyDown);
         document.removeEventListener("keyup", this.keyHandler.keyUp);
+    }
+
+    public initialize() {
+        let numTracks = this.noteManager.tracks.length;
+        initializeKeyBindings(numTracks);
+        let keyBindings = global.config.keyBindings.get(numTracks);
+        for (let i = 0; i < keyBindings.length; i++) {
+            let keyBinding: KeyBinding = keyBindings[i];
+            global.keyboardEventManager.bindKeyToAction(keyBinding.keyCode,
+                () => {this.keyDownActionForTrack(keyBinding.trackNumber)},
+                () => {this.keyUpActionForTrack(keyBinding.trackNumber)})
+        }
+    }
+
+    private keyDownActionForTrack(trackNumber: number) {
+        let playerKeyAction: PlayerKeyAction =
+            new PlayerKeyAction(this.timeManager.getGameTime(performance.now()), trackNumber, KeyState.DOWN);
+        this.accuracyManager.handlePlayerAction(playerKeyAction);
+    }
+
+    private keyUpActionForTrack(trackNumber: number) {
+        let playerKeyAction: PlayerKeyAction =
+            new PlayerKeyAction(this.timeManager.getGameTime(performance.now()), trackNumber, KeyState.UP);
+        this.accuracyManager.handlePlayerAction(playerKeyAction);
     }
 }

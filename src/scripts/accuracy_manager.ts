@@ -1,5 +1,5 @@
 import {NoteManager} from "./note_manager";
-import {KeyState, PlayerKeyAction} from "./key_input_manager";
+import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {Config} from "../scripts2/config";
 import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {HoldManager} from "./hold_manager";
@@ -42,32 +42,35 @@ export class AccuracyManager {
         }
     }
 
-    tryToHitNote(currentTimeInSeconds: number, trackNumber: number) {
-        let accuracyRange: { leastTime: number, greatestTime: number } = this.getAccuracyRangeInSeconds();
-        let receptorTimePosition = currentTimeInSeconds;
-        let hittableTimeRange: { leastTime: number, greatestTime: number } =
-            this.getHittableRange(accuracyRange, receptorTimePosition);
-        let hittableIndexRange: {startIndex: number, endIndexNotInclusive: number} =
-            this.noteManager.getNotesByTimeRange(hittableTimeRange.leastTime, hittableTimeRange.greatestTime, trackNumber);
-        let noteIndex = this.getEarliestUnhitNoteIndex(trackNumber, hittableIndexRange);
+    private tryToHitNote(currentTimeInSeconds: number, trackNumber: number) {
+        let noteIndex = this.getEarliestHittableUnhitNoteIndex(currentTimeInSeconds, trackNumber);
         if (noteIndex != null) {
             let note = this.noteManager.tracks[trackNumber][noteIndex];
             if (note.type == NoteType.NORMAL) {
                 note.state = NoteState.HIT;
-                let accuracy = (note.timeInSeconds - receptorTimePosition) * 1000;
-                handleAccuracyEvent(this.getAccuracyName(accuracy), trackNumber, accuracy, currentTimeInSeconds,
+                let accuracy = (note.timeInSeconds - currentTimeInSeconds) * 1000;
+                handleAccuracyEvent(this.getAccuracyEventName(accuracy), trackNumber, accuracy, currentTimeInSeconds,
                     this.accuracyRecording);
             } else if (note.type == NoteType.HOLD_HEAD) {
                 note.state = NoteState.HELD; // set the note to held so it won't count as a miss
-                let accuracy = (note.timeInSeconds - receptorTimePosition) * 1000;
-                handleAccuracyEvent(this.getAccuracyName(accuracy), trackNumber, accuracy, currentTimeInSeconds,
+                let accuracy = (note.timeInSeconds - currentTimeInSeconds) * 1000;
+                handleAccuracyEvent(this.getAccuracyEventName(accuracy), trackNumber, accuracy, currentTimeInSeconds,
                     this.accuracyRecording);
                 this.holdManager.holdNote(trackNumber);
             }
         } else if (this.isConfiguredForBoos()) {
-            handleAccuracyEvent(this.getAccuracyName(Infinity), trackNumber, Infinity, currentTimeInSeconds,
+            handleAccuracyEvent(this.getAccuracyEventName(Infinity), trackNumber, Infinity, currentTimeInSeconds,
                 this.accuracyRecording);
         }
+    }
+
+    private getEarliestHittableUnhitNoteIndex(currentTimeInSeconds: number, trackNumber: number) {
+        let accuracyRange: { leastTime: number, greatestTime: number } = this.getAccuracyRangeInSeconds();
+        let hittableTimeRange: { leastTime: number, greatestTime: number } =
+            this.getHittableRange(accuracyRange, currentTimeInSeconds);
+        let hittableIndexRange: {startIndex: number, endIndexNotInclusive: number} =
+            this.noteManager.getNotesByTimeRange(hittableTimeRange.leastTime, hittableTimeRange.greatestTime, trackNumber);
+        return this.getEarliestUnhitNoteIndexInRange(trackNumber, hittableIndexRange);
     }
 
     getAccuracyRangeInSeconds() {
@@ -91,8 +94,8 @@ export class AccuracyManager {
         };
     }
 
-    private getEarliestUnhitNoteIndex(trackNumber: number, hittableIndexRange: {startIndex: number, endIndexNotInclusive: number}) {
-        for (let i = hittableIndexRange.startIndex; i < hittableIndexRange.endIndexNotInclusive; i++) {
+    private getEarliestUnhitNoteIndexInRange(trackNumber: number, noteIndexRange: {startIndex: number, endIndexNotInclusive: number}) {
+        for (let i = noteIndexRange.startIndex; i < noteIndexRange.endIndexNotInclusive; i++) {
             if (this.noteManager.tracks[trackNumber][i].state == NoteState.DEFAULT) {
                 return i;
             }
@@ -100,7 +103,7 @@ export class AccuracyManager {
         return null;
     }
 
-    getAccuracyName(timeDifferenceInMilliseconds: number): string {
+    getAccuracyEventName(timeDifferenceInMilliseconds: number): string {
         if (this.config.accuracySettings[0].lowerBound == null &&
             timeDifferenceInMilliseconds < this.config.accuracySettings[0].upperBound) {
             return this.config.accuracySettings[0].name; // Handle miss if it exists
@@ -125,21 +128,15 @@ export class AccuracyManager {
     }
 
     tryToReleaseNote(currentTimeInSeconds: number, trackNumber: number) {
-        let accuracyRange: { leastTime: number, greatestTime: number } = this.getAccuracyRangeInSeconds();
-        let receptorTimePosition = currentTimeInSeconds;
-        let hittableTimeRange: { leastTime: number, greatestTime: number } =
-            this.getHittableRange(accuracyRange, receptorTimePosition);
-        let hittableIndexRange: {startIndex: number, endIndexNotInclusive: number} =
-            this.noteManager.getNotesByTimeRange(hittableTimeRange.leastTime, hittableTimeRange.greatestTime, trackNumber);
-        let noteIndex = this.getEarliestUnhitNoteIndex(trackNumber, hittableIndexRange);
+        let noteIndex = this.getEarliestHittableUnhitNoteIndex(currentTimeInSeconds, trackNumber);
         if (noteIndex != null) {
             let note = this.noteManager.tracks[trackNumber][noteIndex];
             if (note.type == NoteType.TAIL) {
                 let hold = this.noteManager.tracks[trackNumber][noteIndex - 1]; // get the hold belonging to this tail
                 hold.state = NoteState.HIT; // hit the start of the hold
                 note.state = NoteState.HIT; // hit the tail of the hold
-                let accuracy = (note.timeInSeconds - receptorTimePosition) * 1000;
-                handleAccuracyEvent("Release " + this.getAccuracyName(accuracy), trackNumber, accuracy,
+                let accuracy = (note.timeInSeconds - currentTimeInSeconds) * 1000;
+                handleAccuracyEvent("Release " + this.getAccuracyEventName(accuracy), trackNumber, accuracy,
                     currentTimeInSeconds, this.accuracyRecording);
             }
         } else { // let go too early
@@ -150,7 +147,7 @@ export class AccuracyManager {
             if (hold.type == NoteType.HOLD_HEAD && tail.type == NoteType.TAIL) {
                 this.noteManager.tracks[trackNumber][holdStartIndex - 1].state = NoteState.HIT; // hit the start of the hold
                 this.noteManager.tracks[trackNumber][holdStartIndex].state = NoteState.HIT; // hit the tail of the hold
-                handleAccuracyEvent("Release " + this.getAccuracyName(Infinity), trackNumber, Infinity,
+                handleAccuracyEvent("Release " + this.getAccuracyEventName(Infinity), trackNumber, Infinity,
                     currentTimeInSeconds, this.accuracyRecording);
             } else {
                 // TODO: It's possible that this is something like a race condition between the key event and the animation loop. Don't throw an error for now

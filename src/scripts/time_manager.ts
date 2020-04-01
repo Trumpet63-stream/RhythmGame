@@ -11,6 +11,9 @@ export class TimeManager implements GameTimeSupplier {
     }
 
     private getElapsedTime(systemTime: number): number {
+        if (systemTime === undefined) {
+            throw Error("Error: can't get elapsed time. Expected 1 argument: systemTime.");
+        }
         return (systemTime - this.systemTimeWhenGameStarted) / 1000; // in seconds
     }
 

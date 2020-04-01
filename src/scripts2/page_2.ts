@@ -10,7 +10,7 @@ import {
     setCenterPositionRelative
 } from "./ui_util";
 import {global} from "./index";
-import {getKeyBindingButtonId, getKeyString} from "./util";
+import {getKeyBindingButtonId, getKeyString, initializeKeyBindings} from "../scripts/util";
 
 export abstract class Page2 {
     public static draw() {
@@ -130,27 +130,6 @@ function removeOldBindingButtons(numTracks: number) {
     for(let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
         DOMWrapper.removeElementById(getKeyBindingButtonId(trackNumber, numTracks));
     }
-}
-
-function initializeKeyBindings(numTracks: number) {
-    let mapping: { trackNumber: number, keyCode: number, string: string }[] = [];
-
-    if (numTracks <= 9) {
-        let keySequence = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
-        for (let i = 0; i < numTracks; i++) {
-            let keyString = keySequence[i];
-            mapping.push({trackNumber: i, keyCode: keyString.charCodeAt(0), string: keyString});
-        }
-    } else if (numTracks > 9 && numTracks <= 26) {
-        for (let i = 0; i < numTracks; i++) {
-            let characterCode = "A".charCodeAt(0) + i; // This is an ASCII character code
-            mapping.push({trackNumber: i, keyCode: characterCode, string: String.fromCharCode(characterCode)});
-        }
-    } else {
-        throw new Error("Couldn't generate default key bindings for more than 26 tracks. Ran out of letters!");
-    }
-
-    global.config.keyBindings.set(numTracks, mapping);
 }
 
 function DrawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {

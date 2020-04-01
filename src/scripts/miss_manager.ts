@@ -36,7 +36,7 @@ export class MissManager {
         this.updateNextUnmissedNoteIndices(numTracks, newNextUnmissedNoteIndices);
     }
 
-    findMissedNotes(numTracks: number, newNextUnmissedNoteIndices: number[]) {
+    private findMissedNotes(numTracks: number, newNextUnmissedNoteIndices: number[]) {
         let allMissedNotes: Note[][] = [];
         for(let i = 0; i < numTracks; i++) {
             let nextUnmissedNoteIndex = this.nextUnmissedNoteIndices[i];
@@ -52,7 +52,8 @@ export class MissManager {
         return allMissedNotes;
     }
 
-    getNewNextUnmissedNoteIndices(missBoundary: number, numTracks: number) {
+    // TODO: This is confusing. Fix it! Shouldn't it just get all the unmissed note indicies?
+    private getNewNextUnmissedNoteIndices(missBoundary: number, numTracks: number) {
         let earliestHittableNoteIndices: number[] = [];
         for(let i = 0; i < numTracks; i++) {
             let track: Note[] = this.noteManager.tracks[i];
@@ -63,8 +64,7 @@ export class MissManager {
         return earliestHittableNoteIndices;
     }
 
-    //TODO: Add option to disable tail misses
-    handleMissedNotes(missedNotes: Note[][], currentTime: number) {
+    private handleMissedNotes(missedNotes: Note[][], currentTime: number) {
         for(let i = 0; i < missedNotes.length; i++) {
             for(let j = 0; j < missedNotes[i].length; j++) {
                 handleAccuracyEvent(this.config.accuracySettings[0].name, i, -Infinity, currentTime, this.accuracyRecording);
@@ -76,7 +76,7 @@ export class MissManager {
         }
     }
 
-    updateNextUnmissedNoteIndices(numTracks: number, newNextUnmissedNoteIndices: number[]) {
+    private updateNextUnmissedNoteIndices(numTracks: number, newNextUnmissedNoteIndices: number[]) {
         for(let i = 0; i < numTracks; i++) {
             this.nextUnmissedNoteIndices[i] = Math.max(this.nextUnmissedNoteIndices[i], newNextUnmissedNoteIndices[i]);
         }

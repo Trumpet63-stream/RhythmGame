@@ -1,22 +1,7 @@
 import {AccuracyManager} from "./accuracy_manager";
 import {Config} from "../scripts2/config";
 import {GameTimeSupplier} from "../scripts2/game_time_provider";
-
-export class PlayerKeyAction {
-    gameTime: number;
-    track: number;
-    keyState: KeyState;
-
-    constructor(gameTime: number, track: number, keyState: KeyState) {
-        this.gameTime = gameTime;
-        this.track = track;
-        this.keyState = keyState;
-    }
-}
-
-export enum KeyState {
-    UP, DOWN,
-}
+import {KeyState} from "./player_key_action";
 
 export class KeyHandler {
     timeManager: GameTimeSupplier; // Allow ScrollManager only for debug mode
