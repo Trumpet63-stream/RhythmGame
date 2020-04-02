@@ -3,7 +3,7 @@ import {NoteManager} from "./note_manager";
 /* This class is intended only to be used to store the hold state of key events for notes that can be held. This
     shouldn't be used for normal notes */
 export class HoldManager {
-    heldTracks: boolean[];
+    private heldTracks: boolean[];
     private noteManager: NoteManager;
 
     constructor(numTracks: number) {
@@ -13,11 +13,15 @@ export class HoldManager {
         }
     }
 
-    holdNote(trackNumber: number) {
+    public isTrackHeld(trackNumber: number) {
+        return this.heldTracks[trackNumber];
+    }
+
+    public holdTrack(trackNumber: number) {
         this.heldTracks[trackNumber] = true;
     }
 
-    unHoldNote(trackNumber: number) {
+    public unholdTrack(trackNumber: number) {
         this.heldTracks[trackNumber] = false;
     }
 }

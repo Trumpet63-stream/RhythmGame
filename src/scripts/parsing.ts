@@ -1,3 +1,5 @@
+import {$enum} from "ts-enum-util";
+
 export class PartialParse {
     metaData: Map<string, string>;
     modes: Map<string, string>[];
@@ -10,6 +12,7 @@ export enum NoteType {
     TAIL = "3",
     ROLL_HEAD = "4",
     MINE = "M",
+    UNKNOWN = "???"
 }
 
 export enum NoteState {
@@ -19,8 +22,8 @@ export enum NoteState {
     HELD,
 }
 
-export class Note {
-    type: string;
+export interface Note {
+    type: NoteType;
     timeInSeconds: number;
     state?: NoteState;
 }
@@ -235,8 +238,8 @@ function getTracksFromLines(timesBeatsAndLines: { time: number; beat: number; li
     for (let i = 0; i < timesBeatsAndLines.length; i++) {
         let line: { time: number; beat: number; lineInfo: string } = timesBeatsAndLines[i];
         for (let j = 0; j < line.lineInfo.length; j++) {
-            let noteType = line.lineInfo.charAt(j);
-            if (noteType !== "0") {
+            let noteType: NoteType = $enum(NoteType).asKeyOrDefault(line.lineInfo.charAt(j), NoteType.UNKNOWN);
+            if (noteType !== NoteType.NONE) {
                 tracks[j].push({type: noteType, timeInSeconds: line.time});
             }
         }

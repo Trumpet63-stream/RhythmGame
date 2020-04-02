@@ -3,6 +3,7 @@ import {Config} from "../scripts2/config";
 import {global} from "../scripts2/index";
 import {KeyBinding} from "../scripts2/keybind_utility";
 import * as p5 from "p5";
+import {AccuracyEvent} from "./handle_accuracy_event";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -12,23 +13,24 @@ export function isUndefined(value: any): boolean {
     return typeof value === "undefined";
 }
 
-export function saveAccuracy(accuracyRecording: { time: number, accuracy: number }[][],trackNumber: number,
-                             accuracyInMilliseconds: number, gameTime: number) {
-    accuracyRecording[trackNumber].push({time: gameTime, accuracy: accuracyInMilliseconds});
+export function saveAccuracy(accuracyRecording: AccuracyEvent[][], trackNumber: number,
+                             accuracyInMilliseconds: number, gameTime: number, noteType: NoteType) {
+    accuracyRecording[trackNumber].push(
+        {time: gameTime, accuracyInMilliseconds: accuracyInMilliseconds, noteType: noteType});
 }
 
 export function setAllNotesToDefault(tracks: Note[][]) {
-    for(let i = 0; i < tracks.length; i++) {
-        for(let j = 0; j < tracks[i].length; j++) {
+    for (let i = 0; i < tracks.length; i++) {
+        for (let j = 0; j < tracks[i].length; j++) {
             tracks[i][j].state = NoteState.DEFAULT;
         }
     }
 }
 
 export function replaceNotYetImplementedNoteTypes(tracks: Note[][]) {
-    for(let i = 0; i < tracks.length; i++) {
-        for(let j = 0; j < tracks[i].length; j++) {
-            switch(NoteType[tracks[i][j].type as keyof typeof NoteType]) {
+    for (let i = 0; i < tracks.length; i++) {
+        for (let j = 0; j < tracks[i].length; j++) {
+            switch (NoteType[tracks[i][j].type as keyof typeof NoteType]) {
                 case NoteType.TAIL:
                     break;
                 case NoteType.MINE:
@@ -86,8 +88,8 @@ export function enumToStringArray(e: any): string[] {
     });
 }
 
-function getIndexOfTrackNumberBinding(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
-    for(let i = 0; i < bindings.length; i++) {
+function getIndexOfTrackNumberBinding(trackNumber: number, bindings: { trackNumber: number, keyCode: number, string: string }[]) {
+    for (let i = 0; i < bindings.length; i++) {
         if (bindings[i].trackNumber === trackNumber) {
             return i;
         }

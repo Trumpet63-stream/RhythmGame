@@ -16,6 +16,7 @@ import {initializeKeyBindings} from "./util";
 import {global} from "../scripts2/index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "../scripts2/keybind_utility";
+import {AccuracyEvent} from "./handle_accuracy_event";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -30,7 +31,7 @@ export class PlayingDisplay {
     private keyHandler: KeyHandler;
     private gameEndTime: number;
     private showResultsScreen: boolean;
-    private accuracyRecording: { time: number; accuracy: number; }[][];
+    private accuracyRecording: AccuracyEvent[][];
     private isDebugMode: boolean = false;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
@@ -106,7 +107,7 @@ export class PlayingDisplay {
         console.log("Song Ended");
     }
 
-    private getInitialAccuracyRecording(numTracks: number): { time: number, accuracy: number }[][] {
+    private getInitialAccuracyRecording(numTracks: number): AccuracyEvent[][] {
         let accuracyRecording = [];
         for (let i = 0; i < numTracks; i++) {
             accuracyRecording.push([]);
