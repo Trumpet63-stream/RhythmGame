@@ -41,14 +41,24 @@ export class MissManager {
             if (indexOfLastCheckedNote >= track.length) {
                 break;
             }
-            if (this.isNoteMissedAndNotHandled(track[indexOfLastCheckedNote], currentTime)) {
-                this.handleMissedNote(trackNumber, track[indexOfLastCheckedNote], currentTime);
+            let currentNote = track[indexOfLastCheckedNote];
+            if (this.isNotMissable(currentNote)) {
+                indexOfLastCheckedNote++;
+                continue;
+            }
+            if (this.isNoteMissedAndNotHandled(currentNote, currentTime)) {
+                this.handleMissedNote(trackNumber, currentNote, currentTime);
                 indexOfLastCheckedNote++;
             } else {
                 break;
             }
         }
         this.lastCheckedNoteIndices[trackNumber] = indexOfLastCheckedNote;
+    }
+
+    // e.g. notes that have already been hit are not missable
+    private isNotMissable(note: Note) {
+        return note.state !== NoteState.DEFAULT;
     }
 
     private isNoteMissedAndNotHandled(note: Note, currentTime: number): boolean {
@@ -60,7 +70,9 @@ export class MissManager {
         handleAccuracyEvent(this.config.accuracySettings[0].name, trackNumber, -Infinity, currentTime, missedNote.type, this.accuracyRecording);
         missedNote.state = NoteState.MISSED;
         if (missedNote.type == NoteType.TAIL) {
-            this.holdManager.unholdTrack(trackNumber) // Force a hold release upon missing the tail
+            if (this.holdManager.isTrackHeld(trackNumber)) {
+                this.holdManager.unholdTrack(trackNumber) // Force a hold release upon missing the tail
+            }
         }
     }
 }

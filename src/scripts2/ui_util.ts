@@ -10,7 +10,7 @@ export function drawHeading() {
     let scene1Button = DOMWrapper.create(() => {
         return p.createButton("Play From File");
     }, "scene1Button").element;
-    setCenterPositionRelative(scene1Button, 0.3, 0.05);
+    setElementCenterPositionRelative(scene1Button, 0.3, 0.05);
     scene1Button.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PAGE_1);
     });
@@ -18,14 +18,14 @@ export function drawHeading() {
     let scene2Button = DOMWrapper.create(() => {
         return p.createButton("Options");
     }, "scene2Button").element;
-    setCenterPositionRelative(scene2Button, 0.7, 0.05);
+    setElementCenterPositionRelative(scene2Button, 0.7, 0.05);
     scene2Button.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PAGE_2);
     });
 }
 
 // Expects relativeX and relative Y to be between 0 and 1
-export function setCenterPositionRelative(element: p5.Element, relativeX: number, relativeY: number) {
+export function setElementCenterPositionRelative(element: p5.Element, relativeX: number, relativeY: number) {
     let p = global.p5Scene.sketchInstance;
     let canvasPosition: { x: number, y: number } = p._renderer.position();
     let elementSize: { width?: number, height?: number } = element.size();
@@ -103,8 +103,8 @@ export function createLabelledInput(labelString: string, uniqueId: string, initi
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
-export function createLabelledSelect(labelString: string, uniqueId: string, optionsEnum: any, initialEnumValue: any,
-                              labelFontSize: number, labelX: number, labelY: number) {
+export function createScrollDirectionSelect(labelString: string, uniqueId: string, optionsEnum: any, initialEnumValue: any,
+                                            labelFontSize: number, labelX: number, labelY: number) {
     let p: p5 = global.p5Scene.sketchInstance;
     p.push();
     p.textSize(labelFontSize);

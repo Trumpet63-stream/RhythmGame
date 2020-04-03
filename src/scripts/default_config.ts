@@ -3,7 +3,7 @@ import {BiDirectionalMap} from "./bi_directional_map";
 import {ScrollDirection} from "./scroll_direction";
 
 export let DEFAULT_CONFIG = {
-    pixelsPerSecond: 650,
+    pixelsPerSecond: 550,
     scrollDirection: ScrollDirection.Down,
     receptorYPercent: 10,
     additionalOffsetInSeconds: 0,

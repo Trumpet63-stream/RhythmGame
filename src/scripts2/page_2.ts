@@ -5,9 +5,9 @@ import {KeyBinding, KeybindingFunction, Keybindings, SaveOnFinishFunction} from 
 import {
     createKeyBindingInput,
     createLabelledInput,
-    createLabelledSelect,
+    createScrollDirectionSelect,
     DOMWrapper, drawHeading,
-    setCenterPositionRelative
+    setElementCenterPositionRelative
 } from "./ui_util";
 import {global} from "./index";
 import {getKeyBindingButtonId, getKeyString, initializeKeyBindings} from "../scripts/util";
@@ -43,7 +43,7 @@ export abstract class Page2 {
             }
         });
 
-        let scrollDirectionSelect = createLabelledSelect("Scroll Direction", "scrollDirectionSelect",
+        let scrollDirectionSelect = createScrollDirectionSelect("Scroll Direction", "scrollDirectionSelect",
             ScrollDirection, global.config.scrollDirection, 15, 400, currentY += 30);
         // @ts-ignore
         scrollDirectionSelect.changed(() => {

@@ -61,17 +61,6 @@ export class PlayingDisplay {
         document.addEventListener("keydown", this.keyHandler.keyDown.bind(this.keyHandler));
         document.addEventListener("keyup", this.keyHandler.keyUp.bind(this.keyHandler));
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
-
-        // this.scene = new P5Scene(this.config.gameAreaWidth, this.config.gameAreaHeight,
-        //     (canvas: HTMLCanvasElement, p: p5) => {
-        //         this.displayManager = new DisplayManager(this.noteManager, canvas, this.config, p);
-        //         if (this.isDebugMode) {
-        //             canvas.addEventListener("wheel", (e: WheelEvent) => this.scrollManager.canvasScrolled(e));
-        //         }
-        //     },
-        //     () => {
-        //
-        //     });
     }
 
     public draw() {
@@ -117,8 +106,6 @@ export class PlayingDisplay {
 
     remove() {
         this.scene.remove();
-        document.removeEventListener("keydown", this.keyHandler.keyDown);
-        document.removeEventListener("keyup", this.keyHandler.keyUp);
     }
 
     public initialize() {

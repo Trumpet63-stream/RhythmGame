@@ -30,7 +30,7 @@ export function setAllNotesToDefault(tracks: Note[][]) {
 export function replaceNotYetImplementedNoteTypes(tracks: Note[][]) {
     for (let i = 0; i < tracks.length; i++) {
         for (let j = 0; j < tracks[i].length; j++) {
-            switch (NoteType[tracks[i][j].type as keyof typeof NoteType]) {
+            switch (tracks[i][j].type) {
                 case NoteType.TAIL:
                     break;
                 case NoteType.MINE:
