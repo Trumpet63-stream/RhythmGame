@@ -5,6 +5,8 @@ import {NoteState, NoteType} from "../scripts/parsing";
 import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PageManager} from "./page_manager";
 import {PlayingDisplay} from "../scripts/playing_display";
+import {Simfile} from "./simfile";
+import {AudioFile} from "./audio_file";
 
 let width = 720;
 let height = 480;
@@ -45,6 +47,8 @@ class P5Scene {
 export const global: any = {};
 global.p5Scene = new P5Scene();
 global.config = new Config({});
+global.simfile = new Simfile();
+global.audioFile = new AudioFile();
 global.previewNotes = [
     [{type: NoteType.NORMAL, timeInSeconds: 0.1, state: NoteState.DEFAULT}, {
         type: NoteType.NONE,

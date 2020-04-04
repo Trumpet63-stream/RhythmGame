@@ -1,22 +1,5 @@
 import {config, Mode} from "./index";
 
-export enum SimfileState {
-    NO_SIMFILE,
-    SIMFILE_UPLOADED,
-    SIMFILE_PREPARSED,
-    DIFFICULTY_SELECTED,
-    SIMFILE_PARSED,
-}
-
-export enum AudioFileState {
-    NO_AUDIO_FILE,
-    AUDIO_FILE_UPLOADED,
-    AUDIO_FILE_LOADED,
-}
-
-let simfileState: SimfileState;
-let audioFileState: AudioFileState;
-
 enum UiId {
     UPLOAD_SIMFILE_SECTION = "upload-simfile-section",
     UPLOAD_AUDIO_FILE_SECTION= "upload-audio-file-section",
@@ -152,69 +135,69 @@ export function disablePlayButton() {
     playButton.disable();
 }
 
-export function updateSimfileState(simfileState_: SimfileState, args: Mode[] | number = undefined) {
-    switch(simfileState_) {
-        case SimfileState.NO_SIMFILE:
-            uploadSimfileSection.show();
-            selectModeSection.hide();
-            graphicalDisplaySection.hide();
-            gameplaySettingsSection.show();
-            keyBindingMenu.show();
-            break;
-        case SimfileState.SIMFILE_UPLOADED:
-            uploadSimfileSection.show();
-            selectModeSection.hide();
-            graphicalDisplaySection.hide();
-            gameplaySettingsSection.show();
-            keyBindingMenu.show();
-            break;
-        case SimfileState.SIMFILE_PREPARSED:
-            uploadSimfileSection.show();
-            selectModeSection.show(<Mode[]> args);
-            graphicalDisplaySection.hide();
-            gameplaySettingsSection.show();
-            keyBindingMenu.show();
-            break;
-        case SimfileState.DIFFICULTY_SELECTED:
-            uploadSimfileSection.show();
-            selectModeSection.show(<Mode[]> args);
-            graphicalDisplaySection.hide();
-            gameplaySettingsSection.show();
-            keyBindingMenu.show();
-            break;
-        case SimfileState.SIMFILE_PARSED:
-            uploadSimfileSection.show();
-            selectModeSection.show(null);
-            graphicalDisplaySection.show();
-            gameplaySettingsSection.show();
-            keyBindingMenu.show(<number> args);
-            break;
-    }
-    simfileState = simfileState_;
-    updateSharedUIState();
-}
-
-export function updateAudioFileState(audioFileState_: AudioFileState) {
-    switch(audioFileState_) {
-        case AudioFileState.NO_AUDIO_FILE:
-            uploadAudioFileSection.show();
-            break;
-        case AudioFileState.AUDIO_FILE_UPLOADED:
-            uploadAudioFileSection.show();
-            break;
-        case AudioFileState.AUDIO_FILE_LOADED:
-            uploadAudioFileSection.show();
-            break;
-    }
-    audioFileState = audioFileState_;
-    updateSharedUIState();
-}
-
-function updateSharedUIState() {
-    if(simfileState == SimfileState.SIMFILE_PARSED && audioFileState == AudioFileState.AUDIO_FILE_LOADED) {
-        playButton.show();
-    }
-    else {
-        playButton.hide()
-    }
-}
+// export function updateSimfileState(simfileState_: SimfileState, args: Mode[] | number = undefined) {
+//     switch(simfileState_) {
+//         case SimfileState.NO_SIMFILE:
+//             uploadSimfileSection.show();
+//             selectModeSection.hide();
+//             graphicalDisplaySection.hide();
+//             gameplaySettingsSection.show();
+//             keyBindingMenu.show();
+//             break;
+//         case SimfileState.SIMFILE_UPLOADED:
+//             uploadSimfileSection.show();
+//             selectModeSection.hide();
+//             graphicalDisplaySection.hide();
+//             gameplaySettingsSection.show();
+//             keyBindingMenu.show();
+//             break;
+//         case SimfileState.SIMFILE_PREPARSED:
+//             uploadSimfileSection.show();
+//             selectModeSection.show(<Mode[]> args);
+//             graphicalDisplaySection.hide();
+//             gameplaySettingsSection.show();
+//             keyBindingMenu.show();
+//             break;
+//         case SimfileState.DIFFICULTY_SELECTED:
+//             uploadSimfileSection.show();
+//             selectModeSection.show(<Mode[]> args);
+//             graphicalDisplaySection.hide();
+//             gameplaySettingsSection.show();
+//             keyBindingMenu.show();
+//             break;
+//         case SimfileState.SIMFILE_PARSED:
+//             uploadSimfileSection.show();
+//             selectModeSection.show(null);
+//             graphicalDisplaySection.show();
+//             gameplaySettingsSection.show();
+//             keyBindingMenu.show(<number> args);
+//             break;
+//     }
+//     simfileState = simfileState_;
+//     updateSharedUIState();
+// }
+//
+// export function updateAudioFileState(audioFileState_: AudioFileState) {
+//     switch(audioFileState_) {
+//         case AudioFileState.NO_AUDIO_FILE:
+//             uploadAudioFileSection.show();
+//             break;
+//         case AudioFileState.AUDIO_FILE_UPLOADED:
+//             uploadAudioFileSection.show();
+//             break;
+//         case AudioFileState.AUDIO_FILE_LOADED:
+//             uploadAudioFileSection.show();
+//             break;
+//     }
+//     audioFileState = audioFileState_;
+//     updateSharedUIState();
+// }
+//
+// function updateSharedUIState() {
+//     if(simfileState == SimfileState.SIMFILE_PARSED && audioFileState == AudioFileState.AUDIO_FILE_LOADED) {
+//         playButton.show();
+//     }
+//     else {
+//         playButton.hide()
+//     }
+// }

@@ -5,7 +5,7 @@ import {global} from "./index";
 
 export enum PAGES {
     PAGE_1,
-    PAGE_2
+    PAGE_2,
 }
 
 export abstract class PageManager {

@@ -4,10 +4,8 @@ import {NoteManager} from "./note_manager";
 import {TimeManager} from "./time_manager";
 import {MissManager} from "./miss_manager";
 import {AccuracyManager} from "./accuracy_manager";
-import {KeyHandler} from "./key_input_manager";
 import {ScrollManager} from "./scroll_manager";
 import {ResultsDisplay} from "./results_display";
-import {stopAudio} from "./file_util";
 import {Note} from "./parsing";
 import {HoldManager} from "./hold_manager";
 import {GameTimeSupplier} from "../scripts2/game_time_provider";
@@ -28,7 +26,6 @@ export class PlayingDisplay {
     private missManager: MissManager;
     private accuracyManager: AccuracyManager;
     // private holdManager: HoldManager;
-    private keyHandler: KeyHandler;
     private gameEndTime: number;
     private showResultsScreen: boolean;
     private accuracyRecording: AccuracyEvent[][];
@@ -57,9 +54,6 @@ export class PlayingDisplay {
         //     this.noteManager.getLatestNote().timeInSeconds + this.getEarliestAccuracy(this.config) / 1000);
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
-        this.keyHandler = new KeyHandler(this.config, this.timeManager, this.accuracyManager);
-        document.addEventListener("keydown", this.keyHandler.keyDown.bind(this.keyHandler));
-        document.addEventListener("keyup", this.keyHandler.keyUp.bind(this.keyHandler));
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
     }
 
@@ -92,7 +86,7 @@ export class PlayingDisplay {
     }
 
     private endSong() {
-        stopAudio();
+        // stopAudio();
         console.log("Song Ended");
     }
 

@@ -4,6 +4,7 @@ import {global} from "../scripts2/index";
 import {KeyBinding} from "../scripts2/keybind_utility";
 import * as p5 from "p5";
 import {AccuracyEvent} from "./handle_accuracy_event";
+import {Mode} from "./index";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -107,4 +108,58 @@ function getKeyBindingUniqueId(trackNumber: number, numTracks: number) {
 
 export function getKeyString(p: p5) {
     return p.key.length == 1 ? p.key.toUpperCase() : p.key;
+}
+
+export function getModeOptionsForDisplay(modesAsStrings: Map<string, string>[]): Mode[] {
+    let modeOptions: Mode[] = [];
+    for (let i = 0; i < modesAsStrings.length; i++) {
+        let mode: Map<string, string> = modesAsStrings[i];
+        modeOptions.push({type: mode.get("type"), difficulty: mode.get("difficulty"), meter: mode.get("meter"), id: i});
+    }
+    modeOptions.sort(compareModeOptions);
+    return modeOptions;
+}
+
+export function compareModeOptions(a: Mode, b: Mode) {
+    let typeA = a.type.toUpperCase();
+    let typeB = b.type.toUpperCase();
+    if (typeA != typeB) {
+        if (typeA < typeB) {
+            return -1;
+        } else {
+            return 1;
+        }
+    } else {
+        let difficultyA = a.difficulty.toUpperCase();
+        let difficultyB = b.difficulty.toUpperCase();
+        if (difficultyA != difficultyB) {
+            return difficultyRank(difficultyA) - difficultyRank(difficultyB);
+        } else {
+            let meterA = parseFloat(a.meter);
+            let meterB = parseFloat(b.meter);
+            if (meterA != meterB) {
+                return meterA - meterB;
+            }
+        }
+    }
+    return a.id = b.id;
+}
+
+function difficultyRank(difficulty: string) {
+    switch (difficulty) {
+        case "BEGINNER":
+            return 0;
+        case "EASY":
+            return 1;
+        case "MEDIUM":
+            return 2;
+        case "HARD":
+            return 3;
+        case "CHALLENGE":
+            return 4;
+        case "EDIT":
+            return 5;
+        default:
+            return 6;
+    }
 }
