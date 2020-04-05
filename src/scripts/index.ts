@@ -5,7 +5,7 @@ import {
 import {Config, ConfigOption} from "./config";
 import {Globals} from "./globals";
 import {KeyBindingManager} from "./key_binding_manager";
-import {replaceNotYetImplementedNoteTypes, setAllNotesToDefault} from "./util";
+import {replaceNotYetImplementedNoteTypes, setAllNotesToDefaultState} from "./util";
 
 export class Mode {
     public type: string;
@@ -31,8 +31,8 @@ function startParse(fileContents: string) {
 export function modeSelected() {
     // updateSimfileState(SimfileState.DIFFICULTY_SELECTED);
     let selectedMode: number = parseInt((<HTMLInputElement>document.getElementById("mode-select")).value);
-    Globals.PARSED_NOTES = getFullParse(selectedMode, localStartedParse);
-    setAllNotesToDefault(Globals.PARSED_NOTES);
+    // Globals.PARSED_NOTES = getFullParse(selectedMode, localStartedParse);
+    setAllNotesToDefaultState(Globals.PARSED_NOTES);
     replaceNotYetImplementedNoteTypes(Globals.PARSED_NOTES);
     // Globals.CURRENT_GAME_AREA = new PreviewDisplay(Globals.PARSED_NOTES, config);
     // updateSimfileState(SimfileState.SIMFILE_PARSED, Globals.PARSED_NOTES.length);

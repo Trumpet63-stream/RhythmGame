@@ -28,9 +28,9 @@ export class Simfile {
         }));
     }
 
-    public finishParsing(mode: Mode) {
+    public finishParsing(modeIndex: number) {
         if (this.state === SimfileState.PARTIALLY_PARSED) {
-            // this.fullParse = getFullParse();
+            this.fullParse = getFullParse(modeIndex, this.partialParse);
         }
     }
 }

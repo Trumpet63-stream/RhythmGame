@@ -4,7 +4,6 @@ import {PreviewDisplay} from "../scripts/preview_display";
 import {NoteState, NoteType} from "../scripts/parsing";
 import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PageManager} from "./page_manager";
-import {PlayingDisplay} from "../scripts/playing_display";
 import {Simfile} from "./simfile";
 import {AudioFile} from "./audio_file";
 
@@ -26,7 +25,6 @@ class P5Scene {
                 renderer = p.createCanvas(width, height);
                 global.keyboardEventManager = new KeyboardEventManager(p);
                 global.previewDisplay = new PreviewDisplay(global.previewNotes, global.config, global.p5Scene);
-                global.playingDisplay = new PlayingDisplay(global.playingNotes, global.config, global.p5Scene);
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
                 centerCanvas();
             };

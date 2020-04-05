@@ -14,11 +14,22 @@ export enum NoteType {
 }
 
 export function stringToNoteType(string: string): NoteType {
-    let noteTypeValues: string[] = Object.values(NoteType);
-    if (noteTypeValues.includes(string)) {
-        return (<any> NoteType)[string]; // This converts a string to a NoteType and compiles without error
+    switch (string) {
+        case "0":
+            return NoteType.NONE;
+        case "1":
+            return NoteType.NORMAL;
+        case "2":
+            return NoteType.HOLD_HEAD;
+        case "3":
+            return NoteType.TAIL;
+        case "4":
+            return NoteType.ROLL_HEAD;
+        case "M":
+            return NoteType.MINE;
+        default:
+            return NoteType.UNKNOWN;
     }
-    return NoteType.UNKNOWN;
 }
 
 export enum NoteState {
@@ -95,7 +106,7 @@ function cleanMetaDataString(string: string): string {
 /* Step Two Of Parsing */
 
 // TODO: actually return FullParse
-export function getFullParse(modeIndex: number, partialParse: PartialParse): Note[][] {
+export function getFullParse(modeIndex: number, partialParse: PartialParse): FullParse {
     let fullParse = new FullParse(partialParse);
     let unparsedNotes: string = partialParse.modes[modeIndex].get("notes");
     let unparsedArray: string[] = unparsedNotes.split("\n");
@@ -106,7 +117,8 @@ export function getFullParse(modeIndex: number, partialParse: PartialParse): Not
     let bpms: { beat: number; bpm: number }[] = parseBPMS(partialParse.metaData.get("BPMS"));
     let stops: { stopDuration: number; beat: number }[] = parseStops(partialParse.metaData.get("STOPS"));
     let timesBeatsAndLines: { time: number; beat: number; lineInfo: string }[] = getTimeInfoByLine(cleanedBeatsAndLines, offset, bpms, stops);
-    return getTracksFromLines(timesBeatsAndLines);
+    fullParse.tracks = getTracksFromLines(timesBeatsAndLines);
+    return fullParse;
 }
 
 function getMeasures(unparsedArray: string[]) {

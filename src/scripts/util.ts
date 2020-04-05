@@ -20,7 +20,7 @@ export function saveAccuracy(accuracyRecording: AccuracyEvent[][], trackNumber: 
         {time: gameTime, accuracyInMilliseconds: accuracyInMilliseconds, noteType: noteType});
 }
 
-export function setAllNotesToDefault(tracks: Note[][]) {
+export function setAllNotesToDefaultState(tracks: Note[][]) {
     for (let i = 0; i < tracks.length; i++) {
         for (let j = 0; j < tracks[i].length; j++) {
             tracks[i][j].state = NoteState.DEFAULT;
