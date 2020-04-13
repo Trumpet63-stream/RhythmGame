@@ -3,7 +3,7 @@ import {Accuracy} from "../scripts/accuracy_manager";
 import {BiDirectionalMap} from "../scripts/bi_directional_map";
 import {defaultIfUndefined} from "../scripts/util";
 import {DEFAULT_CONFIG} from "../scripts/default_config";
-import {KeyBinding} from "./keybind_utility";
+import {KeyBinding} from "./key_binding_helper";
 
 // Essential config: scroll speed, scroll direction, game width/height, additional offset, pause at start
 export class Config {

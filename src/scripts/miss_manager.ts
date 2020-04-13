@@ -47,7 +47,7 @@ export class MissManager {
                 continue;
             }
             if (this.isNoteMissedAndNotHandled(currentNote, currentTime)) {
-                this.handleMissedNote(trackNumber, currentNote, currentTime);
+                this.handleMissedNote(trackNumber, indexOfLastCheckedNote, currentTime);
                 indexOfLastCheckedNote++;
             } else {
                 break;
@@ -56,7 +56,7 @@ export class MissManager {
         this.lastCheckedNoteIndices[trackNumber] = indexOfLastCheckedNote;
     }
 
-    // e.g. notes that have already been hit are not missable
+    // For example: notes that have already been hit are not missable
     private isNotMissable(note: Note) {
         return note.state !== NoteState.DEFAULT;
     }
@@ -66,12 +66,21 @@ export class MissManager {
         return note.timeInSeconds < missBoundary && note.state === NoteState.DEFAULT;
     }
 
-    private handleMissedNote(trackNumber: number, missedNote: Note, currentTime: number) {
+    private handleMissedNote(trackNumber: number, indexOfMissedNote: number, currentTime: number) {
+        let track = this.noteManager.tracks[trackNumber];
+        let missedNote = track[indexOfMissedNote];
         handleAccuracyEvent(this.config.accuracySettings[0].name, trackNumber, -Infinity, currentTime, missedNote.type, this.accuracyRecording);
         missedNote.state = NoteState.MISSED;
-        if (missedNote.type == NoteType.TAIL) {
+        if (missedNote.type === NoteType.TAIL) {
             if (this.holdManager.isTrackHeld(trackNumber)) {
                 this.holdManager.unholdTrack(trackNumber) // Force a hold release upon missing the tail
+            }
+        } else if(missedNote.type === NoteType.HOLD_HEAD) {
+            let nextNote = track[indexOfMissedNote + 1];
+            if (nextNote !== undefined) {
+                if (nextNote.type === NoteType.TAIL) {
+                    nextNote.state = NoteState.MISSED; // Miss the tail when you miss the head
+                }
             }
         }
     }

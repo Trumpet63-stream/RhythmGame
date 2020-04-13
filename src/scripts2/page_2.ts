@@ -1,16 +1,14 @@
-import {ScrollDirection} from "../scripts/scroll_direction";
 import * as p5 from "p5";
-import * as KeybindingHelper from "./keybinding_helper";
-import {KeyBinding, KeybindingFunction, Keybindings, SaveOnFinishFunction} from "./keybind_utility";
+import {ScrollDirection} from "../scripts/scroll_direction";
+import {KeyBindingHelper} from "./key_binding_helper";
 import {
     createKeyBindingInput,
     createLabelledInput,
     createScrollDirectionSelect,
-    DOMWrapper, drawHeading,
-    setElementCenterPositionRelative
+    DOMWrapper, drawHeading
 } from "./ui_util";
 import {global} from "./index";
-import {getKeyBindingButtonId, getKeyString, initializeKeyBindings} from "../scripts/util";
+import {getKeyBindingButtonId, initializeKeyBindings} from "../scripts/util";
 
 export abstract class Page2 {
     public static draw() {
@@ -141,22 +139,11 @@ function DrawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
     let canvasPosition: { x: number, y: number } = p._renderer.position();
     button.position(canvasPosition.x + topLeftX, canvasPosition.y + topLeftY);
     button.mousePressed(() => {
-        KeybindingHelper.StartRebindingSequence(global.previewNumTracks);
+        let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);
 
         // Bind this action to the "-1" key so that it happens on any key press
         global.keyboardEventManager.bindKeyToAction(-1, () => {
-            if (KeybindingHelper.ActiveKeybindingIterator != null) {
-                var bind: KeybindingFunction = (currentBinding: number) => {
-                    var keybinding: KeyBinding = {trackNumber: currentBinding, keyCode: p.keyCode, string: getKeyString(p)};
-                    return keybinding;
-                };
-
-                var writeOut: SaveOnFinishFunction = (bindings: Keybindings) => {
-                    p.print(bindings);
-                };
-
-                KeybindingHelper.ActiveKeybindingIterator(bind, writeOut);
-            }
+            keybindingHelper.bindNext(p);
         });
     });
 }

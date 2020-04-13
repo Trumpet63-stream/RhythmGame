@@ -13,7 +13,7 @@ import {Config} from "../scripts2/config";
 import {initializeKeyBindings, replaceNotYetImplementedNoteTypes, setAllNotesToDefaultState} from "./util";
 import {global} from "../scripts2/index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
-import {KeyBinding} from "../scripts2/keybind_utility";
+import {KeyBinding} from "../scripts2/key_binding_helper";
 import {AccuracyEvent} from "./handle_accuracy_event";
 
 export class PlayingDisplay {
@@ -36,8 +36,8 @@ export class PlayingDisplay {
         this.scene = scene;
 
         // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
-        this.timeManager = new TimeManager(performance.now(), this.config); //TODO: mess with this to make debug mode work again
         if (!this.isDebugMode) {
+            this.timeManager = new TimeManager(performance.now(), this.config);
             // window.setTimeout(playAudio, config.pauseAtStartInSeconds * 1000);
         }
 
@@ -45,12 +45,8 @@ export class PlayingDisplay {
         this.accuracyRecording = this.getInitialAccuracyRecording(this.noteManager.tracks.length);
         let holdManager = new HoldManager(this.noteManager.tracks.length);
 
-        console.log(this.noteManager);
-        console.log(NoteType);
-
-
         if (this.isDebugMode) {
-            this.timeManager = new ScrollManager(this.config); // this way the KeyHandler gets the right time in debug mode
+            this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
         }
 
         // this.gameEndTime = this.calculateGameEnd(audioSource.buffer.duration,
@@ -111,6 +107,7 @@ export class PlayingDisplay {
     }
 
     private bindKeyBindingsToActions() {
+        console.log(global.config.keyBindings);
         let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];

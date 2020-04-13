@@ -1,7 +1,7 @@
 import {Note, NoteState, NoteType} from "./parsing";
 import {Config} from "../scripts2/config";
 import {global} from "../scripts2/index";
-import {KeyBinding} from "../scripts2/keybind_utility";
+import {KeyBinding} from "../scripts2/key_binding_helper";
 import * as p5 from "p5";
 import {AccuracyEvent} from "./handle_accuracy_event";
 import {Mode} from "./index";

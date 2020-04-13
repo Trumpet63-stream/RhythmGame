@@ -16,7 +16,7 @@ export class PreviewDisplay {
         this.config = config;
         this.scene = scene;
         this.noteManager = new NoteManager(tracks);
-        this.scrollManager = new ScrollManager(this.config);
+        this.scrollManager = new ScrollManager(this.config, this.scene.sketchInstance);
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
     }
 
