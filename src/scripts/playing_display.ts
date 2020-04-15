@@ -6,11 +6,16 @@ import {MissManager} from "./miss_manager";
 import {AccuracyManager} from "./accuracy_manager";
 import {ScrollManager} from "./scroll_manager";
 import {ResultsDisplay} from "./results_display";
-import {Note, NoteType} from "./parsing";
+import {Note} from "./parsing";
 import {HoldManager} from "./hold_manager";
 import {GameTimeSupplier} from "../scripts2/game_time_provider";
 import {Config} from "../scripts2/config";
-import {initializeKeyBindings, replaceNotYetImplementedNoteTypes, setAllNotesToDefaultState} from "./util";
+import {
+    initializeKeyBindings,
+    isKeyBindingsDefined,
+    replaceNotYetImplementedNoteTypes,
+    setAllNotesToDefaultState
+} from "./util";
 import {global} from "../scripts2/index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "../scripts2/key_binding_helper";
@@ -54,7 +59,9 @@ export class PlayingDisplay {
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
-        initializeKeyBindings(this.noteManager.tracks.length);
+        if (!isKeyBindingsDefined(this.noteManager.tracks.length)) {
+            initializeKeyBindings(this.noteManager.tracks.length);
+        }
         this.bindKeyBindingsToActions();
         setAllNotesToDefaultState(this.noteManager.tracks);
         replaceNotYetImplementedNoteTypes(this.noteManager.tracks);
@@ -62,7 +69,6 @@ export class PlayingDisplay {
 
     public draw() {
         let currentTimeInSeconds = this.timeManager.getGameTime(performance.now());
-        // console.log(currentTimeInSeconds);
         if (currentTimeInSeconds >= this.gameEndTime && !this.showResultsScreen) {
             this.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
                 this.scene.sketchInstance, this.accuracyRecording);

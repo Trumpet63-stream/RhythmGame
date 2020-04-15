@@ -8,7 +8,7 @@ import {
     DOMWrapper, drawHeading
 } from "./ui_util";
 import {global} from "./index";
-import {getKeyBindingButtonId, initializeKeyBindings} from "../scripts/util";
+import {getKeyBindingButtonId, initializeKeyBindings, isKeyBindingsDefined} from "../scripts/util";
 
 export abstract class Page2 {
     public static draw() {
@@ -99,7 +99,7 @@ export abstract class Page2 {
 
         DrawQuickStartKeyBindingsButton(400, currentY += 15);
 
-        if (global.config.keyBindings.get(global.previewNumTracks) === undefined) {
+        if (!isKeyBindingsDefined(global.previewNumTracks)) {
             initializeKeyBindings(global.previewNumTracks);
         }
         let bindingsStartY = currentY += 45;

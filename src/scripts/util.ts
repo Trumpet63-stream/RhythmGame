@@ -56,6 +56,10 @@ export function getMissBoundary(currentTime: number, config: Config) {
     return missBoundary;
 }
 
+export function isKeyBindingsDefined(numTracks: number) {
+    return global.config.keyBindings.get(numTracks) !== undefined;
+}
+
 export function initializeKeyBindings(numTracks: number) {
     let mapping: { trackNumber: number, keyCode: number, string: string }[] = [];
 
