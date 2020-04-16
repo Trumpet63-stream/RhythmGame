@@ -1,18 +1,19 @@
 import {NoteManager} from "./note_manager";
 import {Config} from "../scripts2/config";
-import {AccuracyEvent, handleAccuracyEvent} from "./handle_accuracy_event";
+import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {getMissBoundary} from "./util";
 import {Note, NoteState, NoteType} from "./parsing";
 import {HoldManager} from "./hold_manager";
+import {AccuracyEvent, AccuracyRecording} from "../scripts2/accuracy_recording";
 
 export class MissManager {
     private config: Config;
     private noteManager: NoteManager;
     private lastCheckedNoteIndices: number[];
-    private accuracyRecording: AccuracyEvent[][];
+    private accuracyRecording: AccuracyRecording;
     private holdManager: HoldManager;
 
-    constructor(config: Config, noteManager: NoteManager, accuracyRecording: AccuracyEvent[][],
+    constructor(config: Config, noteManager: NoteManager, accuracyRecording: AccuracyRecording,
                 holdManager: HoldManager) {
         this.config = config;
         this.noteManager = noteManager;

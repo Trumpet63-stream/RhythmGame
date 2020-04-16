@@ -1,5 +1,4 @@
 import {Accuracy} from "./accuracy_manager";
-import {BiDirectionalMap} from "./bi_directional_map";
 import {ScrollDirection} from "./scroll_direction";
 
 export let DEFAULT_CONFIG = {
@@ -25,5 +24,6 @@ export let DEFAULT_CONFIG = {
     keyBindings: new Map(),
     gameAreaHeight: 600,
     gameAreaWidth: 400,
-    noteSize: 20
+    noteSize: 20,
+    quitKey: 27, // Quit defaults to escape key
 };

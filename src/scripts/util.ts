@@ -3,7 +3,6 @@ import {Config} from "../scripts2/config";
 import {global} from "../scripts2/index";
 import {KeyBinding} from "../scripts2/key_binding_helper";
 import * as p5 from "p5";
-import {AccuracyEvent} from "./handle_accuracy_event";
 import {Mode} from "./index";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
@@ -12,12 +11,6 @@ export function defaultIfUndefined(value: any, defaultValue: any): any {
 
 export function isUndefined(value: any): boolean {
     return typeof value === "undefined";
-}
-
-export function saveAccuracy(accuracyRecording: AccuracyEvent[][], trackNumber: number,
-                             accuracyInMilliseconds: number, gameTime: number, noteType: NoteType) {
-    accuracyRecording[trackNumber].push(
-        {time: gameTime, accuracyInMilliseconds: accuracyInMilliseconds, noteType: noteType});
 }
 
 export function setAllNotesToDefaultState(tracks: Note[][]) {

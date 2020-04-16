@@ -34,7 +34,7 @@ export abstract class Page1 {
                 playButton.mouseClicked(() => {
                     let selectedMode: Mode = getSelectedMode(modeRadio);
                     global.simfile.finishParsing(selectedMode.id);
-                    readyPlayingDisplay(global.simfile.fullParse.tracks);
+                    initPlayingDisplay(global.simfile.fullParse.tracks);
                     PageManager.setCurrentScene(PAGES.PAGE_3);
                 });
             }
@@ -103,7 +103,7 @@ function isFilesReady() {
         global.audioFile.state === AudioFileState.BUFFERED;
 }
 
-function readyPlayingDisplay(tracks: Note[][]) {
+function initPlayingDisplay(tracks: Note[][]) {
     global.playingDisplay = new PlayingDisplay(tracks, global.config, global.p5Scene);
 }
 

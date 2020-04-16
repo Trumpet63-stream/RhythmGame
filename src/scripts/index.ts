@@ -40,7 +40,7 @@ export function modeSelected() {
 
 export function goToPrepareGameplay() {
     disablePlayButton();
-    Globals.CURRENT_GAME_AREA.remove();
+    // Globals.CURRENT_GAME_AREA.remove();
     // Globals.CURRENT_GAME_AREA = new PlayingDisplay(Globals.PARSED_NOTES, config);
 }
 

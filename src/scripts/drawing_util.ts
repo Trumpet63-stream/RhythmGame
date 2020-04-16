@@ -2,10 +2,10 @@ import * as p5 from "p5";
 
 import {NoteManager} from "./note_manager";
 import {AccuracyManager} from "./accuracy_manager";
-import {AccuracyEvent} from "./handle_accuracy_event";
+import {AccuracyRecording} from "../scripts2/accuracy_recording";
 
 export function drawAccuracyBars(p: p5, accuracyLabels: string[],
-                                 accuracyRecording: AccuracyEvent[][],
+                                 accuracyRecording: AccuracyRecording,
                                  centerX: number, centerY: number, textSize: number, barWidth: number,
                                  barHeight: number, noteManager: NoteManager, accuracyManager: AccuracyManager) {
     let maxTextWidth = getMaxTextWidth(p, accuracyLabels, textSize);
@@ -21,11 +21,11 @@ export function drawAccuracyBars(p: p5, accuracyLabels: string[],
     }
 }
 
-function getNumAccuracyEvents(accuracyLabel: string, accuracyRecording: AccuracyEvent[][],
+function getNumAccuracyEvents(accuracyLabel: string, accuracyRecording: AccuracyRecording,
                               accuracyManager: AccuracyManager) {
-    return accuracyRecording.reduce((sum, trackRecording) =>
+    return accuracyRecording.recording.reduce((sum, trackRecording) =>
         sum + trackRecording.filter(accuracyEvent =>
-        accuracyManager.getAccuracyEventName(accuracyEvent.accuracyInMilliseconds) === accuracyLabel).length, 0);
+        accuracyManager.getAccuracyEventName(accuracyEvent.accuracyMillis) === accuracyLabel).length, 0);
 }
 
 function getMaxTextWidth(p: p5, textArray: string[], textSize: number) {

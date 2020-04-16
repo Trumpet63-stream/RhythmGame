@@ -1,6 +1,5 @@
 import * as p5 from "p5";
 import {FullParse, getFullParse, getPartialParse, PartialParse} from "../scripts/parsing";
-import {Mode} from "../scripts/index";
 
 export enum SimfileState {
     NO_SIMFILE,
@@ -31,6 +30,7 @@ export class Simfile {
     public finishParsing(modeIndex: number) {
         if (this.state === SimfileState.PARTIALLY_PARSED) {
             this.fullParse = getFullParse(modeIndex, this.partialParse);
+            this.state = SimfileState.FULLY_PARSED;
         }
     }
 }

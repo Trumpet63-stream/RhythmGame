@@ -17,6 +17,7 @@ export class Config {
     gameAreaHeight: number;
     gameAreaWidth: number;
     noteSize: number;
+    quitKey: number;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -29,6 +30,7 @@ export class Config {
                     gameAreaHeight?: number,
                     gameAreaWidth?: number,
                     noteSize?: number,
+                    quitKey?: number,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
@@ -56,5 +58,7 @@ export class Config {
         this.noteSize = defaultIfUndefined(args.noteSize, DEFAULT_CONFIG.noteSize);
 
         this.keyBindings = defaultIfUndefined(args.keyBindings, DEFAULT_CONFIG.keyBindings);
+
+        this.quitKey = defaultIfUndefined(args.quitKey, DEFAULT_CONFIG.quitKey);
     }
 }

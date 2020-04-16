@@ -6,6 +6,7 @@ import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PageManager} from "./page_manager";
 import {Simfile} from "./simfile";
 import {AudioFile} from "./audio_file";
+import {AccuracyRecording} from "./accuracy_recording";
 
 let width = 720;
 let height = 480;

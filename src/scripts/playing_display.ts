@@ -19,20 +19,20 @@ import {
 import {global} from "../scripts2/index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "../scripts2/key_binding_helper";
-import {AccuracyEvent} from "./handle_accuracy_event";
+import {PageManager, PAGES} from "../scripts2/page_manager";
+import {AccuracyRecording} from "../scripts2/accuracy_recording";
 
 export class PlayingDisplay {
     private scene: P5Scene;
     private config: Config;
     private noteManager: NoteManager;
-    private resultsDisplay: ResultsDisplay;
     private displayManager: DisplayManager;
     private timeManager: GameTimeSupplier;
     private missManager: MissManager;
     private accuracyManager: AccuracyManager;
     private gameEndTime: number;
     private showResultsScreen: boolean;
-    private accuracyRecording: AccuracyEvent[][];
+    private accuracyRecording: AccuracyRecording;
     private isDebugMode: boolean = false;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
@@ -47,7 +47,7 @@ export class PlayingDisplay {
         }
 
         this.noteManager = new NoteManager(tracks);
-        this.accuracyRecording = this.getInitialAccuracyRecording(this.noteManager.tracks.length);
+        this.accuracyRecording = new AccuracyRecording(this.noteManager.tracks.length);
         let holdManager = new HoldManager(this.noteManager.tracks.length);
 
         if (this.isDebugMode) {
@@ -70,17 +70,10 @@ export class PlayingDisplay {
     public draw() {
         let currentTimeInSeconds = this.timeManager.getGameTime(performance.now());
         if (currentTimeInSeconds >= this.gameEndTime && !this.showResultsScreen) {
-            this.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
-                this.scene.sketchInstance, this.accuracyRecording);
             this.endSong();
-            this.showResultsScreen = true;
         }
-        if (this.showResultsScreen) {
-            this.resultsDisplay.draw();
-        } else {
-            this.missManager.update(currentTimeInSeconds);
-            this.displayManager.draw(currentTimeInSeconds);
-        }
+        this.missManager.update(currentTimeInSeconds);
+        this.displayManager.draw(currentTimeInSeconds);
     }
 
     private getEarliestAccuracy(config: Config) {
@@ -97,23 +90,12 @@ export class PlayingDisplay {
 
     private endSong() {
         // stopAudio();
-        console.log("Song Ended");
-    }
-
-    private getInitialAccuracyRecording(numTracks: number): AccuracyEvent[][] {
-        let accuracyRecording = [];
-        for (let i = 0; i < numTracks; i++) {
-            accuracyRecording.push([]);
-        }
-        return accuracyRecording;
-    }
-
-    remove() {
-        this.scene.remove();
+        global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
+            this.scene.sketchInstance, this.accuracyRecording);
+        PageManager.setCurrentScene(PAGES.PAGE_4);
     }
 
     private bindKeyBindingsToActions() {
-        console.log(global.config.keyBindings);
         let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];
@@ -121,6 +103,10 @@ export class PlayingDisplay {
                 () => {this.keyDownActionForTrack(keyBinding.trackNumber)},
                 () => {this.keyUpActionForTrack(keyBinding.trackNumber)})
         }
+
+        global.keyboardEventManager.bindKeyToAction(global.config.quitKey, () => {
+            this.endSong();
+        });
     }
 
     private keyDownActionForTrack(trackNumber: number) {

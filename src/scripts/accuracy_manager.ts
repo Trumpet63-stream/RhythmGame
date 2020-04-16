@@ -1,9 +1,10 @@
 import {NoteManager} from "./note_manager";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {Config} from "../scripts2/config";
-import {AccuracyEvent, handleAccuracyEvent} from "./handle_accuracy_event";
+import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {HoldManager} from "./hold_manager";
 import {Note, NoteState, NoteType} from "./parsing";
+import {AccuracyEvent, AccuracyRecording} from "../scripts2/accuracy_recording";
 
 export class Accuracy {
     name: string;
@@ -21,9 +22,9 @@ export class AccuracyManager {
     private noteManager: NoteManager;
     holdManager: HoldManager;
     private config: Config;
-    private accuracyRecording: AccuracyEvent[][];
+    private accuracyRecording: AccuracyRecording;
 
-    constructor(noteManager: NoteManager, config: Config, accuracyRecording: AccuracyEvent[][],
+    constructor(noteManager: NoteManager, config: Config, accuracyRecording: AccuracyRecording,
                 holdManager: HoldManager) {
         this.noteManager = noteManager;
         this.config = config;

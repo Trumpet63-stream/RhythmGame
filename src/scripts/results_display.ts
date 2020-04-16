@@ -3,18 +3,18 @@ import {drawAccuracyBars} from "./drawing_util";
 import {Accuracy, AccuracyManager} from "./accuracy_manager";
 import {Config} from "../scripts2/config";
 import {NoteManager} from "./note_manager";
-import {AccuracyEvent} from "./handle_accuracy_event";
+import {AccuracyRecording} from "../scripts2/accuracy_recording";
 
 //TODO: take holds and releases into account
 export class ResultsDisplay {
     private config: Config;
     private noteManager: NoteManager;
     private accuracyManager: AccuracyManager;
-    private accuracyRecording: AccuracyEvent[][];
+    private accuracyRecording: AccuracyRecording;
     private p: p5;
 
     constructor(config: Config, noteManager: NoteManager, accuracyManager: AccuracyManager, p: p5,
-                accuracyRecording: AccuracyEvent[][]) {
+                accuracyRecording: AccuracyRecording) {
         this.config = config;
         this.noteManager = noteManager;
         this.accuracyManager = accuracyManager;
@@ -23,12 +23,11 @@ export class ResultsDisplay {
     }
 
     draw() {
-        this.p.clear();
         this.drawAccuracyResults(this.p, this.config.accuracySettings, this.accuracyRecording, this.noteManager, this.accuracyManager);
     }
 
     private drawAccuracyResults(p: p5, accuracySettings: Accuracy[],
-                                accuracyRecording: AccuracyEvent[][],
+                                accuracyRecording: AccuracyRecording,
                                 noteManager: NoteManager, accuracyManager: AccuracyManager) {
         let centerX = p.width / 2;
         let centerY = p.height / 2;
