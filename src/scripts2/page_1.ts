@@ -14,6 +14,8 @@ export abstract class Page1 {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
 
+        newLabeledInput("Label", "inputId", "initial", 100, 100);
+
         let stepfileInput = DOMWrapper.create(() => {
             return p.createFileInput(global.simfile.load.bind(global.simfile), "false");
         }, "setfileInputButton").element;
@@ -84,7 +86,7 @@ function drawModeSelect(p: p5): p5.Element {
             radioOption.value = i;
         }
 
-        // This style is being set on the div containing the radio elements
+        // This style is being set on the div containing the radio elements to make it a scrollable box
         modeRadio.style("border:2px solid #ccc;");
         modeRadio.style("width:300px;");
         modeRadio.style("height:80px;");
@@ -109,4 +111,32 @@ function initPlayingDisplay(tracks: Note[][]) {
 
 function getSelectedMode(modeRadio: p5.Element) {
     return global.page1ModeOptions[modeRadio.value()];
+}
+
+let run = true;
+function newLabeledInput(labelString: string, inputId: string, inputInitialValue: string, containerX: number, containerY: number) {
+    if (run) {
+        let p: p5 = global.p5Scene.sketchInstance;
+        let myBiggerDiv = p.createDiv();
+        for (let i = 0; i < 20; i++) {
+            let id = inputId + i;
+            let myDiv = p.createDiv();
+            let labelHtml = '<label for="' + id + '">' + labelString + '</label>';
+            myDiv.html(labelHtml);
+            let myInput = p.createInput(inputInitialValue);
+            myInput.parent(myDiv);
+            myInput.id(id);
+            // @ts-ignore
+            myDiv.parent(myBiggerDiv);
+        }
+        let canvasPosition: { x: number, y: number } = p._renderer.position();
+        // myBiggerDiv.style("border:2px solid #ccc;");
+        myBiggerDiv.style("width:300px;");
+        myBiggerDiv.style("height:80px;");
+        myBiggerDiv.style("overflow-y: scroll;");
+        myBiggerDiv.position(canvasPosition.x + containerX, canvasPosition.y + containerY);
+        myBiggerDiv.remove();
+
+        run = false;
+    }
 }

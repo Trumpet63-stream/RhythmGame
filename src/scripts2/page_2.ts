@@ -14,6 +14,11 @@ export abstract class Page2 {
     public static draw() {
         drawHeading();
         let currentY = 70;
+        let p: p5 = global.p5Scene.sketchInstance;
+
+        // let scrollDiv = DOMWrapper.create(() => {
+        //     return p.createDiv();
+        // }, "scrollDiv").element;
 
         let pauseAtStartInSecondsInput = createLabelledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
             global.config.pauseAtStartInSeconds.toString(), 15, 400, currentY);
@@ -27,6 +32,7 @@ export abstract class Page2 {
                 global.config.pauseAtStartInSeconds = value;
             }
         });
+        // pauseAtStartInSecondsInput.parent(scrollDiv);
 
         let scrollSpeedInput = createLabelledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
             global.config.pixelsPerSecond.toString(), 15, 400, currentY += 30);
@@ -40,6 +46,7 @@ export abstract class Page2 {
                 global.config.pixelsPerSecond = value;
             }
         });
+        // scrollSpeedInput.parent(scrollDiv);
 
         let scrollDirectionSelect = createScrollDirectionSelect("Scroll Direction", "scrollDirectionSelect",
             ScrollDirection, global.config.scrollDirection, 15, 400, currentY += 30);
@@ -97,7 +104,7 @@ export abstract class Page2 {
             }
         });
 
-        DrawQuickStartKeyBindingsButton(400, currentY += 15);
+        drawQuickStartKeyBindingsButton(400, currentY += 15);
 
         if (!isKeyBindingsDefined(global.previewNumTracks)) {
             initializeKeyBindings(global.previewNumTracks);
@@ -130,7 +137,7 @@ function removeOldBindingButtons(numTracks: number) {
     }
 }
 
-function DrawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
+function drawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
     let p: p5 = global.p5Scene.sketchInstance;
     let button = DOMWrapper.create(() => {
         return p.createButton("KeyBindings Quickstart");
