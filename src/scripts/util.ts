@@ -160,3 +160,18 @@ function difficultyRank(difficulty: string) {
             return 6;
     }
 }
+
+function getFirstElementByTagName(div: p5.Element, tagName: string): p5.Element {
+    let childrenNodes = div.child();
+    for (let i = 0; i < childrenNodes.length; i++) {
+        let node: Node = childrenNodes[i];
+        // @ts-ignore
+        console.log(node.tagName);
+        // @ts-ignore
+        if (node.tagName === tagName) {
+            // @ts-ignore
+            return new p5.Element(node);
+        }
+    }
+    return undefined;
+}

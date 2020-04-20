@@ -3,33 +3,34 @@ import {ScrollDirection} from "../scripts/scroll_direction";
 import {KeyBindingHelper} from "./key_binding_helper";
 import {
     createKeyBindingInput,
-    createLabelledInput,
-    createScrollDirectionSelect,
     DOMWrapper, drawHeading
 } from "./ui_util";
 import {global} from "./index";
-import {getKeyBindingButtonId, initializeKeyBindings, isKeyBindingsDefined} from "../scripts/util";
+import {enumToStringArray, getKeyBindingButtonId, initializeKeyBindings, isKeyBindingsDefined} from "../scripts/util";
 
 export abstract class Page2 {
     public static draw() {
         drawHeading();
-        let currentY = 70;
+        let currentY = 220;
         let p: p5 = global.p5Scene.sketchInstance;
 
-        // let scrollDiv = DOMWrapper.create(() => {
-        //     return p.createDiv();
-        // }, "scrollDiv").element;
+        let scrollDiv = DOMWrapper.create(() => {
+            return p.createDiv();
+        }, "scrollDiv");
+        if (!scrollDiv.alreadyExists) {
+            // @ts-ignore
+            let canvasPosition: { x: number, y: number } = p._renderer.position();
+            scrollDiv.element.style("border:2px solid #ccc;");
+            scrollDiv.element.style("width:380px;");
+            scrollDiv.element.style("height:150px;");
+            scrollDiv.element.style("overflow-y: scroll;");
+            scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
+        }
 
-        // let labeledInput = newLabeledInput("Label", "inputId", "initial");
-        // setOnInputUnlessItAlreadyExists(labeledInput, () => {
-        //     console.log(labeledInput.element.value());
-        // });
-
-        let pauseAtStartInSecondsInput = newLabeledInput("Pause at Start (sec)", "pauseAtStartInSeconds",
+        let pauseAtStartInSecondsInput = newLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
             global.config.pauseAtStartInSeconds.toString());
-        // @ts-ignore
-        pauseAtStartInSecondsInput.input(() => {
-            let value: string | number = pauseAtStartInSecondsInput.value();
+        setOnInputUnlessItAlreadyExists(pauseAtStartInSecondsInput, () => {
+            let value: string | number = pauseAtStartInSecondsInput.element.value();
             if (typeof value === "string") {
                 value = parseFloat(value);
             }
@@ -37,13 +38,14 @@ export abstract class Page2 {
                 global.config.pauseAtStartInSeconds = value;
             }
         });
-        // pauseAtStartInSecondsInput.parent(scrollDiv);
+        if (!pauseAtStartInSecondsInput.alreadyExists) {
+            scrollDiv.element.child(pauseAtStartInSecondsInput.element.parent());
+        }
 
         let scrollSpeedInput = newLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
             global.config.pixelsPerSecond.toString());
-        // @ts-ignore
-        scrollSpeedInput.input(() => {
-            let value: string | number = scrollSpeedInput.value();
+        setOnInputUnlessItAlreadyExists(scrollSpeedInput, () => {
+            let value: string | number = scrollSpeedInput.element.value();
             if (typeof value === "string") {
                 value = parseFloat(value);
             }
@@ -51,24 +53,27 @@ export abstract class Page2 {
                 global.config.pixelsPerSecond = value;
             }
         });
-        // scrollSpeedInput.parent(scrollDiv);
+        if (!scrollSpeedInput.alreadyExists) {
+            scrollDiv.element.child(scrollSpeedInput.element.parent());
+        }
 
-        let scrollDirectionSelect = createScrollDirectionSelect("Scroll Direction", "scrollDirectionSelect",
-            ScrollDirection, global.config.scrollDirection, 15, 400, currentY += 30);
-        // @ts-ignore
-        scrollDirectionSelect.changed(() => {
-            let value: string = String(scrollDirectionSelect.value());
+        let scrollDirectionSelect = newCreateLabeledSelect("Scroll Direction", "scrollDirectionSelect",
+            ScrollDirection, global.config.scrollDirection);
+        setOnInputUnlessItAlreadyExists(scrollDirectionSelect, () => {
+            let value: string = String(scrollDirectionSelect.element.value());
             let enumOfValue = ScrollDirection[value as keyof typeof ScrollDirection];
             if (enumOfValue !== undefined) {
                 global.config.scrollDirection = enumOfValue;
             }
         });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(scrollDirectionSelect.element.parent());
+        }
 
         let receptorPositionInput = newLabeledInput("Receptor Position (%)", "receptorPositionInput",
             global.config.receptorYPercent.toString());
-        // @ts-ignore
-        receptorPositionInput.input(() => {
-            let value: string | number = receptorPositionInput.value();
+        setOnInputUnlessItAlreadyExists(receptorPositionInput, () => {
+            let value: string | number = receptorPositionInput.element.value();
             if (typeof value === "string") {
                 value = parseFloat(value);
             }
@@ -76,12 +81,14 @@ export abstract class Page2 {
                 global.config.receptorYPercent = value;
             }
         });
+        if (!receptorPositionInput.alreadyExists) {
+            scrollDiv.element.child(receptorPositionInput.element.parent());
+        }
 
         let additionalOffsetInSecondsInput = newLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
             global.config.additionalOffsetInSeconds.toString());
-        // @ts-ignore
-        additionalOffsetInSecondsInput.input(() => {
-            let value: string | number = additionalOffsetInSecondsInput.value();
+        setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
+            let value: string | number = additionalOffsetInSecondsInput.element.value();
             if (typeof value === "string") {
                 value = parseFloat(value);
             }
@@ -89,6 +96,9 @@ export abstract class Page2 {
                 global.config.additionalOffsetInSeconds = value;
             }
         });
+        if (!additionalOffsetInSecondsInput.alreadyExists) {
+            scrollDiv.element.child(additionalOffsetInSecondsInput.element.parent());
+        }
 
         drawKeyBindingsSectionText(18, 400, currentY += 40);
 
@@ -98,8 +108,8 @@ export abstract class Page2 {
         let previewNumTracks = newLabeledInput("Number of Tracks", "previewNumTracksInput",
             global.previewNumTracks.toString());
         // @ts-ignore
-        previewNumTracks.input(() => {
-            let value: string | number = previewNumTracks.value();
+        setOnInputUnlessItAlreadyExists(previewNumTracks, () => {
+            let value: string | number = previewNumTracks.element.value();
             if (typeof value === "string") {
                 value = parseInt(value);
             }
@@ -108,6 +118,9 @@ export abstract class Page2 {
                 global.previewNumTracks = value;
             }
         });
+        if (!previewNumTracks.alreadyExists) {
+            scrollDiv.element.child(previewNumTracks.element.parent());
+        }
 
         drawQuickStartKeyBindingsButton(400, currentY += 15);
 
@@ -123,7 +136,7 @@ export abstract class Page2 {
     }
 }
 
-function setOnInputUnlessItAlreadyExists(inputElement: {element: p5.Element, alreadyExists: boolean}, onInput: () => void) {
+function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
     if (!inputElement.alreadyExists) {
         // @ts-ignore
         inputElement.element.input(onInput);
@@ -170,64 +183,50 @@ function drawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
 function newLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
-    let createResult = DOMWrapper.create(() => {
+    let input: p5.Element;
+    let container = DOMWrapper.create(() => {
         let container = p.createDiv();
-        let labelHtml = '<label for="' + inputId + '" style="margin-right:15px;">' + labelString + '</label>';
+        let labelHtml = getLabelHtml(inputId, labelString);
         container.html(labelHtml);
-        let myInput = p.createInput(inputInitialValue);
-        myInput.parent(container);
-        myInput.id(inputId);
+        input = p.createInput(inputInitialValue);
+        input.parent(container);
+        input.id(inputId);
+        container.style("margin-top:10px; margin-bottom:10px");
         return container;
-    }, inputId + "container");
+    }, inputId + "Container");
 
-    let container = createResult.element;
-    // @ts-ignore
-    let canvasPosition: { x: number, y: number } = p._renderer.position();
-    container.position(canvasPosition.x, canvasPosition.y);
-
-    let myInput = getFirstInputInDiv(container);
-    return {element: myInput, alreadyExists: createResult.alreadyExists};
+    return {element: input, alreadyExists: container.alreadyExists};
 }
 
-function getFirstInputInDiv(div: p5.Element): p5.Element {
-    let childrenNodes = div.child();
-    for (let i = 0; i < childrenNodes.length; i++) {
-        let node: Node = childrenNodes[i];
-        // @ts-ignore
-        if (node.tagName === "INPUT") {
-            // @ts-ignore
-            return new p5.Element(node);
-        }
-    }
-    return undefined;
+function getLabelHtml(forId: string, labelString: string) {
+    return '<label for="' + forId + '" style="margin-right:15px;">' + labelString + '</label>'
 }
 
-let run = true;
+function newCreateLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any):
+    { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
 
-function test(labelString: string, inputId: string, inputInitialValue: string, containerX: number, containerY: number) {
-    if (run) {
-        let p: p5 = global.p5Scene.sketchInstance;
-        let myBiggerDiv = p.createDiv();
-        for (let i = 0; i < 20; i++) {
-            let id = inputId + i;
-            let myDiv = p.createDiv();
-            let labelHtml = '<label for="' + id + '">' + labelString + '</label>';
-            myDiv.html(labelHtml);
-            let myInput = p.createInput(inputInitialValue);
-            myInput.parent(myDiv);
-            myInput.id(id);
+    let select: p5.Element;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = getLabelHtml(selectId, labelString);
+        container.html(labelHtml);
+        select = p.createSelect();
+        select.parent(container);
+        select.id(selectId);
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, selectId + "Container");
+
+    if (!container.alreadyExists) {
+        let initialOptions = enumToStringArray(optionsEnum);
+        for (let i = 0; i < initialOptions.length; i++) {
             // @ts-ignore
-            myDiv.parent(myBiggerDiv);
+            select.option(initialOptions[i]);
         }
         // @ts-ignore
-        let canvasPosition: { x: number, y: number } = p._renderer.position();
-        // myBiggerDiv.style("border:2px solid #ccc;");
-        myBiggerDiv.style("width:300px;");
-        myBiggerDiv.style("height:80px;");
-        myBiggerDiv.style("overflow-y: scroll;");
-        myBiggerDiv.position(canvasPosition.x + containerX, canvasPosition.y + containerY);
-        myBiggerDiv.remove();
-
-        run = false;
+        select.selected(optionsEnum[initialEnumValue as keyof typeof optionsEnum].toString());
     }
+
+    return {element: select, alreadyExists: container.alreadyExists};
 }
