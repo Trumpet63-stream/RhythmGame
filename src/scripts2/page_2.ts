@@ -20,8 +20,13 @@ export abstract class Page2 {
         //     return p.createDiv();
         // }, "scrollDiv").element;
 
-        let pauseAtStartInSecondsInput = createLabelledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
-            global.config.pauseAtStartInSeconds.toString(), 15, 400, currentY);
+        // let labeledInput = newLabeledInput("Label", "inputId", "initial");
+        // setOnInputUnlessItAlreadyExists(labeledInput, () => {
+        //     console.log(labeledInput.element.value());
+        // });
+
+        let pauseAtStartInSecondsInput = newLabeledInput("Pause at Start (sec)", "pauseAtStartInSeconds",
+            global.config.pauseAtStartInSeconds.toString());
         // @ts-ignore
         pauseAtStartInSecondsInput.input(() => {
             let value: string | number = pauseAtStartInSecondsInput.value();
@@ -34,8 +39,8 @@ export abstract class Page2 {
         });
         // pauseAtStartInSecondsInput.parent(scrollDiv);
 
-        let scrollSpeedInput = createLabelledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
-            global.config.pixelsPerSecond.toString(), 15, 400, currentY += 30);
+        let scrollSpeedInput = newLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
+            global.config.pixelsPerSecond.toString());
         // @ts-ignore
         scrollSpeedInput.input(() => {
             let value: string | number = scrollSpeedInput.value();
@@ -59,8 +64,8 @@ export abstract class Page2 {
             }
         });
 
-        let receptorPositionInput = createLabelledInput("Receptor Position (%)", "receptorPositionInput",
-            global.config.receptorYPercent.toString(), 15, 400, currentY += 30);
+        let receptorPositionInput = newLabeledInput("Receptor Position (%)", "receptorPositionInput",
+            global.config.receptorYPercent.toString());
         // @ts-ignore
         receptorPositionInput.input(() => {
             let value: string | number = receptorPositionInput.value();
@@ -72,8 +77,8 @@ export abstract class Page2 {
             }
         });
 
-        let additionalOffsetInSecondsInput = createLabelledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
-            global.config.additionalOffsetInSeconds.toString(), 15, 400, currentY += 30);
+        let additionalOffsetInSecondsInput = newLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
+            global.config.additionalOffsetInSeconds.toString());
         // @ts-ignore
         additionalOffsetInSecondsInput.input(() => {
             let value: string | number = additionalOffsetInSecondsInput.value();
@@ -90,8 +95,8 @@ export abstract class Page2 {
         if (global.previewNumTracks == undefined) {
             global.previewNumTracks = 4;
         }
-        let previewNumTracks = createLabelledInput("Number of Tracks", "previewNumTracksInput",
-            global.previewNumTracks.toString(), 15, 400, currentY += 30);
+        let previewNumTracks = newLabeledInput("Number of Tracks", "previewNumTracksInput",
+            global.previewNumTracks.toString());
         // @ts-ignore
         previewNumTracks.input(() => {
             let value: string | number = previewNumTracks.value();
@@ -118,6 +123,13 @@ export abstract class Page2 {
     }
 }
 
+function setOnInputUnlessItAlreadyExists(inputElement: {element: p5.Element, alreadyExists: boolean}, onInput: () => void) {
+    if (!inputElement.alreadyExists) {
+        // @ts-ignore
+        inputElement.element.input(onInput);
+    }
+}
+
 function drawKeyBindingsSectionText(fontsize: number, lineStartX: number, lineStartY: number) {
     let p: p5 = global.p5Scene.sketchInstance;
     p.push();
@@ -132,7 +144,7 @@ function drawKeyBindingsSectionText(fontsize: number, lineStartX: number, lineSt
 }
 
 function removeOldBindingButtons(numTracks: number) {
-    for(let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
+    for (let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
         DOMWrapper.removeElementById(getKeyBindingButtonId(trackNumber, numTracks));
     }
 }
@@ -153,4 +165,69 @@ function drawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
             keybindingHelper.bindNext(p);
         });
     });
+}
+
+function newLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
+
+    let createResult = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = '<label for="' + inputId + '" style="margin-right:15px;">' + labelString + '</label>';
+        container.html(labelHtml);
+        let myInput = p.createInput(inputInitialValue);
+        myInput.parent(container);
+        myInput.id(inputId);
+        return container;
+    }, inputId + "container");
+
+    let container = createResult.element;
+    // @ts-ignore
+    let canvasPosition: { x: number, y: number } = p._renderer.position();
+    container.position(canvasPosition.x, canvasPosition.y);
+
+    let myInput = getFirstInputInDiv(container);
+    return {element: myInput, alreadyExists: createResult.alreadyExists};
+}
+
+function getFirstInputInDiv(div: p5.Element): p5.Element {
+    let childrenNodes = div.child();
+    for (let i = 0; i < childrenNodes.length; i++) {
+        let node: Node = childrenNodes[i];
+        // @ts-ignore
+        if (node.tagName === "INPUT") {
+            // @ts-ignore
+            return new p5.Element(node);
+        }
+    }
+    return undefined;
+}
+
+let run = true;
+
+function test(labelString: string, inputId: string, inputInitialValue: string, containerX: number, containerY: number) {
+    if (run) {
+        let p: p5 = global.p5Scene.sketchInstance;
+        let myBiggerDiv = p.createDiv();
+        for (let i = 0; i < 20; i++) {
+            let id = inputId + i;
+            let myDiv = p.createDiv();
+            let labelHtml = '<label for="' + id + '">' + labelString + '</label>';
+            myDiv.html(labelHtml);
+            let myInput = p.createInput(inputInitialValue);
+            myInput.parent(myDiv);
+            myInput.id(id);
+            // @ts-ignore
+            myDiv.parent(myBiggerDiv);
+        }
+        // @ts-ignore
+        let canvasPosition: { x: number, y: number } = p._renderer.position();
+        // myBiggerDiv.style("border:2px solid #ccc;");
+        myBiggerDiv.style("width:300px;");
+        myBiggerDiv.style("height:80px;");
+        myBiggerDiv.style("overflow-y: scroll;");
+        myBiggerDiv.position(canvasPosition.x + containerX, canvasPosition.y + containerY);
+        myBiggerDiv.remove();
+
+        run = false;
+    }
 }
