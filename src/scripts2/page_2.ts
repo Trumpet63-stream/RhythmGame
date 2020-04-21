@@ -111,9 +111,7 @@ export abstract class Page2 {
             if (typeof value === "string") {
                 let newAccuracySettings: Accuracy[] = parseAccuracySettingsJson(value);
                 if (newAccuracySettings !== null) {
-                    console.log(global.config.accuracySettings);
                     global.config.accuracySettings = newAccuracySettings;
-                    console.log(global.config.accuracySettings);
                 }
             }
         })
