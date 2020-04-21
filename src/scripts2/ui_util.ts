@@ -1,8 +1,13 @@
 import * as p5 from "p5";
-import {ScrollDirection} from "../scripts/scroll_direction";
 import {global} from "./index";
 import {PageManager, PAGES} from "./page_manager";
-import {enumToStringArray, getKeyBindingButtonId, getKeyString, setConfigKeyBinding} from "../scripts/util";
+import {
+    enumToStringArray, findBindingInfoForTrack, getFirstElementByTagName,
+    getKeyBindingButtonId,
+    getKeyBindingContainerId,
+    getKeyString,
+    setConfigKeyBinding
+} from "../scripts/util";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -78,112 +83,106 @@ export abstract class DOMWrapper {
     }
 }
 
-export function createLabelledInput(labelString: string, uniqueId: string, initialValue: string, labelFontSize: number,
-                             labelX: number, labelY: number) {
+export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
-    p.push();
-    p.textSize(labelFontSize);
-    p.text(labelString, labelX, labelY);
-    // @ts-ignore
-    let canvasPosition: { x: number, y: number } = p._renderer.position();
-    let input = DOMWrapper.create(() => {
-        return p.createInput(initialValue);
-    }, uniqueId).element;
 
-    let inputFontSize = labelFontSize * 0.9;
-    let inputRelativeLength = 8.0;
-    let relativeSpacing = 1.0;
-    input.style("font-size", inputFontSize + "px");
-    input.size(inputRelativeLength * inputFontSize);
-    let inputSize: { width?: number, height?: number } = input.size();
-    input.position(canvasPosition.x + labelX + p.textWidth(labelString) + relativeSpacing * labelFontSize,
-        canvasPosition.y + labelY - (inputSize.height / 2) - (p.textAscent() * 0.35));
-    p.pop();
-    return input;
+    let input: p5.Element;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = getLabelHtml(inputId, labelString);
+        container.html(labelHtml);
+        input = p.createInput(inputInitialValue);
+        input.parent(container);
+        input.id(inputId);
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, inputId + "Container");
+
+    return {element: input, alreadyExists: container.alreadyExists};
+}
+
+function getLabelHtml(forId: string, labelString: string) {
+    return '<label for="' + forId + '" style="margin-right:15px;">' + labelString + '</label>'
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
-export function createScrollDirectionSelect(labelString: string, uniqueId: string, optionsEnum: any, initialEnumValue: any,
-                                            labelFontSize: number, labelX: number, labelY: number) {
+export function createLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any):
+    { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
-    p.push();
-    p.textSize(labelFontSize);
-    p.text(labelString, labelX, labelY);
-    // @ts-ignore
-    let canvasPosition: { x: number, y: number } = p._renderer.position();
-    let createResult = DOMWrapper.create(() => {
-        return p.createSelect();
-    }, uniqueId);
-    let select = createResult.element;
-    if (!createResult.alreadyExists) {
+
+    let select: p5.Element;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = getLabelHtml(selectId, labelString);
+        container.html(labelHtml);
+        select = p.createSelect();
+        select.parent(container);
+        select.id(selectId);
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, selectId + "Container");
+
+    if (!container.alreadyExists) {
         let initialOptions = enumToStringArray(optionsEnum);
         for (let i = 0; i < initialOptions.length; i++) {
             // @ts-ignore
             select.option(initialOptions[i]);
         }
         // @ts-ignore
-        select.selected(ScrollDirection[initialEnumValue as keyof typeof ScrollDirection].toString());
+        select.selected(optionsEnum[initialEnumValue as keyof typeof optionsEnum].toString());
     }
 
-    let inputFontSize = labelFontSize * 0.9;
-    let inputRelativeLength = 8.0;
-    let relativeSpacing = 1.0;
-    select.style("font-size", inputFontSize + "px");
-    select.size(inputRelativeLength * inputFontSize);
-    let inputSize: { width?: number, height?: number } = select.size();
-    select.position(canvasPosition.x + labelX + p.textWidth(labelString) + relativeSpacing * labelFontSize,
-        canvasPosition.y + labelY - (inputSize.height / 2) - (p.textAscent() * 0.35));
-    p.pop();
-    return select;
+    return {element: select, alreadyExists: container.alreadyExists};
 }
 
-export function createKeyBindingInput(trackNumber: number, numTracks: number, labelFontSize: number, labelX: number, labelY: number) {
+export function createKeyBindingInput(trackNumber: number, numTracks: number): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
-    p.push();
-    p.textSize(labelFontSize);
-    let labelString = "Track " + (trackNumber + 1);
-    labelString += ":";
-    p.text(labelString, labelX, labelY);
+
+    let setButtonId = getKeyBindingButtonId(trackNumber, numTracks);
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = getLabelHtml(setButtonId, "");
+        container.html(labelHtml);
+
+        let setButton = p.createButton("Set");
+        setButton.parent(container);
+        setButton.id(setButtonId);
+        setButton.mousePressed(() => {
+            global.keyboardEventManager.bindKeyToAction(-1, () => {
+                setConfigKeyBinding(trackNumber, numTracks,
+                    {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)});
+                global.keyboardEventManager.unbindKey(-1);
+            });
+        });
+
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, getKeyBindingContainerId(trackNumber, numTracks));
 
     let trackBindingInfo = findBindingInfoForTrack(trackNumber, global.config.keyBindings.get(numTracks));
     let keyString = trackBindingInfo.string;
-    let labelToKeyRelativeSpacing = 1.0;
-    let keyStringX = labelX + p.textWidth(labelString) + labelToKeyRelativeSpacing * labelFontSize;
-    p.text(keyString, keyStringX, labelY);
+    let labelString = 'Track ' + (trackNumber + 1) + ': ' + keyString;
+    let labelElement = getFirstElementByTagName(container.element, "LABEL");
+    labelElement.html(labelString);
 
-    // @ts-ignore
-    let canvasPosition: { x: number, y: number } = p._renderer.position();
-    let button = DOMWrapper.create(() => {
-        return p.createButton("Set");
-    }, getKeyBindingButtonId(trackNumber, numTracks)).element;
-
-    button.mousePressed(() => {
-        global.keyboardEventManager.bindKeyToAction(-1, () => {
-            setConfigKeyBinding(trackNumber, numTracks,
-                {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)});
-            global.keyboardEventManager.unbindKey(-1);
-        });
-    });
-
-    let inputFontSize = labelFontSize * 0.9;
-    let inputRelativeLength = 3.3;
-    let relativeSpacing = 1.0;
-    button.style("font-size", inputFontSize + "px");
-    button.size(inputRelativeLength * inputFontSize);
-    let inputSize: { width?: number, height?: number } = button.size();
-    let minimumKeyStringSpace = p.textWidth("LShift"); // Nothing special about LShift here, just seems like a good long string
-    let inputX = canvasPosition.x + keyStringX + Math.max(minimumKeyStringSpace, p.textWidth(keyString)) + relativeSpacing * labelFontSize;
-    let inputY = canvasPosition.y + labelY - (inputSize.height / 2) - (p.textAscent() * 0.35);
-    button.position(inputX, inputY);
-    p.pop();
-    return button;
+    return container;
 }
 
-function findBindingInfoForTrack(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
-    for(let i = 0; i < bindings.length; i++) {
-        if (bindings[i].trackNumber === trackNumber) {
-            return bindings[i];
-        }
-    }
-    return undefined;
+export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string):
+    { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
+
+    let textArea: p5.Element;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        let labelHtml = getLabelHtml(inputId, labelString);
+        container.html(labelHtml + "<br>");
+        textArea = p.createElement("textarea", inputInitialValue);
+        textArea.parent(container);
+        textArea.id(inputId);
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, inputId + "Container");
+
+    return {element: textArea, alreadyExists: container.alreadyExists};
 }

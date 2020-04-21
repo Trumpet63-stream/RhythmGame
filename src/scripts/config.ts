@@ -1,10 +1,8 @@
 import {Accuracy} from "./accuracy_manager";
-import {TimeManager} from "./time_manager";
 import {BiDirectionalMap} from "./bi_directional_map";
 import {DEFAULT_CONFIG} from "./default_config";
 import {defaultIfUndefined} from "./util";
 import {ScrollDirection} from "./scroll_direction";
-import {NoteManager} from "./note_manager";
 
 export enum ConfigOption {
     SECONDS_PER_PIXEL,

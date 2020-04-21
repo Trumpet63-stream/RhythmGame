@@ -28,7 +28,6 @@ export class KeyBindingHelper {
 
         if (this.currentBindingNumber >= this.bindingsToAcquire) {
             global.keyboardEventManager.unbindKey(-1);
-            console.log(global.config.keyBindings);
         }
     }
 }

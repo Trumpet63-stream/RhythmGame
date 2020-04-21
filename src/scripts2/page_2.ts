@@ -2,16 +2,20 @@ import * as p5 from "p5";
 import {ScrollDirection} from "../scripts/scroll_direction";
 import {KeyBindingHelper} from "./key_binding_helper";
 import {
-    createKeyBindingInput,
+    createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
     DOMWrapper, drawHeading
 } from "./ui_util";
 import {global} from "./index";
-import {enumToStringArray, getKeyBindingButtonId, initializeKeyBindings, isKeyBindingsDefined} from "../scripts/util";
+import {
+    getKeyBindingContainerId,
+    initializeKeyBindings,
+    isKeyBindingsDefined
+} from "../scripts/util";
+import {Accuracy} from "../scripts/accuracy_manager";
 
 export abstract class Page2 {
     public static draw() {
         drawHeading();
-        let currentY = 220;
         let p: p5 = global.p5Scene.sketchInstance;
 
         let scrollDiv = DOMWrapper.create(() => {
@@ -22,12 +26,12 @@ export abstract class Page2 {
             let canvasPosition: { x: number, y: number } = p._renderer.position();
             scrollDiv.element.style("border:2px solid #ccc;");
             scrollDiv.element.style("width:380px;");
-            scrollDiv.element.style("height:150px;");
+            scrollDiv.element.style("height:420px;");
             scrollDiv.element.style("overflow-y: scroll;");
             scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
         }
 
-        let pauseAtStartInSecondsInput = newLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
+        let pauseAtStartInSecondsInput = createLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
             global.config.pauseAtStartInSeconds.toString());
         setOnInputUnlessItAlreadyExists(pauseAtStartInSecondsInput, () => {
             let value: string | number = pauseAtStartInSecondsInput.element.value();
@@ -42,7 +46,7 @@ export abstract class Page2 {
             scrollDiv.element.child(pauseAtStartInSecondsInput.element.parent());
         }
 
-        let scrollSpeedInput = newLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
+        let scrollSpeedInput = createLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
             global.config.pixelsPerSecond.toString());
         setOnInputUnlessItAlreadyExists(scrollSpeedInput, () => {
             let value: string | number = scrollSpeedInput.element.value();
@@ -57,7 +61,7 @@ export abstract class Page2 {
             scrollDiv.element.child(scrollSpeedInput.element.parent());
         }
 
-        let scrollDirectionSelect = newCreateLabeledSelect("Scroll Direction", "scrollDirectionSelect",
+        let scrollDirectionSelect = createLabeledSelect("Scroll Direction", "scrollDirectionSelect",
             ScrollDirection, global.config.scrollDirection);
         setOnInputUnlessItAlreadyExists(scrollDirectionSelect, () => {
             let value: string = String(scrollDirectionSelect.element.value());
@@ -70,7 +74,7 @@ export abstract class Page2 {
             scrollDiv.element.child(scrollDirectionSelect.element.parent());
         }
 
-        let receptorPositionInput = newLabeledInput("Receptor Position (%)", "receptorPositionInput",
+        let receptorPositionInput = createLabeledInput("Receptor Position (%)", "receptorPositionInput",
             global.config.receptorYPercent.toString());
         setOnInputUnlessItAlreadyExists(receptorPositionInput, () => {
             let value: string | number = receptorPositionInput.element.value();
@@ -85,7 +89,7 @@ export abstract class Page2 {
             scrollDiv.element.child(receptorPositionInput.element.parent());
         }
 
-        let additionalOffsetInSecondsInput = newLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
+        let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
             global.config.additionalOffsetInSeconds.toString());
         setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
             let value: string | number = additionalOffsetInSecondsInput.element.value();
@@ -100,12 +104,32 @@ export abstract class Page2 {
             scrollDiv.element.child(additionalOffsetInSecondsInput.element.parent());
         }
 
-        drawKeyBindingsSectionText(18, 400, currentY += 40);
+        let accuracySettingsInput = createLabeledTextArea("Accuracy Settings", "accuracySettingsInput",
+            JSON.stringify(global.config.accuracySettings, null, 3));
+        setOnInputUnlessItAlreadyExists(accuracySettingsInput, () => {
+            let value: string | number = accuracySettingsInput.element.value();
+            if (typeof value === "string") {
+                let newAccuracySettings: Accuracy[] = parseAccuracySettingsJson(value);
+                if (newAccuracySettings !== null) {
+                    console.log(global.config.accuracySettings);
+                    global.config.accuracySettings = newAccuracySettings;
+                    console.log(global.config.accuracySettings);
+                }
+            }
+        })
+        if (!accuracySettingsInput.alreadyExists) {
+            scrollDiv.element.child(accuracySettingsInput.element.parent());
+        }
+
+        let keyBindingsSectionHeader = createKeyBindingsSectionHeader();
+        if (!keyBindingsSectionHeader.alreadyExists) {
+            scrollDiv.element.child(keyBindingsSectionHeader.element);
+        }
 
         if (global.previewNumTracks == undefined) {
             global.previewNumTracks = 4;
         }
-        let previewNumTracks = newLabeledInput("Number of Tracks", "previewNumTracksInput",
+        let previewNumTracks = createLabeledInput("Number of Tracks", "previewNumTracksInput",
             global.previewNumTracks.toString());
         // @ts-ignore
         setOnInputUnlessItAlreadyExists(previewNumTracks, () => {
@@ -113,7 +137,7 @@ export abstract class Page2 {
             if (typeof value === "string") {
                 value = parseInt(value);
             }
-            if (!isNaN(value) && value > 0 && Number.isInteger(value)) {
+            if (Number.isInteger(value) && value > 0 && value <= 26) {
                 removeOldBindingButtons(global.previewNumTracks);
                 global.previewNumTracks = value;
             }
@@ -122,18 +146,48 @@ export abstract class Page2 {
             scrollDiv.element.child(previewNumTracks.element.parent());
         }
 
-        drawQuickStartKeyBindingsButton(400, currentY += 15);
+        let keyBindingsQuickstartButton = DOMWrapper.create(() => {
+            return p.createButton("KeyBindings Quickstart");
+        }, "keyBindingsQuickstartButton");
+        if (!keyBindingsQuickstartButton.alreadyExists) {
+            keyBindingsQuickstartButton.element.mousePressed(() => {
+                let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);
+
+                // Bind this action to the "-1" key so that it happens on any key press
+                global.keyboardEventManager.bindKeyToAction(-1, () => {
+                    keybindingHelper.bindNext(p);
+                });
+            });
+
+            scrollDiv.element.child(keyBindingsQuickstartButton.element);
+        }
 
         if (!isKeyBindingsDefined(global.previewNumTracks)) {
             initializeKeyBindings(global.previewNumTracks);
         }
-        let bindingsStartY = currentY += 45;
         for (let trackNumber = 0; trackNumber < global.previewNumTracks; trackNumber++) {
-            createKeyBindingInput(trackNumber, global.previewNumTracks, 15, 400, bindingsStartY + 30 * trackNumber);
+            let keyBindingInput = createKeyBindingInput(trackNumber, global.previewNumTracks);
+            if (!keyBindingInput.alreadyExists) {
+                scrollDiv.element.child(keyBindingInput.element);
+            }
         }
 
         global.previewDisplay.draw();
     }
+}
+
+function createKeyBindingsSectionHeader(): { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+        container.html(
+            'Key Bindings <span style="font-size:12px">(track 1 is the leftmost track)</span>'
+        );
+        container.style("margin-top:10px; margin-bottom:10px; font-size:18px");
+        return container;
+    }, "keyBindingsSectionHeader");
+
+    return container;
 }
 
 function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
@@ -143,90 +197,22 @@ function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, al
     }
 }
 
-function drawKeyBindingsSectionText(fontsize: number, lineStartX: number, lineStartY: number) {
-    let p: p5 = global.p5Scene.sketchInstance;
-    p.push();
-    p.textSize(fontsize);
-    let keyBindingsHeader = "Key Bindings";
-    p.text(keyBindingsHeader, lineStartX, lineStartY);
-    let nextX = lineStartX + p.textWidth(keyBindingsHeader) + 0.2 * fontsize;
-    let nextY = lineStartY - (p.textAscent() * 0.15);
-    p.textSize(fontsize * 0.7);
-    p.text("(track 1 is the leftmost track)", nextX, nextY);
-    p.pop();
-}
-
 function removeOldBindingButtons(numTracks: number) {
     for (let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
-        DOMWrapper.removeElementById(getKeyBindingButtonId(trackNumber, numTracks));
+        DOMWrapper.removeElementById(getKeyBindingContainerId(trackNumber, numTracks));
     }
 }
 
-function drawQuickStartKeyBindingsButton(topLeftX: number, topLeftY: number) {
-    let p: p5 = global.p5Scene.sketchInstance;
-    let button = DOMWrapper.create(() => {
-        return p.createButton("KeyBindings Quickstart");
-    }, "keyBindingsQuickstartButton").element;
-    // @ts-ignore
-    let canvasPosition: { x: number, y: number } = p._renderer.position();
-    button.position(canvasPosition.x + topLeftX, canvasPosition.y + topLeftY);
-    button.mousePressed(() => {
-        let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);
-
-        // Bind this action to the "-1" key so that it happens on any key press
-        global.keyboardEventManager.bindKeyToAction(-1, () => {
-            keybindingHelper.bindNext(p);
-        });
-    });
-}
-
-function newLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
-    let p: p5 = global.p5Scene.sketchInstance;
-
-    let input: p5.Element;
-    let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(inputId, labelString);
-        container.html(labelHtml);
-        input = p.createInput(inputInitialValue);
-        input.parent(container);
-        input.id(inputId);
-        container.style("margin-top:10px; margin-bottom:10px");
-        return container;
-    }, inputId + "Container");
-
-    return {element: input, alreadyExists: container.alreadyExists};
-}
-
-function getLabelHtml(forId: string, labelString: string) {
-    return '<label for="' + forId + '" style="margin-right:15px;">' + labelString + '</label>'
-}
-
-function newCreateLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any):
-    { element: p5.Element, alreadyExists: boolean } {
-    let p: p5 = global.p5Scene.sketchInstance;
-
-    let select: p5.Element;
-    let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(selectId, labelString);
-        container.html(labelHtml);
-        select = p.createSelect();
-        select.parent(container);
-        select.id(selectId);
-        container.style("margin-top:10px; margin-bottom:10px");
-        return container;
-    }, selectId + "Container");
-
-    if (!container.alreadyExists) {
-        let initialOptions = enumToStringArray(optionsEnum);
-        for (let i = 0; i < initialOptions.length; i++) {
-            // @ts-ignore
-            select.option(initialOptions[i]);
+function parseAccuracySettingsJson(accuracySettingsJson: string): Accuracy[] {
+    try {
+        let accuracySettings: Accuracy[] = []
+        let jsonArray: Accuracy[] = JSON.parse(accuracySettingsJson);
+        for (let i = 0; i < jsonArray.length; i++) {
+            let accuracy = jsonArray[i];
+            // this fails if the user gave the wrong input
+            accuracySettings.push(new Accuracy(accuracy.name, accuracy.lowerBound, accuracy.upperBound));
         }
-        // @ts-ignore
-        select.selected(optionsEnum[initialEnumValue as keyof typeof optionsEnum].toString());
-    }
-
-    return {element: select, alreadyExists: container.alreadyExists};
+        return accuracySettings;
+    } catch (e) {}
+    return null;
 }

@@ -62,13 +62,15 @@ export function initializeKeyBindings(numTracks: number) {
             let keyString = keySequence[i];
             mapping.push({trackNumber: i, keyCode: keyString.charCodeAt(0), string: keyString});
         }
-    } else if (numTracks > 9 && numTracks <= 26) {
+    } else {
+        if (numTracks > 26) {
+            console.error("Couldn't generate default key bindings for more than 26 tracks. Ran out of letters!");
+            numTracks = 26;
+        }
         for (let i = 0; i < numTracks; i++) {
             let characterCode = "A".charCodeAt(0) + i; // This is an ASCII character code
             mapping.push({trackNumber: i, keyCode: characterCode, string: String.fromCharCode(characterCode)});
         }
-    } else {
-        throw new Error("Couldn't generate default key bindings for more than 26 tracks. Ran out of letters!");
     }
 
     global.config.keyBindings.set(numTracks, mapping);
@@ -96,6 +98,10 @@ function getIndexOfTrackNumberBinding(trackNumber: number, bindings: { trackNumb
 }
 
 export function getKeyBindingButtonId(trackNumber: number, numTracks: number) {
+    return getKeyBindingUniqueId(trackNumber, numTracks) + "Button";
+}
+
+export function getKeyBindingContainerId(trackNumber: number, numTracks: number) {
     return getKeyBindingUniqueId(trackNumber, numTracks) + "Button";
 }
 
@@ -161,16 +167,23 @@ function difficultyRank(difficulty: string) {
     }
 }
 
-function getFirstElementByTagName(div: p5.Element, tagName: string): p5.Element {
+export function getFirstElementByTagName(div: p5.Element, tagName: string): p5.Element {
     let childrenNodes = div.child();
     for (let i = 0; i < childrenNodes.length; i++) {
         let node: Node = childrenNodes[i];
         // @ts-ignore
-        console.log(node.tagName);
-        // @ts-ignore
         if (node.tagName === tagName) {
             // @ts-ignore
             return new p5.Element(node);
+        }
+    }
+    return undefined;
+}
+
+export function findBindingInfoForTrack(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
+    for(let i = 0; i < bindings.length; i++) {
+        if (bindings[i].trackNumber === trackNumber) {
+            return bindings[i];
         }
     }
     return undefined;
