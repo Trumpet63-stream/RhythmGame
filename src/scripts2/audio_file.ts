@@ -10,6 +10,7 @@ export class AudioFile {
     public state: AudioFileState;
     public file: File;
     public audioSource: AudioBufferSourceNode;
+    public audioContext: AudioContext;
 
     public constructor() {
         this.state = AudioFileState.NO_AUDIO_FILE;
@@ -20,11 +21,11 @@ export class AudioFile {
         loadSoundFile(this.file, ((onFileRead: ProgressEvent<FileReader>) => {
             this.state = AudioFileState.DONE_READING;
             // @ts-ignore
-            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.audioSource = audioContext.createBufferSource();
-            audioContext.decodeAudioData(<ArrayBuffer>onFileRead.target.result).then(((buffer: AudioBuffer) => {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioSource = this.audioContext.createBufferSource();
+            this.audioContext.decodeAudioData(<ArrayBuffer>onFileRead.target.result).then(((buffer: AudioBuffer) => {
                     this.audioSource.buffer = buffer;
-                    this.audioSource.connect(audioContext.destination);
+                    this.audioSource.connect(this.audioContext.destination);
                     this.state = AudioFileState.BUFFERED;
                 }),
                 (e: any) => {
@@ -40,8 +41,8 @@ export class AudioFile {
         return undefined;
     }
 
-    public play() {
-        this.audioSource.start(0);
+    public play(delayInSeconds: number = 0) {
+        this.audioSource.start(this.audioContext.currentTime + delayInSeconds);
     }
 
     public stop() {

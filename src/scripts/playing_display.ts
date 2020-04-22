@@ -43,7 +43,7 @@ export class PlayingDisplay {
         // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
         if (!this.isDebugMode) {
             this.timeManager = new TimeManager(performance.now(), this.config);
-            // window.setTimeout(playAudio, config.pauseAtStartInSeconds * 1000);
+            global.audioFile.play(config.pauseAtStartInSeconds);
         }
 
         this.noteManager = new NoteManager(tracks);
@@ -54,8 +54,7 @@ export class PlayingDisplay {
             this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
         }
 
-        // this.gameEndTime = this.calculateGameEnd(audioSource.buffer.duration,
-        //     this.noteManager.getLatestNote().timeInSeconds + this.getEarliestAccuracy(this.config) / 1000);
+        this.gameEndTime = this.calculateGameEnd(global.audioFile.getDuration(), this.getNotesEndTime());
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
@@ -76,20 +75,25 @@ export class PlayingDisplay {
         this.displayManager.draw(currentTimeInSeconds);
     }
 
-    private getEarliestAccuracy(config: Config) {
-        if (config.accuracySettings[config.accuracySettings.length - 1].upperBound != null) {
-            return config.accuracySettings[config.accuracySettings.length - 1].upperBound;
+    private getNotesEndTime() {
+        let earliestAccuracy: number;
+        if (this.config.accuracySettings[this.config.accuracySettings.length - 1].upperBound != null) {
+            earliestAccuracy = this.config.accuracySettings[this.config.accuracySettings.length - 1].upperBound;
         } else {
-            return config.accuracySettings[config.accuracySettings.length - 2].upperBound;
+            earliestAccuracy = this.config.accuracySettings[this.config.accuracySettings.length - 2].upperBound;
         }
+        return this.noteManager.getLatestNote().timeInSeconds + earliestAccuracy / 1000;
     }
 
     private calculateGameEnd(audioDuration: number, notesEndTime: number) {
-        return Math.max(Math.min(notesEndTime + 5, audioDuration), notesEndTime);
+        if (audioDuration < notesEndTime) {
+            return notesEndTime + 1;
+        }
+        return Math.min(notesEndTime + 5, audioDuration);
     }
 
     private endSong() {
-        // stopAudio();
+        global.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
             this.scene.sketchInstance, this.accuracyRecording);
         PageManager.setCurrentScene(PAGES.PAGE_4);
@@ -100,8 +104,12 @@ export class PlayingDisplay {
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];
             global.keyboardEventManager.bindKeyToAction(keyBinding.keyCode,
-                () => {this.keyDownActionForTrack(keyBinding.trackNumber)},
-                () => {this.keyUpActionForTrack(keyBinding.trackNumber)})
+                () => {
+                    this.keyDownActionForTrack(keyBinding.trackNumber)
+                },
+                () => {
+                    this.keyUpActionForTrack(keyBinding.trackNumber)
+                })
         }
 
         global.keyboardEventManager.bindKeyToAction(global.config.quitKey, () => {
