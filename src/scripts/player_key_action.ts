@@ -1,4 +1,3 @@
-
 export class PlayerKeyAction {
     gameTime: number;
     track: number;

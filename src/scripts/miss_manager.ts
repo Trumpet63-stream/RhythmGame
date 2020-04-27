@@ -1,10 +1,10 @@
 import {NoteManager} from "./note_manager";
-import {Config} from "../scripts2/config";
+import {Config} from "./config";
 import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {getMissBoundary} from "./util";
 import {Note, NoteState, NoteType} from "./parsing";
 import {HoldManager} from "./hold_manager";
-import {AccuracyEvent, AccuracyRecording} from "../scripts2/accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
 
 export class MissManager {
     private config: Config;

@@ -46,6 +46,13 @@ export interface Note {
     state?: NoteState;
 }
 
+export class Mode {
+    public type: string;
+    public difficulty: string;
+    public meter: string;
+    public id: number;
+}
+
 export class FullParse {
     metaData: Map<string, string>;
     modes: Map<string, string>[];

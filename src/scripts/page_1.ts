@@ -1,12 +1,11 @@
 import * as p5 from "p5";
-import {DOMWrapper, drawHeading, setElementCenterPositionRelative} from "./ui_util";
+import {DOMWrapper, drawHeading, setElementCenterPositionRelative, createFileInput} from "./ui_util";
 import {global} from "./index";
-import {SimfileState} from "./simfile";
+import {StepfileState} from "./stepfile";
 import {AudioFileState} from "./audio_file";
-import {getModeOptionsForDisplay} from "../scripts/util";
-import {Mode} from "../scripts/index";
-import {PlayingDisplay} from "../scripts/playing_display";
-import {Note} from "../scripts/parsing";
+import {getModeOptionsForDisplay} from "./util";
+import {PlayingDisplay} from "./playing_display";
+import {Mode, Note} from "./parsing";
 import {PageManager, PAGES} from "./page_manager";
 
 export abstract class Page1 {
@@ -14,30 +13,35 @@ export abstract class Page1 {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
 
-        let stepfileInput = DOMWrapper.create(() => {
-            return p.createFileInput(global.simfile.load.bind(global.simfile), "false");
-        }, "setfileInputButton").element;
-        setElementCenterPositionRelative(stepfileInput, 0.35, 0.3);
+        let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
+            global.stepfile.load.bind(global.stepfile)).element;
+        setElementCenterPositionRelative(stepfileInput, 0.25, 0.3);
 
-        let audioFileInput = DOMWrapper.create(() => {
-            return p.createFileInput(global.audioFile.load.bind(global.audioFile), "false");
-        }, "audioFileInputButton").element;
-        setElementCenterPositionRelative(audioFileInput, 0.65, 0.3);
+        let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3)", "audioFileInput",
+            global.audioFile.load.bind(global.audioFile)).element;
+        setElementCenterPositionRelative(audioFileInput, 0.75, 0.3);
 
+        let playButtonId = "playButton";
+        let modeRadioId = "modeRadio";
         if (isFilesReady()) {
-            let modeRadio = drawModeSelect(p);
-            if (modeRadio.value() !== "") {
+            let modeRadio = drawModeSelect(p, modeRadioId);
+            if (modeRadio.value() !== "") { // user has selected a mode
                 let playButton = DOMWrapper.create(() => {
                     return p.createButton("Play");
-                }, "playButton").element;
+                }, playButtonId).element;
                 setElementCenterPositionRelative(playButton, 0.5, 0.8);
                 playButton.mouseClicked(() => {
                     let selectedMode: Mode = getSelectedMode(modeRadio);
-                    global.simfile.finishParsing(selectedMode.id);
-                    initPlayingDisplay(global.simfile.fullParse.tracks);
+                    global.stepfile.finishParsing(selectedMode.id);
+                    initPlayingDisplay(global.stepfile.fullParse.tracks);
                     PageManager.setCurrentScene(PAGES.PAGE_3);
                 });
+            } else {
+                DOMWrapper.removeElementById(playButtonId);
             }
+        } else {
+            DOMWrapper.removeElementById(modeRadioId);
+            DOMWrapper.removeElementById(playButtonId);
         }
     }
 }
@@ -62,14 +66,14 @@ function fixRadioDivElement(radioDivP5Element: p5.Element) {
     }
 }
 
-function drawModeSelect(p: p5): p5.Element {
+function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
     if (global.page1ModeOptions === undefined) {
-        global.page1ModeOptions = getModeOptionsForDisplay(global.simfile.partialParse.modes);
+        global.page1ModeOptions = getModeOptionsForDisplay(global.stepfile.partialParse.modes);
     }
     let modeRadioCreateResult = DOMWrapper.create(() => {
         return p.createRadio();
-    }, "modeRadio");
+    }, uniqueId);
     let modeRadio = modeRadioCreateResult.element;
     p.textAlign(p.CENTER);
     if (!modeRadioCreateResult.alreadyExists) {
@@ -99,8 +103,10 @@ function drawModeSelect(p: p5): p5.Element {
 }
 
 function isFilesReady() {
-    return global.simfile.state === SimfileState.PARTIALLY_PARSED &&
-        global.audioFile.state === AudioFileState.BUFFERED;
+    let stepfileReady = global.stepfile.state === StepfileState.PARTIALLY_PARSED ||
+        global.stepfile.state === StepfileState.FULLY_PARSED;
+    let audioFileReady = global.audioFile.state === AudioFileState.BUFFERED;
+    return stepfileReady && audioFileReady;
 }
 
 function initPlayingDisplay(tracks: Note[][]) {
@@ -109,4 +115,42 @@ function initPlayingDisplay(tracks: Note[][]) {
 
 function getSelectedMode(modeRadio: p5.Element) {
     return global.page1ModeOptions[modeRadio.value()];
+}
+
+function getStepfileInputLabel() {
+    switch(global.stepfile.state) {
+        case StepfileState.NO_SIMFILE:
+            return "No file chosen";
+            break;
+        case StepfileState.DONE_READING:
+        case StepfileState.PARTIALLY_PARSED:
+        case StepfileState.FULLY_PARSED:
+            return truncateFileNameIfTooLong(global.stepfile.file.name, 21);
+            break;
+        default:
+            return "Error";
+    }
+}
+
+function getAudioFileInputLabel() {
+    switch(global.audioFile.state) {
+        case AudioFileState.NO_AUDIO_FILE:
+            return "No file chosen";
+            break;
+        case AudioFileState.DONE_READING:
+        case AudioFileState.BUFFERED:
+            return truncateFileNameIfTooLong(global.audioFile.file.name, 21);
+            break;
+        default:
+            return "Error";
+    }
+}
+
+function truncateFileNameIfTooLong(fullFileName: string, maxLength: number) {
+    if (fullFileName.length <= maxLength) {
+        return fullFileName;
+    }
+    return fullFileName.substr(0, maxLength - 11) +
+        "..." +
+        fullFileName.substr(fullFileName.length - 10);
 }

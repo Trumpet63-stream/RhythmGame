@@ -1,7 +1,7 @@
-import {GameTimeSupplier} from "../scripts2/game_time_provider";
-import {Config} from "../scripts2/config";
+import {GameTimeProvider} from "./game_time_provider";
+import {Config} from "./config";
 
-export class TimeManager implements GameTimeSupplier {
+export class TimeManager implements GameTimeProvider {
     private systemTimeWhenGameStarted: number;
     private config: Config;
 

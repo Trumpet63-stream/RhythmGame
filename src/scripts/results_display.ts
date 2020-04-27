@@ -1,9 +1,9 @@
 import * as p5 from "p5";
 import {drawAccuracyBars} from "./drawing_util";
 import {Accuracy, AccuracyManager} from "./accuracy_manager";
-import {Config} from "../scripts2/config";
+import {Config} from "./config";
 import {NoteManager} from "./note_manager";
-import {AccuracyRecording} from "../scripts2/accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
 
 //TODO: take holds and releases into account
 export class ResultsDisplay {

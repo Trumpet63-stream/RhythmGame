@@ -1,40 +1,40 @@
 import * as p5 from "p5";
+import {KeyboardEventManager} from "./keyboard_event_manager";
+import {PreviewDisplay} from "./preview_display";
+import {PageManager} from "./page_manager";
+import {global} from "./index";
 
-const gameContainer: HTMLElement = document.getElementById("graphical-display-section");
+let width = 720;
+let height = 480;
 
 export class P5Scene {
-    canvas: HTMLCanvasElement;
     sketchInstance: p5;
 
-    constructor(width: number, height: number,
-                setupFunction: (canvas: HTMLCanvasElement, sketchInstance: p5) => void,
-                drawFunction: () => void) {
-
+    constructor() {
         this.sketchInstance = new p5((p: p5) => {
             let renderer: p5.Renderer;
 
             function centerCanvas() {
-                // let centerX = (p.windowWidth - p.width) / 2;
-                // let centerY = (p.windowHeight - p.height) / 2;
-                // renderer.position(centerX, centerY);
                 renderer.center();
             }
 
             p.setup = function () {
-                this.canvas = p.createCanvas(width, height).elt;
-                setupFunction(this.canvas, p);
+                renderer = p.createCanvas(width, height);
+                global.keyboardEventManager = new KeyboardEventManager(p);
+                global.previewDisplay = new PreviewDisplay(global.previewNotes, global.config, global.p5Scene);
+                renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
+                centerCanvas();
             };
 
-            p.draw = drawFunction;
+            p.draw = function () {
+                p.clear();
+                p.background(200);
+                PageManager.draw();
+            };
 
             p.windowResized = function () {
                 centerCanvas();
             };
-
-        }, gameContainer);
-    }
-
-    remove() {
-        this.sketchInstance.remove();
+        });
     }
 }

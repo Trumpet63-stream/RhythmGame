@@ -3,7 +3,7 @@ import * as p5 from "p5";
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing";
-import {Config} from "../scripts2/config";
+import {Config} from "./config";
 
 class NoteDisplay {
     centerX: number;
@@ -129,8 +129,8 @@ export class DisplayManager {
     private width: number;
     private height: number;
 
-    constructor(noteManager: NoteManager, config: Config, sketchInstance: p5, topLeftX: number = 40,
-                topLeftY: number = 40, width: number = 180, height: number = 400) {
+    constructor(noteManager: NoteManager, config: Config, sketchInstance: p5, topLeftX: number = 0,
+                topLeftY: number = 0, width: number = 180, height: number = 400) {
         this.config = config;
         this.noteManager = noteManager;
         this.currentTimeInSeconds = 0;
@@ -216,12 +216,12 @@ export class DisplayManager {
     private drawAllConnectors(leastTime: number, greatestTime: number) {
         let tracks = this.noteManager.tracks;
         for (let i = 0; i < tracks.length; i++) {
-            this.drawConnectorsInTrack(leastTime, greatestTime, tracks[i], i,
+            this.drawAllTrackConnectors(leastTime, greatestTime, tracks[i], i,
                 tracks.length, this.currentTimeInSeconds);
         }
     }
 
-    private drawConnectorsInTrack(leastTime: number, greatestTime: number, track: Note[], trackNumber: number,
+    private drawAllTrackConnectors(leastTime: number, greatestTime: number, track: Note[], trackNumber: number,
                           numTracks: number, currentTime: number) {
         let noteStack: Note[] = [];
         for (let i = 0; i < track.length; i++) {
@@ -274,9 +274,22 @@ export class DisplayManager {
         } else {
             startY = this.getNoteCenterY(startNote.timeInSeconds, currentTime);
         }
+        startY = this.clampValueToRange(startY, this.topLeftY, this.topLeftY + this.height);
 
-        let endY = this.getNoteCenterY(endNote.timeInSeconds - (this.config.noteSize / this.config.pixelsPerSecond / 2), currentTime);
+        let timeLengthOfHalfANote = this.config.noteSize / this.config.pixelsPerSecond / 2;
+        let endY = this.getNoteCenterY(endNote.timeInSeconds - timeLengthOfHalfANote, currentTime);
+        endY = this.clampValueToRange(endY, this.topLeftY, this.topLeftY + this.height);
         new HoldConnector(x, startY, endY, this.sketchInstance).draw();
+    }
+
+    private clampValueToRange(value: number, lowerBound: number, upperBound: number): number {
+        if (value < lowerBound) {
+            return lowerBound;
+        }
+        if (value > upperBound) {
+            return upperBound;
+        }
+        return value;
     }
 
     private drawReceptors() {

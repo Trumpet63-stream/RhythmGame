@@ -2,7 +2,7 @@ import * as p5 from "p5";
 
 import {NoteManager} from "./note_manager";
 import {AccuracyManager} from "./accuracy_manager";
-import {AccuracyRecording} from "../scripts2/accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
 
 export function drawAccuracyBars(p: p5, accuracyLabels: string[],
                                  accuracyRecording: AccuracyRecording,
@@ -13,6 +13,7 @@ export function drawAccuracyBars(p: p5, accuracyLabels: string[],
     let barSpacing = 10;
     let totalHeight = accuracyLabels.length * barHeight + (accuracyLabels.length - 1) * barSpacing;
     let startY = (p.height - totalHeight) / 2 + barHeight / 2;
+    startY *= 0.8; // shift the results up to make room for exit button
     for (let i = 0; i < accuracyLabels.length; i++) {
         let accuracyLabel = accuracyLabels[i];
         let numAccuracyEvents = getNumAccuracyEvents(accuracyLabel, accuracyRecording, accuracyManager);

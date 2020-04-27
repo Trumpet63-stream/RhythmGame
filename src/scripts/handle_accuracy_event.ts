@@ -1,5 +1,5 @@
 import {NoteType} from "./parsing";
-import {AccuracyRecording} from "../scripts2/accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
 
 //TODO: animations for accuracy events
 export function handleAccuracyEvent(accuracyName: string, trackNumber: number, accuracy: number, currentTime: number,

@@ -7,7 +7,7 @@ import {
     getKeyBindingContainerId,
     getKeyString,
     setConfigKeyBinding
-} from "../scripts/util";
+} from "./util";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -168,8 +168,8 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number): {
     return container;
 }
 
-export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string):
-    { element: p5.Element, alreadyExists: boolean } {
+export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string, rows: number = 4,
+                                      cols: number = 40): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let textArea: p5.Element;
@@ -180,9 +180,46 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
         textArea = p.createElement("textarea", inputInitialValue);
         textArea.parent(container);
         textArea.id(inputId);
+        textArea.attribute("rows", rows.toString());
+        textArea.attribute("cols", cols.toString());
         container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, inputId + "Container");
 
     return {element: textArea, alreadyExists: container.alreadyExists};
+}
+
+export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: () => void): { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
+
+    let buttonId = uniqueId + "Button";
+    let containerId = uniqueId + "Container";
+    let labelElement;
+    let container = DOMWrapper.create(() => {
+        let container = p.createDiv();
+
+        let fileInput = p.createFileInput(onFileLoad, "false");
+        fileInput.parent(container);
+        fileInput.hide();
+
+        let button = p.createButton(buttonText);
+        button.parent(container);
+        button.id(buttonId);
+        button.mouseClicked(() => {
+            fileInput.elt.click();
+        });
+
+        let labelElement = p.createElement("label", labelString);
+        labelElement.parent(container);
+        labelElement.attribute("for", buttonId);
+        labelElement.style("margin-left:5px");
+
+        container.style("margin-top:10px; margin-bottom:10px");
+        return container;
+    }, containerId);
+
+    labelElement = getFirstElementByTagName(container.element, "LABEL");
+    labelElement.html(labelString);
+
+    return container;
 }

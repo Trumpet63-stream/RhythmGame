@@ -1,4 +1,4 @@
-import {NoteType} from "../scripts/parsing";
+import {NoteType} from "./parsing";
 
 export enum AccuracyRecordingState {
     INCOMPLETE,

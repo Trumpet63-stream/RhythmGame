@@ -1,3 +1,4 @@
-export interface GameTimeSupplier {
+
+export interface GameTimeProvider {
     getGameTime(argument?: number): number;
 }

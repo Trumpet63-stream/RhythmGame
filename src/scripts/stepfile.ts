@@ -1,36 +1,41 @@
 import * as p5 from "p5";
-import {FullParse, getFullParse, getPartialParse, PartialParse} from "../scripts/parsing";
+import {FullParse, getFullParse, getPartialParse, PartialParse} from "./parsing";
 
-export enum SimfileState {
+export enum StepfileState {
     NO_SIMFILE,
     DONE_READING,
     PARTIALLY_PARSED,
     FULLY_PARSED,
+    ERROR,
 }
 
-export class Simfile {
-    public state: SimfileState;
+export class Stepfile {
+    public state: StepfileState;
     public file: File;
     public partialParse: PartialParse;
     public fullParse: FullParse;
 
     public constructor() {
-        this.state = SimfileState.NO_SIMFILE;
+        this.state = StepfileState.NO_SIMFILE;
     }
 
     public load(file: p5.File) {
         this.file = file.file; // this unwraps the p5.File wrapper to get the original DOM file
         loadTextFile(this.file, ((event: ProgressEvent<FileReader>) => {
-            this.state = SimfileState.DONE_READING;
+            this.state = StepfileState.DONE_READING;
             this.partialParse = getPartialParse(<string>event.target.result);
-            this.state = SimfileState.PARTIALLY_PARSED;
+            if (this.partialParse.modes.length < 1) {
+                this.state = StepfileState.ERROR;
+            } else {
+                this.state = StepfileState.PARTIALLY_PARSED;
+            }
         }));
     }
 
     public finishParsing(modeIndex: number) {
-        if (this.state === SimfileState.PARTIALLY_PARSED) {
+        if (this.state === StepfileState.PARTIALLY_PARSED) {
             this.fullParse = getFullParse(modeIndex, this.partialParse);
-            this.state = SimfileState.FULLY_PARSED;
+            this.state = StepfileState.FULLY_PARSED;
         }
     }
 }

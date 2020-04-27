@@ -1,5 +1,5 @@
 import * as p5 from "p5";
-import {ScrollDirection} from "../scripts/scroll_direction";
+import {ScrollDirection} from "./scroll_direction";
 import {KeyBindingHelper} from "./key_binding_helper";
 import {
     createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
@@ -10,8 +10,8 @@ import {
     getKeyBindingContainerId,
     initializeKeyBindings,
     isKeyBindingsDefined
-} from "../scripts/util";
-import {Accuracy} from "../scripts/accuracy_manager";
+} from "./util";
+import {Accuracy} from "./accuracy_manager";
 
 export abstract class Page2 {
     public static draw() {

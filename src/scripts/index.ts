@@ -1,77 +1,49 @@
-import {getFullParse, getPartialParse, PartialParse} from "./parsing";
-import {
-    disablePlayButton
-} from "./ui_state";
-import {Config, ConfigOption} from "./config";
-import {Globals} from "./globals";
-import {KeyBindingManager} from "./key_binding_manager";
-import {replaceNotYetImplementedNoteTypes, setAllNotesToDefaultState} from "./util";
+import {Config} from "./config";
+import {NoteState, NoteType} from "./parsing";
+import {Stepfile} from "./stepfile";
+import {AudioFile} from "./audio_file";
+import {P5Scene} from "./p5_scene";
 
-export class Mode {
-    public type: string;
-    public difficulty: string;
-    public meter: string;
-    public id: number;
-}
-
-let localStartedParse: PartialParse;
-export let config = new Config({});
-let keyBindingManager = new KeyBindingManager(config);
-document.addEventListener("keydown", (e) => (keyBindingManager.keyDown(e)));
-
-export let audioSource: AudioBufferSourceNode;
-
-function startParse(fileContents: string) {
-    localStartedParse = getPartialParse(fileContents);
-    // let modeOptions: Mode[] = getModeOptionsForDisplay(localStartedParse.modes);
-    // updateSimfileState(SimfileState.SIMFILE_PREPARSED, modeOptions);
-}
-
-// This function is called from html that's generated in script
-export function modeSelected() {
-    // updateSimfileState(SimfileState.DIFFICULTY_SELECTED);
-    let selectedMode: number = parseInt((<HTMLInputElement>document.getElementById("mode-select")).value);
-    // Globals.PARSED_NOTES = getFullParse(selectedMode, localStartedParse);
-    setAllNotesToDefaultState(Globals.PARSED_NOTES);
-    replaceNotYetImplementedNoteTypes(Globals.PARSED_NOTES);
-    // Globals.CURRENT_GAME_AREA = new PreviewDisplay(Globals.PARSED_NOTES, config);
-    // updateSimfileState(SimfileState.SIMFILE_PARSED, Globals.PARSED_NOTES.length);
-}
-
-export function goToPrepareGameplay() {
-    disablePlayButton();
-    // Globals.CURRENT_GAME_AREA.remove();
-    // Globals.CURRENT_GAME_AREA = new PlayingDisplay(Globals.PARSED_NOTES, config);
-}
-
-export function bindingClicked(bindingIndex: number) {
-    keyBindingManager.expectingKeyInput = true;
-    keyBindingManager.receivingIndex = bindingIndex;
-}
-
-export function configUpdated(configOptionCode: number) {
-    switch (configOptionCode) {
-        case ConfigOption.SECONDS_PER_PIXEL:
-            config.updateSecondsPerPixel();
-            break;
-        case ConfigOption.RECEPTOR_Y_POSITION:
-            config.updateReceptorYPosition();
-            break;
-        case ConfigOption.SCROLL_DIRECTION:
-            config.updateScrollDirection();
-            break;
-        case ConfigOption.AUDIO_START_DELAY:
-            config.updateAudioStartDelay();
-            break;
-        case ConfigOption.ACCURACY_SETTINGS:
-            config.updateAccuracySettings();
-            break;
-        case ConfigOption.PAUSE_AT_START:
-            config.updatePauseAtStart();
-            break;
-    }
-}
-
-export function autoPauseAtStart() {
-    // Globals.CURRENT_GAME_AREA.config.setPauseAtStartToDefault(Globals.CURRENT_GAME_AREA.noteManager);
-}
+export const global: any = {};
+global.p5Scene = new P5Scene();
+global.config = new Config({});
+global.stepfile = new Stepfile();
+global.audioFile = new AudioFile();
+global.previewNotes = [
+    [{type: NoteType.NORMAL, timeInSeconds: 0.1, state: NoteState.DEFAULT}, {
+        type: NoteType.NONE,
+        timeInSeconds: 0.35,
+        state: NoteState.DEFAULT
+    }],
+    [{type: NoteType.HOLD_HEAD, timeInSeconds: 0.2, state: NoteState.DEFAULT}, {
+        type: NoteType.TAIL,
+        timeInSeconds: 0.5,
+        state: NoteState.DEFAULT
+    }],
+    [{type: NoteType.MINE, timeInSeconds: 0.3, state: NoteState.DEFAULT}],
+    [{type: NoteType.ROLL_HEAD, timeInSeconds: 0.4, state: NoteState.DEFAULT}, {
+        type: NoteType.TAIL,
+        timeInSeconds: 0.55,
+        state: NoteState.DEFAULT
+    }]
+];
+global.playingNotes = [
+    [
+        {type: NoteType.NORMAL, timeInSeconds: 1.1, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.3, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.5, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.7, state: NoteState.DEFAULT},
+        {type: NoteType.NORMAL, timeInSeconds: 1.9, state: NoteState.DEFAULT},
+    ],
+    [
+        {type: NoteType.HOLD_HEAD, timeInSeconds: 2.2, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 2.5, state: NoteState.DEFAULT}
+    ],
+    [
+        {type: NoteType.MINE, timeInSeconds: 2.3, state: NoteState.DEFAULT}
+    ],
+    [
+        {type: NoteType.ROLL_HEAD, timeInSeconds: 2.4, state: NoteState.DEFAULT},
+        {type: NoteType.TAIL, timeInSeconds: 2.55, state: NoteState.DEFAULT}
+    ]
+];

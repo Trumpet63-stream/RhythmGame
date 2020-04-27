@@ -8,26 +8,26 @@ import {ScrollManager} from "./scroll_manager";
 import {ResultsDisplay} from "./results_display";
 import {Note} from "./parsing";
 import {HoldManager} from "./hold_manager";
-import {GameTimeSupplier} from "../scripts2/game_time_provider";
-import {Config} from "../scripts2/config";
+import {GameTimeProvider} from "./game_time_provider";
+import {Config} from "./config";
 import {
     initializeKeyBindings,
     isKeyBindingsDefined,
     replaceNotYetImplementedNoteTypes,
     setAllNotesToDefaultState
 } from "./util";
-import {global} from "../scripts2/index";
+import {global} from "./index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
-import {KeyBinding} from "../scripts2/key_binding_helper";
-import {PageManager, PAGES} from "../scripts2/page_manager";
-import {AccuracyRecording} from "../scripts2/accuracy_recording";
+import {KeyBinding} from "./key_binding_helper";
+import {PageManager, PAGES} from "./page_manager";
+import {AccuracyRecording} from "./accuracy_recording";
 
 export class PlayingDisplay {
     private scene: P5Scene;
     private config: Config;
     private noteManager: NoteManager;
     private displayManager: DisplayManager;
-    private timeManager: GameTimeSupplier;
+    private timeManager: GameTimeProvider;
     private missManager: MissManager;
     private accuracyManager: AccuracyManager;
     private gameEndTime: number;
@@ -57,7 +57,14 @@ export class PlayingDisplay {
         this.gameEndTime = this.calculateGameEnd(global.audioFile.getDuration(), this.getNotesEndTime());
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
-        this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
+
+        let width = 200;
+        let height = 400;
+        let topLeftX = (this.scene.sketchInstance.width - width) / 2;
+        let topLeftY = (this.scene.sketchInstance.height - height) / 2;
+        this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance,
+            topLeftX, topLeftY, width, height);
+
         if (!isKeyBindingsDefined(this.noteManager.tracks.length)) {
             initializeKeyBindings(this.noteManager.tracks.length);
         }

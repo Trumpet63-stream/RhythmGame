@@ -3,7 +3,7 @@ import {NoteManager} from "./note_manager";
 import {P5Scene} from "./p5_scene";
 import {ScrollManager} from "./scroll_manager";
 import {Note} from "./parsing";
-import {Config} from "../scripts2/config";
+import {Config} from "./config";
 
 export class PreviewDisplay {
     private scene: P5Scene;
@@ -11,20 +11,25 @@ export class PreviewDisplay {
     noteManager: NoteManager;
     private scrollManager: ScrollManager;
     private displayManager: DisplayManager;
+    private topLeftX = 65;
+    private topLeftY = 55;
+    private width = 200;
+    private height = 400;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
         this.config = config;
         this.scene = scene;
         this.noteManager = new NoteManager(tracks);
-        this.scrollManager = new ScrollManager(this.config, this.scene.sketchInstance);
-        this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance);
+        this.scrollManager = new ScrollManager(this.config, this.scene.sketchInstance, this.getBounds());
+        this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance,
+            this.topLeftX, this.topLeftY, this.width, this.height);
     }
 
     draw() {
         this.displayManager.draw(this.scrollManager.getGameTime());
     }
 
-    remove() {
-        this.scene.remove();
+    private getBounds() {
+        return {topLeftX: this.topLeftX, topLeftY: this.topLeftY, width: this.width, height: this.height};
     }
 }

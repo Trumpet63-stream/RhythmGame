@@ -1,5 +1,5 @@
-import {Mode} from "./index";
 import {compareModeOptions} from "./util";
+import {Mode} from "./parsing";
 
 // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
 export function modeTest() {

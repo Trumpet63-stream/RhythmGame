@@ -1,10 +1,10 @@
 import {NoteManager} from "./note_manager";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
-import {Config} from "../scripts2/config";
+import {Config} from "./config";
 import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {HoldManager} from "./hold_manager";
 import {Note, NoteState, NoteType} from "./parsing";
-import {AccuracyEvent, AccuracyRecording} from "../scripts2/accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
 
 export class Accuracy {
     name: string;

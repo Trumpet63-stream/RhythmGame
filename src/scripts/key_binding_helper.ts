@@ -1,5 +1,5 @@
 import * as p5 from "p5";
-import {getKeyString, setConfigKeyBinding} from "../scripts/util";
+import {getKeyString, setConfigKeyBinding} from "./util";
 import {global} from "./index";
 
 export interface KeyBinding {
