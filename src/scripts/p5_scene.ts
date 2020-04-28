@@ -3,6 +3,7 @@ import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PreviewDisplay} from "./preview_display";
 import {PageManager} from "./page_manager";
 import {global} from "./index";
+import {generatePreviewNotes} from "./util";
 
 let width = 720;
 let height = 480;
@@ -21,7 +22,7 @@ export class P5Scene {
             p.setup = function () {
                 renderer = p.createCanvas(width, height);
                 global.keyboardEventManager = new KeyboardEventManager(p);
-                global.previewDisplay = new PreviewDisplay(global.previewNotes, global.config, global.p5Scene);
+                global.previewDisplay = new PreviewDisplay(generatePreviewNotes(4), global.config, global.p5Scene);
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
                 centerCanvas();
             };

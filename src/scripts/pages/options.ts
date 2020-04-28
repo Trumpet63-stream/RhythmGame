@@ -1,19 +1,21 @@
 import * as p5 from "p5";
-import {ScrollDirection} from "./scroll_direction";
-import {KeyBindingHelper} from "./key_binding_helper";
+import {ScrollDirection} from "../scroll_direction";
+import {KeyBindingHelper} from "../key_binding_helper";
 import {
     createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
     DOMWrapper, drawHeading
-} from "./ui_util";
-import {global} from "./index";
+} from "../ui_util";
+import {global} from "../index";
 import {
+    generatePreviewNotes,
     getKeyBindingContainerId,
     initializeKeyBindings,
     isKeyBindingsDefined
-} from "./util";
-import {Accuracy} from "./accuracy_manager";
+} from "../util";
+import {Accuracy} from "../accuracy_manager";
+import {PreviewDisplay} from "../preview_display";
 
-export abstract class Page2 {
+export abstract class Options {
     public static draw() {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
@@ -22,14 +24,14 @@ export abstract class Page2 {
             return p.createDiv();
         }, "scrollDiv");
         if (!scrollDiv.alreadyExists) {
-            // @ts-ignore
-            let canvasPosition: { x: number, y: number } = p._renderer.position();
             scrollDiv.element.style("border:2px solid #ccc;");
             scrollDiv.element.style("width:380px;");
             scrollDiv.element.style("height:420px;");
             scrollDiv.element.style("overflow-y: scroll;");
-            scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
         }
+        // @ts-ignore
+        let canvasPosition: { x: number, y: number } = p._renderer.position();
+        scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
 
         let pauseAtStartInSecondsInput = createLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
             global.config.pauseAtStartInSeconds.toString());
@@ -138,6 +140,7 @@ export abstract class Page2 {
             if (Number.isInteger(value) && value > 0 && value <= 26) {
                 removeOldBindingButtons(global.previewNumTracks);
                 global.previewNumTracks = value;
+                global.previewDisplay = new PreviewDisplay(generatePreviewNotes(value), global.config, global.p5Scene);
             }
         });
         if (!previewNumTracks.alreadyExists) {

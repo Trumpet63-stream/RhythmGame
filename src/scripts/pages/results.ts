@@ -1,9 +1,9 @@
-import {global} from "./index";
-import {DOMWrapper, setElementCenterPositionRelative} from "./ui_util";
+import {global} from "../index";
+import {DOMWrapper, setElementCenterPositionRelative} from "../ui_util";
 import * as p5 from "p5";
-import {PageManager, PAGES} from "./page_manager";
+import {PageManager, PAGES} from "../page_manager";
 
-export abstract class Page4 {
+export abstract class Results {
     public static draw() {
         let p: p5 = global.p5Scene.sketchInstance;
 
@@ -15,7 +15,7 @@ export abstract class Page4 {
         if (!returnButton.alreadyExists) {
             setElementCenterPositionRelative(returnButton.element, 0.5, 0.9);
             returnButton.element.mouseClicked(() => {
-                PageManager.setCurrentScene(PAGES.PAGE_1);
+                PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
             })
         }
     }

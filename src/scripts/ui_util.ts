@@ -17,7 +17,7 @@ export function drawHeading() {
     }, "scene1Button").element;
     setElementCenterPositionRelative(scene1Button, 0.3, 0.05);
     scene1Button.mousePressed(() => {
-        PageManager.setCurrentScene(PAGES.PAGE_1);
+        PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
     });
 
     let scene2Button = DOMWrapper.create(() => {
@@ -25,7 +25,7 @@ export function drawHeading() {
     }, "scene2Button").element;
     setElementCenterPositionRelative(scene2Button, 0.7, 0.05);
     scene2Button.mousePressed(() => {
-        PageManager.setCurrentScene(PAGES.PAGE_2);
+        PageManager.setCurrentScene(PAGES.OPTIONS);
     });
 }
 

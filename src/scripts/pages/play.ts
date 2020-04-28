@@ -1,6 +1,6 @@
-import {global} from "./index";
+import {global} from "../index";
 
-export abstract class Page3 {
+export abstract class Play {
     public static draw() {
         global.playingDisplay.draw();
     }

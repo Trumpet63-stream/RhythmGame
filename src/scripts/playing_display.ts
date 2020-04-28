@@ -20,7 +20,7 @@ import {global} from "./index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "./key_binding_helper";
 import {PageManager, PAGES} from "./page_manager";
-import {AccuracyRecording} from "./accuracy_recording";
+import {AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -76,6 +76,7 @@ export class PlayingDisplay {
     public draw() {
         let currentTimeInSeconds = this.timeManager.getGameTime(performance.now());
         if (currentTimeInSeconds >= this.gameEndTime && !this.showResultsScreen) {
+            this.accuracyRecording.state = AccuracyRecordingState.READY;
             this.endSong();
         }
         this.missManager.update(currentTimeInSeconds);
@@ -103,7 +104,7 @@ export class PlayingDisplay {
         global.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
             this.scene.sketchInstance, this.accuracyRecording);
-        PageManager.setCurrentScene(PAGES.PAGE_4);
+        PageManager.setCurrentScene(PAGES.RESULTS);
     }
 
     private bindKeyBindingsToActions() {

@@ -187,3 +187,25 @@ export function findBindingInfoForTrack(trackNumber: number, bindings: {trackNum
     }
     return undefined;
 }
+
+export function generatePreviewNotes(numTracks: number): Note[][] {
+    let notes: Note[][] = [];
+    let isHold = false;
+    let currentTime = 0.1;
+    let timeIncrement = 0.3 / numTracks;
+    for (let i = 0; i < numTracks; i++) {
+        let track: Note[] = [];
+        if (isHold) {
+            track.push({type: NoteType.HOLD_HEAD, typeString: "Don't Care", timeInSeconds: currentTime,
+                state: NoteState.DEFAULT});
+            track.push({type: NoteType.TAIL, typeString: "Don't Care", timeInSeconds: currentTime + 0.25,
+                state: NoteState.DEFAULT});
+        } else {
+            track.push({type: NoteType.NORMAL, typeString: "Don't Care", timeInSeconds: currentTime,state: NoteState.DEFAULT});
+        }
+        notes.push(track);
+        isHold = !isHold;
+        currentTime += timeIncrement;
+    }
+    return notes;
+}

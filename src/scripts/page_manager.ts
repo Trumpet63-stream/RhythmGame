@@ -1,19 +1,19 @@
 import {DOMWrapper} from "./ui_util";
 import {global} from "./index";
-import {Page1} from "./page_1";
-import {Page2} from "./page_2";
-import {Page3} from "./page_3";
-import {Page4} from "./page_4";
+import {PlayFromFile} from "./pages/play_from_file";
+import {Options} from "./pages/options";
+import {Play} from "./pages/play";
+import {Results} from "./pages/results";
 
 export enum PAGES {
-    PAGE_1,
-    PAGE_2,
-    PAGE_3,
-    PAGE_4,
+    PLAY_FROM_FILE,
+    OPTIONS,
+    PLAY,
+    RESULTS,
 }
 
 export abstract class PageManager {
-    private static currentScene: PAGES = PAGES.PAGE_1;
+    private static currentScene: PAGES = PAGES.PLAY_FROM_FILE;
 
     public static getCurrentScene() {
         return this.currentScene;
@@ -26,17 +26,17 @@ export abstract class PageManager {
 
     public static draw() {
         switch (this.currentScene) {
-            case PAGES.PAGE_1:
-                Page1.draw();
+            case PAGES.PLAY_FROM_FILE:
+                PlayFromFile.draw();
                 break;
-            case PAGES.PAGE_2:
-                Page2.draw();
+            case PAGES.OPTIONS:
+                Options.draw();
                 break;
-            case PAGES.PAGE_3:
-                Page3.draw();
+            case PAGES.PLAY:
+                Play.draw();
                 break;
-            case PAGES.PAGE_4:
-                Page4.draw();
+            case PAGES.RESULTS:
+                Results.draw();
                 break;
             default:
                 throw new Error("Unexpected scene: " + global.currentScene);
