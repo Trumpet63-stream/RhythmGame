@@ -4,6 +4,7 @@ import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing";
 import {Config} from "./config";
+import {global} from "./index";
 
 class NoteDisplay {
     centerX: number;
@@ -11,44 +12,37 @@ class NoteDisplay {
     noteType: string;
     private sketchInstance: p5;
     noteSize: number;
+    private trackNumber: number;
+    private numTracks: number;
 
-    constructor(centerX: number, centerY: number, noteType: string, sketchInstance: p5, noteSize: number) {
+    constructor(centerX: number, centerY: number, noteType: string, sketchInstance: p5, noteSize: number,
+                trackNumber: number, numTracks: number) {
         this.sketchInstance = sketchInstance;
         this.centerX = centerX;
         this.centerY = centerY;
         this.noteType = noteType;
         this.noteSize = noteSize;
+        this.trackNumber = trackNumber;
+        this.numTracks = numTracks;
     }
 
     draw() {
         let p = this.sketchInstance;
-        let width = 20;
-        let height = 20;
         p.push();
         p.fill("black");
         switch (this.noteType) {
             case NoteType.NORMAL:
-                p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
+                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
                 break;
             case NoteType.HOLD_HEAD:
-                p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
-                p.textSize(20);
-                p.textFont("Arial");
-                p.textAlign(p.CENTER);
-                p.fill("white");
-                p.text("v", this.centerX, this.centerY + 6);
+                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
                 break;
             case NoteType.TAIL:
                 p.noFill();
-                p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
+                p.rect(this.centerX - this.noteSize / 2, this.centerY - this.noteSize / 2, this.noteSize, this.noteSize);
                 break;
             case NoteType.ROLL_HEAD:
-                p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
-                p.textSize(20);
-                p.textFont("Arial");
-                p.textAlign(p.CENTER);
-                p.fill("white");
-                p.text("x", this.centerX, this.centerY + 6);
+                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
                 break;
             case NoteType.MINE:
                 p.fill("black");
@@ -61,7 +55,7 @@ class NoteDisplay {
                 break;
             default:
                 p.noFill();
-                p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
+                p.rect(this.centerX - this.noteSize / 2, this.centerY - this.noteSize / 2, this.noteSize, this.noteSize);
                 p.fill("black");
                 p.textSize(20);
                 p.textFont("Arial");
@@ -100,20 +94,24 @@ class Receptor {
     centerX: number;
     centerY: number;
     private sketchInstance: p5;
+    private noteSize: number
+    private trackNumber: number;
+    private numTracks: number;
 
-    constructor(centerX: number, centerY: number, sketchInstance: p5) {
+    constructor(centerX: number, centerY: number, sketchInstance: p5, noteSize: number, trackNumber: number,
+                numTracks: number) {
         this.sketchInstance = sketchInstance;
         this.centerX = centerX;
         this.centerY = centerY;
+        this.noteSize = noteSize;
+        this.trackNumber = trackNumber;
+        this.numTracks = numTracks;
     }
 
     draw() {
         let p = this.sketchInstance;
-        let width = 20;
-        let height = 20;
         p.push();
-        p.noFill();
-        p.rect(this.centerX - width / 2, this.centerY - height / 2, width, height);
+        global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
         p.pop();
     }
 }
@@ -175,7 +173,7 @@ export class DisplayManager {
         if (note.state == NoteState.DEFAULT) {
             let x = this.getNoteCenterX(trackNumber, numTracks);
             let y = this.getNoteCenterY(note.timeInSeconds, currentTime);
-            new NoteDisplay(x, y, note.type, this.sketchInstance, this.config.noteSize).draw();
+            new NoteDisplay(x, y, note.type, this.sketchInstance, this.config.noteSize, trackNumber, numTracks).draw();
         }
     }
 
@@ -296,7 +294,7 @@ export class DisplayManager {
         let numTracks = this.noteManager.tracks.length;
         for (let i = 0; i < numTracks; i++) {
             new Receptor(this.getNoteCenterX(i, numTracks), this.getNoteCenterY(this.currentTimeInSeconds, this.currentTimeInSeconds),
-                this.sketchInstance).draw();
+                this.sketchInstance, this.config.noteSize, i, numTracks).draw();
         }
     }
 }

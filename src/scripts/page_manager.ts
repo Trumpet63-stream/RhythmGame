@@ -1,9 +1,9 @@
-import {DOMWrapper} from "./ui_util";
 import {global} from "./index";
 import {PlayFromFile} from "./pages/play_from_file";
 import {Options} from "./pages/options";
 import {Play} from "./pages/play";
 import {Results} from "./pages/results";
+import {DOMWrapper} from "./dom_wrapper";
 
 export enum PAGES {
     PLAY_FROM_FILE,

@@ -3,7 +3,7 @@ import {ScrollDirection} from "../scroll_direction";
 import {KeyBindingHelper} from "../key_binding_helper";
 import {
     createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
-    DOMWrapper, drawHeading
+    drawHeading
 } from "../ui_util";
 import {global} from "../index";
 import {
@@ -14,6 +14,7 @@ import {
 } from "../util";
 import {Accuracy} from "../accuracy_manager";
 import {PreviewDisplay} from "../preview_display";
+import {DOMWrapper} from "../dom_wrapper";
 
 export abstract class Options {
     public static draw() {

@@ -24,6 +24,6 @@ export let DEFAULT_CONFIG = {
     keyBindings: new Map(),
     gameAreaHeight: 600,
     gameAreaWidth: 400,
-    noteSize: 20,
+    noteSize: 30,
     quitKey: 27, // Quit defaults to escape key
 };

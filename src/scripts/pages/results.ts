@@ -1,7 +1,8 @@
 import {global} from "../index";
-import {DOMWrapper, setElementCenterPositionRelative} from "../ui_util";
+import {setElementCenterPositionRelative} from "../ui_util";
 import * as p5 from "p5";
 import {PageManager, PAGES} from "../page_manager";
+import {DOMWrapper} from "../dom_wrapper";
 
 export abstract class Results {
     public static draw() {

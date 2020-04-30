@@ -2,12 +2,15 @@ import * as p5 from "p5";
 import {global} from "./index";
 import {PageManager, PAGES} from "./page_manager";
 import {
-    enumToStringArray, findBindingInfoForTrack, getFirstElementByTagName,
+    enumToStringArray,
+    findBindingInfoForTrack,
+    getFirstElementByTagName,
     getKeyBindingButtonId,
     getKeyBindingContainerId,
     getKeyString,
     setConfigKeyBinding
 } from "./util";
+import {DOMWrapper} from "./dom_wrapper";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -38,71 +41,34 @@ export function setElementCenterPositionRelative(element: p5.Element, relativeX:
         canvasPosition.y + (relativeY * p.height) - (elementSize.height / 2));
 }
 
-// Lets us code the DOM UI elements as if it were "immediate", i.e. stateless
-export abstract class DOMWrapper {
-    private static registry: Map<string, p5.Element> = new Map();
-
-    // uniqueID should be unique within a scene
-    public static create(createCall: () => p5.Element, uniqueId: string): { element: p5.Element, alreadyExists: boolean } {
-        if (this.registry.has(uniqueId)) {
-            return {
-                element: this.registry.get(uniqueId),
-                alreadyExists: true
-            };
-        } else {
-            let element = createCall();
-            this.registry.set(uniqueId, element);
-            return {
-                element: element,
-                alreadyExists: false
-            };
-        }
-    }
-
-    public static clearRegistry() {
-        this.registry.forEach((value, key, map) => {
-            value.remove();
-        });
-        this.registry.clear();
-    }
-
-    // Returns true if remove was successful, otherwise returns false;
-    public static removeElementById(id: string) {
-        if (this.registry.has(id)) {
-            this.registry.get(id).remove();
-            this.registry.delete(id);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Returns the element if found, otherwise returns undefined;
-    public static getElementById(id: string) {
-        return this.registry.get(id);
-    }
-}
-
 export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let input: p5.Element;
     let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(inputId, labelString);
-        container.html(labelHtml);
+        let container: p5.Element = p.createDiv();
+        container.style("margin-top", "10px");
+        container.style("margin-bottom", "10px");
+
+        let label = createLabel(p, labelString, inputId);
+        label.style("margin-right","15px");
+        label.parent(container);
+
         input = p.createInput(inputInitialValue);
         input.parent(container);
         input.id(inputId);
-        container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, inputId + "Container");
 
     return {element: input, alreadyExists: container.alreadyExists};
 }
 
-function getLabelHtml(forId: string, labelString: string) {
-    return '<label for="' + forId + '" style="margin-right:15px;">' + labelString + '</label>'
+function createLabel(p: p5, labelString: string, forId?: string): p5.Element {
+    let label = p.createElement("label", labelString);
+    if (forId !== undefined) {
+        label.attribute("for", forId);
+    }
+    return label;
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
@@ -112,13 +78,17 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
 
     let select: p5.Element;
     let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(selectId, labelString);
-        container.html(labelHtml);
+        let container: p5.Element = p.createDiv();
+        container.style("margin-top", "10px");
+        container.style("margin-bottom", "10px");
+
+        let label = createLabel(p, labelString, selectId);
+        label.style("margin-right","15px");
+        label.parent(container);
+
         select = p.createSelect();
         select.parent(container);
         select.id(selectId);
-        container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, selectId + "Container");
 
@@ -140,9 +110,13 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number): {
 
     let setButtonId = getKeyBindingButtonId(trackNumber, numTracks);
     let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(setButtonId, "");
-        container.html(labelHtml);
+        let container: p5.Element = p.createDiv();
+        container.style("margin-top", "10px");
+        container.style("margin-bottom", "10px");
+
+        let label = createLabel(p, "", setButtonId);
+        label.style("margin-right","15px");
+        label.parent(container);
 
         let setButton = p.createButton("Set");
         setButton.parent(container);
@@ -155,7 +129,6 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number): {
             });
         });
 
-        container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, getKeyBindingContainerId(trackNumber, numTracks));
 
@@ -174,15 +147,19 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
 
     let textArea: p5.Element;
     let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        let labelHtml = getLabelHtml(inputId, labelString);
-        container.html(labelHtml + "<br>");
+        let container: p5.Element = p.createDiv();
+        container.style("margin-top", "10px");
+        container.style("margin-bottom", "10px");
+
+        let label = createLabel(p, labelString, inputId);
+        label.style("margin-right","15px");
+        label.parent(container);
+
         textArea = p.createElement("textarea", inputInitialValue);
         textArea.parent(container);
         textArea.id(inputId);
         textArea.attribute("rows", rows.toString());
         textArea.attribute("cols", cols.toString());
-        container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, inputId + "Container");
 
@@ -194,9 +171,10 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
 
     let buttonId = uniqueId + "Button";
     let containerId = uniqueId + "Container";
-    let labelElement;
     let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
+        let container: p5.Element = p.createDiv();
+        container.style("margin-top", "10px");
+        container.style("margin-bottom", "10px");
 
         let fileInput = p.createFileInput(onFileLoad, "false");
         fileInput.parent(container);
@@ -209,17 +187,15 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
             fileInput.elt.click();
         });
 
-        let labelElement = p.createElement("label", labelString);
-        labelElement.parent(container);
-        labelElement.attribute("for", buttonId);
-        labelElement.style("margin-left:5px");
+        let label = createLabel(p, labelString, buttonId);
+        label.style("margin-left:5px");
+        label.parent(container);
 
-        container.style("margin-top:10px; margin-bottom:10px");
         return container;
     }, containerId);
 
-    labelElement = getFirstElementByTagName(container.element, "LABEL");
-    labelElement.html(labelString);
+    let label: p5.Element = getFirstElementByTagName(container.element, "LABEL");
+    label.html(labelString);
 
     return container;
 }

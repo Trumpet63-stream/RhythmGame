@@ -1,5 +1,5 @@
 import * as p5 from "p5";
-import {DOMWrapper, drawHeading, setElementCenterPositionRelative, createFileInput} from "../ui_util";
+import {drawHeading, setElementCenterPositionRelative, createFileInput} from "../ui_util";
 import {global} from "../index";
 import {StepfileState} from "../stepfile";
 import {AudioFileState} from "../audio_file";
@@ -7,7 +7,9 @@ import {getModeOptionsForDisplay} from "../util";
 import {PlayingDisplay} from "../playing_display";
 import {Mode, Note} from "../parsing";
 import {PageManager, PAGES} from "../page_manager";
+import {DOMWrapper} from "../dom_wrapper";
 
+// let first = true;
 export abstract class PlayFromFile {
     public static draw() {
         drawHeading();

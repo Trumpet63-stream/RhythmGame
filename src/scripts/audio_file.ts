@@ -4,6 +4,7 @@ export enum AudioFileState {
     NO_AUDIO_FILE,
     DONE_READING,
     BUFFERED,
+    ERROR,
 }
 
 export class AudioFile {
@@ -30,6 +31,7 @@ export class AudioFile {
                 }),
                 (e: any) => {
                     console.log("Error with decoding audio data" + e.err);
+                    this.state = AudioFileState.ERROR;
                 });
         }));
     }

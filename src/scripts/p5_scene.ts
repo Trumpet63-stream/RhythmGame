@@ -4,6 +4,7 @@ import {PreviewDisplay} from "./preview_display";
 import {PageManager} from "./page_manager";
 import {global} from "./index";
 import {generatePreviewNotes} from "./util";
+import {NoteSkin} from "./note_skin";
 
 let width = 720;
 let height = 480;
@@ -23,6 +24,7 @@ export class P5Scene {
                 renderer = p.createCanvas(width, height);
                 global.keyboardEventManager = new KeyboardEventManager(p);
                 global.previewDisplay = new PreviewDisplay(generatePreviewNotes(4), global.config, global.p5Scene);
+                global.noteSkin = new NoteSkin(p.loadImage("../assets/80_arrow_up.png"));
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
                 centerCanvas();
             };
