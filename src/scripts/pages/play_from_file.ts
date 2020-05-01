@@ -9,7 +9,6 @@ import {Mode, Note} from "../parsing";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
 
-// let first = true;
 export abstract class PlayFromFile {
     public static draw() {
         drawHeading();

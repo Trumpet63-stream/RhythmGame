@@ -20,11 +20,17 @@ export class P5Scene {
                 renderer.center();
             }
 
+            p.preload = function () {
+                global.noteSkin = new NoteSkin(
+                    p.loadImage("../assets/80_arrow_up.png"),
+                    p.loadImage("../assets/80_connector_tile.png")
+                );
+            }
+
             p.setup = function () {
                 renderer = p.createCanvas(width, height);
                 global.keyboardEventManager = new KeyboardEventManager(p);
                 global.previewDisplay = new PreviewDisplay(generatePreviewNotes(4), global.config, global.p5Scene);
-                global.noteSkin = new NoteSkin(p.loadImage("../assets/80_arrow_up.png"));
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window
                 centerCanvas();
             };

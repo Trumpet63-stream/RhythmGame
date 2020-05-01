@@ -5,17 +5,18 @@ import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing";
 import {Config} from "./config";
 import {global} from "./index";
+import {DefaultNoteSkin} from "./default_note_skin";
 
 class NoteDisplay {
     centerX: number;
     centerY: number;
-    noteType: string;
+    noteType: NoteType;
     private sketchInstance: p5;
     noteSize: number;
     private trackNumber: number;
     private numTracks: number;
 
-    constructor(centerX: number, centerY: number, noteType: string, sketchInstance: p5, noteSize: number,
+    constructor(centerX: number, centerY: number, noteType: NoteType, sketchInstance: p5, noteSize: number,
                 trackNumber: number, numTracks: number) {
         this.sketchInstance = sketchInstance;
         this.centerX = centerX;
@@ -27,43 +28,11 @@ class NoteDisplay {
     }
 
     draw() {
-        let p = this.sketchInstance;
-        p.push();
-        p.fill("black");
-        switch (this.noteType) {
-            case NoteType.NORMAL:
-                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
-                break;
-            case NoteType.HOLD_HEAD:
-                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
-                break;
-            case NoteType.TAIL:
-                p.noFill();
-                p.rect(this.centerX - this.noteSize / 2, this.centerY - this.noteSize / 2, this.noteSize, this.noteSize);
-                break;
-            case NoteType.ROLL_HEAD:
-                global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
-                break;
-            case NoteType.MINE:
-                p.fill("black");
-                p.circle(this.centerX, this.centerY, 24);
-                p.textSize(20);
-                p.textFont("Arial");
-                p.textAlign(p.CENTER);
-                p.fill("white");
-                p.text("X", this.centerX, this.centerY + 8);
-                break;
-            default:
-                p.noFill();
-                p.rect(this.centerX - this.noteSize / 2, this.centerY - this.noteSize / 2, this.noteSize, this.noteSize);
-                p.fill("black");
-                p.textSize(20);
-                p.textFont("Arial");
-                p.textAlign(p.CENTER);
-                p.text("?", this.centerX, this.centerY + 7);
-                break;
+        let isNoteDrawSuccessful = global.noteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX,
+            this.centerY, this.noteType);
+        if (!isNoteDrawSuccessful) {
+            DefaultNoteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX, this.centerY, this.noteType);
         }
-        p.pop();
     }
 }
 
@@ -81,12 +50,10 @@ class HoldConnector {
     }
 
     draw() {
-        let p = this.sketchInstance;
-        let width = 10;
-        p.push();
-        p.fill("black");
-        p.rect(this.centerX - width / 2, this.startY, width, this.endY - this.startY);
-        p.pop();
+        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.startY, this.endY);
+        if (!isConnectorDrawSuccessful) {
+            DefaultNoteSkin.drawHoldConnector(this.centerX, this.startY, this.endY);
+        }
     }
 }
 
@@ -109,10 +76,11 @@ class Receptor {
     }
 
     draw() {
-        let p = this.sketchInstance;
-        p.push();
-        global.noteSkin.drawRotated(this.trackNumber, this.numTracks, this.centerX, this.centerY);
-        p.pop();
+        let isReceptorDrawSuccessful = global.noteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX,
+            this.centerY);
+        if (!isReceptorDrawSuccessful) {
+            DefaultNoteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX, this.centerY);
+        }
     }
 }
 
@@ -161,7 +129,7 @@ export class DisplayManager {
     }
 
     private drawNotesInTrack(leastTime: number, greatestTime: number, trackNumber: number,
-                     numTracks: number, currentTime: number) {
+                             numTracks: number, currentTime: number) {
         let noteIndexRange = this.noteManager.getNotesByTimeRange(leastTime, greatestTime, trackNumber);
         let notes = this.noteManager.tracks[trackNumber].slice(noteIndexRange.startIndex, noteIndexRange.endIndexNotInclusive);
         for (let i = 0; i < notes.length; i++) {
@@ -220,7 +188,7 @@ export class DisplayManager {
     }
 
     private drawAllTrackConnectors(leastTime: number, greatestTime: number, track: Note[], trackNumber: number,
-                          numTracks: number, currentTime: number) {
+                                   numTracks: number, currentTime: number) {
         let noteStack: Note[] = [];
         for (let i = 0; i < track.length; i++) {
             let currentNote: Note = track[i];
