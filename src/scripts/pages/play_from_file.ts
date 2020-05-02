@@ -8,11 +8,17 @@ import {PlayingDisplay} from "../playing_display";
 import {Mode, Note} from "../parsing";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
+import {NoteSkin} from "../note_skin";
 
 export abstract class PlayFromFile {
     public static draw() {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
+
+        // for (let i = 0; i < 15; i++) {
+        //     (<NoteSkin> global.noteSkin).drawHoldConnector(40 * i + 25, 260, 200,
+        //         200 + 2 * i, 360);
+        // }
 
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
             global.stepfile.load.bind(global.stepfile)).element;

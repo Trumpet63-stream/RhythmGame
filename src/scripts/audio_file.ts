@@ -43,6 +43,7 @@ export class AudioFile {
         return undefined;
     }
 
+    // TODO: Failed to execute 'start' on 'AudioBufferSourceNode': cannot call start more than once.
     public play(delayInSeconds: number = 0) {
         this.audioSource.start(this.audioContext.currentTime + delayInSeconds);
     }

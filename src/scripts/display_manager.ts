@@ -40,17 +40,22 @@ class HoldConnector {
     centerX: number;
     startY: number;
     endY: number;
+    noteStartY: number;
+    noteEndY: number;
     private sketchInstance: p5;
 
-    constructor(centerX: number, startY: number, endY: number, sketchInstance: p5) {
+    constructor(centerX: number, startY: number, endY: number, noteStartY: number, noteEndY: number, sketchInstance: p5) {
         this.sketchInstance = sketchInstance;
         this.centerX = centerX;
         this.startY = startY;
         this.endY = endY;
+        this.noteStartY = noteStartY;
+        this.noteEndY = noteEndY;
     }
 
     draw() {
-        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.startY, this.endY);
+        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.startY, this.endY,
+            this.noteStartY, this.noteEndY);
         if (!isConnectorDrawSuccessful) {
             DefaultNoteSkin.drawHoldConnector(this.centerX, this.startY, this.endY);
         }
@@ -232,20 +237,22 @@ export class DisplayManager {
     }
 
     private drawConnector(startNote: Note, endNote: Note, trackNumber: number, numTracks: number, currentTime: number) {
-        let x = this.getNoteCenterX(trackNumber, numTracks);
+        let centerX = this.getNoteCenterX(trackNumber, numTracks);
+        let noteStartY = this.getNoteCenterY(startNote.timeInSeconds, currentTime);
+        let noteEndY = this.getNoteCenterY(endNote.timeInSeconds, currentTime);
 
-        let startY;
+        let drawStartY;
         if (startNote.state == NoteState.HELD) {
-            startY = this.getNoteCenterY(Math.min(currentTime, endNote.timeInSeconds), currentTime);
+            drawStartY = this.getNoteCenterY(Math.min(currentTime, endNote.timeInSeconds), currentTime);
         } else {
-            startY = this.getNoteCenterY(startNote.timeInSeconds, currentTime);
+            drawStartY = this.getNoteCenterY(startNote.timeInSeconds, currentTime);
         }
-        startY = this.clampValueToRange(startY, this.topLeftY, this.topLeftY + this.height);
+        drawStartY = this.clampValueToRange(drawStartY, this.topLeftY, this.topLeftY + this.height);
 
-        let timeLengthOfHalfANote = this.config.noteSize / this.config.pixelsPerSecond / 2;
-        let endY = this.getNoteCenterY(endNote.timeInSeconds - timeLengthOfHalfANote, currentTime);
-        endY = this.clampValueToRange(endY, this.topLeftY, this.topLeftY + this.height);
-        new HoldConnector(x, startY, endY, this.sketchInstance).draw();
+        // let timeLengthOfHalfANote = this.config.noteSize / this.config.pixelsPerSecond / 2;
+        let drawEndY = this.getNoteCenterY(endNote.timeInSeconds, currentTime);
+        drawEndY = this.clampValueToRange(drawEndY, this.topLeftY, this.topLeftY + this.height);
+        new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.sketchInstance).draw();
     }
 
     private clampValueToRange(value: number, lowerBound: number, upperBound: number): number {

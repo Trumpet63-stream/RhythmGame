@@ -1,6 +1,7 @@
 import * as p5 from "p5";
 import {global} from "./index";
 import {NoteType} from "./parsing";
+import {ScrollDirection} from "./scroll_direction";
 
 export class NoteSkin {
     public note: p5.Image;
@@ -9,7 +10,6 @@ export class NoteSkin {
         [4, [270, 180, 0, 90]],
         [6, [270, 315, 180, 0, 45, 90]]
     ]);
-    private first = true;
 
     constructor(note: p5.Image, connector: p5.Image) {
         this.note = note;
@@ -36,34 +36,60 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    public drawHoldConnector(centerX: number, startY: number, endY: number) {
+    public drawHoldConnector(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number) {
         let p: p5 = global.p5Scene.sketchInstance;
         let noteSize = global.config.noteSize;
         let sourceWidth = this.connectorTile.width;
         let sourceHeight = this.connectorTile.height;
         let scaledWidth = noteSize;
         let scaledHeight = scaledWidth / sourceWidth * sourceHeight;
-        let connectorHeight = endY - startY;
-        let numCompleteTiles = Math.floor(connectorHeight / scaledHeight);
-        let remainderHeight = connectorHeight - scaledHeight * numCompleteTiles;
-        let remainderHeightPercent = remainderHeight / scaledHeight;
-        if (this.first) {
-            console.log(sourceWidth + ", " + sourceHeight);
-            console.log(scaledWidth + ", " + scaledHeight);
-            this.first = false;
-        }
+        let connectorHeight = Math.abs(drawEndY - drawStartY);
+        let startYOffset = Math.abs(noteStartY - drawStartY);
+        let startRemainderHeight = scaledHeight - startYOffset % scaledHeight;
+        let endRemainderHeight = ((connectorHeight - startRemainderHeight) % scaledHeight);
+        let numCompleteTiles = Math.round((connectorHeight - startRemainderHeight - endRemainderHeight) / scaledHeight);
 
-        for (let i = 0; i < numCompleteTiles; i++) {
-            p.image(this.connectorTile, centerX - noteSize / 2, startY + i * scaledHeight, scaledWidth,
-                scaledHeight);
+        if (global.config.scrollDirection === ScrollDirection.Up) {
+            this.drawPartialTile(centerX, drawStartY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
+                startRemainderHeight / scaledHeight, true, p);
+            this.drawCompleteTiles(centerX,drawStartY + startRemainderHeight, scaledWidth, scaledHeight,
+                numCompleteTiles, p);
+            this.drawPartialTile(centerX, drawEndY - endRemainderHeight, scaledWidth, scaledHeight,
+                sourceWidth, sourceHeight, endRemainderHeight / scaledHeight, false, p);
+        } else {
+            this.drawPartialTile(centerX, drawStartY - startRemainderHeight, scaledWidth, scaledHeight,
+                sourceWidth, sourceHeight, startRemainderHeight / scaledHeight, false, p);
+            this.drawCompleteTiles(centerX, drawEndY + endRemainderHeight, scaledWidth, scaledHeight,
+                numCompleteTiles, p);
+            this.drawPartialTile(centerX, drawEndY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
+                endRemainderHeight / scaledHeight, true, p);
         }
-
-        p.image(this.connectorTile, centerX - noteSize / 2, startY + numCompleteTiles * scaledHeight,
-            scaledWidth, scaledHeight, 0, 0, sourceWidth, remainderHeightPercent * sourceHeight);
 
         return true;
     }
 
+    private drawCompleteTiles(centerX: number, leastY: number, scaledWidth: number, scaledHeight: number,
+                              numTiles: number, p: p5) {
+        for (let i = 0; i < numTiles; i++) {
+            p.image(this.connectorTile, centerX - scaledWidth / 2, leastY + i * scaledHeight, scaledWidth,
+                scaledHeight);
+        }
+    }
+
+    private drawPartialTile(centerX: number, topLeftY: number, scaledWidth: number, scaledHeight: number,
+                            sourceWidth: number, sourceHeight: number, heightPercent: number, isDrawnFromBottom: boolean,
+                           p: p5) {
+        if (heightPercent > 0) {
+            if (isDrawnFromBottom) { // Draw from the bottom of the image
+                p.image(this.connectorTile, centerX - scaledWidth / 2, topLeftY, scaledWidth,
+                    heightPercent * scaledHeight, 0, sourceHeight - heightPercent * sourceHeight,
+                    sourceWidth, heightPercent * sourceHeight);
+            } else { // Draw from the top of the image
+                p.image(this.connectorTile, centerX - scaledWidth / 2, topLeftY, scaledWidth,
+                    heightPercent * scaledHeight, 0, 0, sourceWidth, heightPercent * sourceHeight);
+            }
+        }
+    }
 
     private drawNoteRotated(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
         let p: p5 = global.p5Scene.sketchInstance;
