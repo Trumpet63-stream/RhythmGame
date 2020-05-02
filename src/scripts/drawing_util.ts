@@ -3,6 +3,7 @@ import * as p5 from "p5";
 import {NoteManager} from "./note_manager";
 import {AccuracyManager} from "./accuracy_manager";
 import {AccuracyRecording} from "./accuracy_recording";
+import {getAccuracyEventName} from "./util";
 
 export function drawAccuracyBars(p: p5, accuracyLabels: string[],
                                  accuracyRecording: AccuracyRecording,
@@ -26,7 +27,7 @@ function getNumAccuracyEvents(accuracyLabel: string, accuracyRecording: Accuracy
                               accuracyManager: AccuracyManager) {
     return accuracyRecording.recording.reduce((sum, trackRecording) =>
         sum + trackRecording.filter(accuracyEvent =>
-        accuracyManager.getAccuracyEventName(accuracyEvent.accuracyMillis) === accuracyLabel).length, 0);
+        getAccuracyEventName(accuracyEvent.accuracyMillis, accuracyManager.config) === accuracyLabel).length, 0);
 }
 
 function getMaxTextWidth(p: p5, textArray: string[], textSize: number) {

@@ -15,11 +15,6 @@ export abstract class PlayFromFile {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
 
-        // for (let i = 0; i < 15; i++) {
-        //     (<NoteSkin> global.noteSkin).drawHoldConnector(40 * i + 25, 260, 200,
-        //         200 + 2 * i, 360);
-        // }
-
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
             global.stepfile.load.bind(global.stepfile)).element;
         setElementCenterPositionRelative(stepfileInput, 0.25, 0.3);

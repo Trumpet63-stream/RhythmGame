@@ -21,6 +21,7 @@ import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "./key_binding_helper";
 import {PageManager, PAGES} from "./page_manager";
 import {AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
+import {AccuracyFeedbackDisplay} from "./accuracy_feedback_display";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -34,6 +35,7 @@ export class PlayingDisplay {
     private showResultsScreen: boolean;
     private accuracyRecording: AccuracyRecording;
     private isDebugMode: boolean = false;
+    public accuracyFeedbackDisplay: AccuracyFeedbackDisplay;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
         this.showResultsScreen = false;
@@ -64,6 +66,8 @@ export class PlayingDisplay {
         let topLeftY = (this.scene.sketchInstance.height - height) / 2;
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance,
             topLeftX, topLeftY, width, height);
+        this.accuracyFeedbackDisplay = new AccuracyFeedbackDisplay(this.accuracyRecording, topLeftX + width / 2,
+            topLeftY + height / 2, this.config);
 
         if (!isKeyBindingsDefined(this.noteManager.tracks.length)) {
             initializeKeyBindings(this.noteManager.tracks.length);
@@ -81,6 +85,7 @@ export class PlayingDisplay {
         }
         this.missManager.update(currentTimeInSeconds);
         this.displayManager.draw(currentTimeInSeconds);
+        this.accuracyFeedbackDisplay.draw(currentTimeInSeconds);
     }
 
     private getNotesEndTime() {

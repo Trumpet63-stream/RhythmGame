@@ -245,13 +245,13 @@ export class DisplayManager {
         if (startNote.state == NoteState.HELD) {
             drawStartY = this.getNoteCenterY(Math.min(currentTime, endNote.timeInSeconds), currentTime);
         } else {
-            drawStartY = this.getNoteCenterY(startNote.timeInSeconds, currentTime);
+            drawStartY = noteStartY;
         }
         drawStartY = this.clampValueToRange(drawStartY, this.topLeftY, this.topLeftY + this.height);
 
-        // let timeLengthOfHalfANote = this.config.noteSize / this.config.pixelsPerSecond / 2;
-        let drawEndY = this.getNoteCenterY(endNote.timeInSeconds, currentTime);
+        let drawEndY = noteEndY
         drawEndY = this.clampValueToRange(drawEndY, this.topLeftY, this.topLeftY + this.height);
+
         new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.sketchInstance).draw();
     }
 

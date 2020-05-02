@@ -44,28 +44,46 @@ export class NoteSkin {
         let scaledWidth = noteSize;
         let scaledHeight = scaledWidth / sourceWidth * sourceHeight;
         let connectorHeight = Math.abs(drawEndY - drawStartY);
-        let startYOffset = Math.abs(noteStartY - drawStartY);
-        let startRemainderHeight = scaledHeight - startYOffset % scaledHeight;
-        let endRemainderHeight = ((connectorHeight - startRemainderHeight) % scaledHeight);
-        let numCompleteTiles = Math.round((connectorHeight - startRemainderHeight - endRemainderHeight) / scaledHeight);
+        let startYOffset = this.getNoteStartOffset(noteStartY, drawStartY);
+        let startPartialTileHeight = scaledHeight - startYOffset % scaledHeight;
+        let endPartialTileHeight = ((connectorHeight - startPartialTileHeight) % scaledHeight);
+        let numCompleteTiles = Math.round((connectorHeight - startPartialTileHeight - endPartialTileHeight) / scaledHeight);
 
+        // The following block allows us to use the same drawing method for both upscroll and downscroll
+        let bottomPartialTileHeight: number;
+        let topPartialTileHeight: number;
         if (global.config.scrollDirection === ScrollDirection.Up) {
-            this.drawPartialTile(centerX, drawStartY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
-                startRemainderHeight / scaledHeight, true, p);
-            this.drawCompleteTiles(centerX,drawStartY + startRemainderHeight, scaledWidth, scaledHeight,
-                numCompleteTiles, p);
-            this.drawPartialTile(centerX, drawEndY - endRemainderHeight, scaledWidth, scaledHeight,
-                sourceWidth, sourceHeight, endRemainderHeight / scaledHeight, false, p);
+            bottomPartialTileHeight = endPartialTileHeight;
+            topPartialTileHeight = startPartialTileHeight;
         } else {
-            this.drawPartialTile(centerX, drawStartY - startRemainderHeight, scaledWidth, scaledHeight,
-                sourceWidth, sourceHeight, startRemainderHeight / scaledHeight, false, p);
-            this.drawCompleteTiles(centerX, drawEndY + endRemainderHeight, scaledWidth, scaledHeight,
-                numCompleteTiles, p);
-            this.drawPartialTile(centerX, drawEndY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
-                endRemainderHeight / scaledHeight, true, p);
+            bottomPartialTileHeight = startPartialTileHeight;
+            topPartialTileHeight = endPartialTileHeight;
         }
+        let drawMinY = Math.min(drawStartY, drawEndY);
+        let drawMaxY = Math.max(drawStartY, drawEndY);
+
+        this.drawPartialTile(centerX, drawMinY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
+            topPartialTileHeight / scaledHeight, true, p);
+        this.drawCompleteTiles(centerX, drawMinY + topPartialTileHeight, scaledWidth, scaledHeight,
+            numCompleteTiles, p);
+        this.drawPartialTile(centerX, drawMaxY - bottomPartialTileHeight, scaledWidth, scaledHeight,
+            sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, false, p);
 
         return true;
+    }
+
+    private getNoteStartOffset(noteStartY: number, drawStartY: number) {
+        let offset: number;
+        if (global.config.scrollDirection === ScrollDirection.Up) {
+            offset = drawStartY - noteStartY;
+        } else {
+            offset = noteStartY - drawStartY;
+        }
+
+        // This prevents the partial tile texture from stretching when the player hits a hold early
+        offset = Math.max(0, offset);
+
+        return offset;
     }
 
     private drawCompleteTiles(centerX: number, leastY: number, scaledWidth: number, scaledHeight: number,
