@@ -23,6 +23,9 @@ export class NoteSkin {
             case NoteType.HOLD_HEAD:
                 this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
                 break;
+            case NoteType.TAIL:
+                this.drawTailRotated(trackNumber, numTracks, centerX, centerY);
+                break;
             default:
                 return false;
         }
@@ -30,7 +33,7 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    public drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number): boolean {
+    public drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
         this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
         return true;
     }
@@ -70,6 +73,21 @@ export class NoteSkin {
             sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, false, p);
 
         return true;
+    }
+
+    private drawTailRotated(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+        // let p: p5 = global.p5Scene.sketchInstance;
+        // let noteSize = global.config.noteSize;
+        // let sourceWidth = this.connectorTile.width;
+        // let sourceHeight = this.connectorTile.height;
+        // p.push();
+        // p.angleMode(p.DEGREES);
+        // p.translate(centerX, centerY);
+        // this.rotate(p, trackNumber, numTracks);
+        // p.image(this.note, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2, 0, 0, sourceWidth,
+        //     sourceHeight / 2);
+        // p.pop();
+        this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
     }
 
     private getNoteStartOffset(noteStartY: number, drawStartY: number) {

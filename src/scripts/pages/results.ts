@@ -13,8 +13,8 @@ export abstract class Results {
         let returnButton = DOMWrapper.create(() => {
             return p.createButton("Return");
         }, "returnButton");
+        setElementCenterPositionRelative(returnButton.element, 0.5, 0.9);
         if (!returnButton.alreadyExists) {
-            setElementCenterPositionRelative(returnButton.element, 0.5, 0.9);
             returnButton.element.mouseClicked(() => {
                 PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
             })
