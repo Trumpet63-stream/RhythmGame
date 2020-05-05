@@ -6,14 +6,19 @@ import {ScrollDirection} from "./scroll_direction";
 export class NoteSkin {
     public note: p5.Image;
     public connectorTile: p5.Image;
+
+    /* Requires that the tail be half the height and same width as note image */
+    public tail: p5.Image;
+
     private rotationAngles: Map<number, number[]> = new Map([
         [4, [270, 180, 0, 90]],
         [6, [270, 315, 180, 0, 45, 90]]
     ]);
 
-    constructor(note: p5.Image, connector: p5.Image) {
+    constructor(note: p5.Image, connector: p5.Image, tail: p5.Image) {
         this.note = note;
         this.connectorTile = connector;
+        this.tail = tail;
     }
 
     // Returns true if able to draw note type, otherwise returns false
@@ -24,7 +29,7 @@ export class NoteSkin {
                 this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
                 break;
             case NoteType.TAIL:
-                this.drawTailRotated(trackNumber, numTracks, centerX, centerY);
+                this.drawTail(trackNumber, numTracks, centerX, centerY);
                 break;
             default:
                 return false;
@@ -47,10 +52,11 @@ export class NoteSkin {
         let scaledWidth = noteSize;
         let scaledHeight = scaledWidth / sourceWidth * sourceHeight;
         let connectorHeight = Math.abs(drawEndY - drawStartY);
-        let startYOffset = this.getNoteStartOffset(noteStartY, drawStartY);
-        let startPartialTileHeight = scaledHeight - startYOffset % scaledHeight;
-        let endPartialTileHeight = ((connectorHeight - startPartialTileHeight) % scaledHeight);
-        let numCompleteTiles = Math.round((connectorHeight - startPartialTileHeight - endPartialTileHeight) / scaledHeight);
+        let endYOffset = this.getNoteEndOffset(noteEndY, drawEndY);
+        let endPartialTileHeight = scaledHeight - (endYOffset % scaledHeight);
+        let startPartialTileHeight = (connectorHeight - endPartialTileHeight) % scaledHeight;
+        let numCompleteTiles = Math.round(
+            (connectorHeight - startPartialTileHeight - endPartialTileHeight) / scaledHeight);
 
         // The following block allows us to use the same drawing method for both upscroll and downscroll
         let bottomPartialTileHeight: number;
@@ -64,38 +70,40 @@ export class NoteSkin {
         }
         let drawMinY = Math.min(drawStartY, drawEndY);
         let drawMaxY = Math.max(drawStartY, drawEndY);
+        let isReversed = global.config.scrollDirection === ScrollDirection.Up;
 
         this.drawPartialTile(centerX, drawMinY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
-            topPartialTileHeight / scaledHeight, true, p);
+            topPartialTileHeight / scaledHeight, true, isReversed, p);
         this.drawCompleteTiles(centerX, drawMinY + topPartialTileHeight, scaledWidth, scaledHeight,
-            numCompleteTiles, p);
+            numCompleteTiles, isReversed, p);
         this.drawPartialTile(centerX, drawMaxY - bottomPartialTileHeight, scaledWidth, scaledHeight,
-            sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, false, p);
+            sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, false,
+            isReversed, p);
 
         return true;
     }
 
-    private drawTailRotated(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
-        // let p: p5 = global.p5Scene.sketchInstance;
-        // let noteSize = global.config.noteSize;
-        // let sourceWidth = this.connectorTile.width;
-        // let sourceHeight = this.connectorTile.height;
-        // p.push();
-        // p.angleMode(p.DEGREES);
-        // p.translate(centerX, centerY);
-        // this.rotate(p, trackNumber, numTracks);
-        // p.image(this.note, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2, 0, 0, sourceWidth,
-        //     sourceHeight / 2);
-        // p.pop();
-        this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
+    public drawTail(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+        let p: p5 = global.p5Scene.sketchInstance;
+        let noteSize = global.config.noteSize;
+        if (global.config.scrollDirection === ScrollDirection.Up) {
+            p.push();
+            p.angleMode(p.DEGREES);
+            p.translate(centerX, centerY);
+            p.rotate(180);
+            p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2);
+            p.pop();
+        } else {
+            p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize / 2);
+        }
     }
 
-    private getNoteStartOffset(noteStartY: number, drawStartY: number) {
+    private getNoteEndOffset(noteEndY: number, drawEndY: number) {
         let offset: number;
         if (global.config.scrollDirection === ScrollDirection.Up) {
-            offset = drawStartY - noteStartY;
+            offset = noteEndY - drawEndY;
         } else {
-            offset = noteStartY - drawStartY;
+            offset = drawEndY - noteEndY;
         }
 
         // This prevents the partial tile texture from stretching when the player hits a hold early
@@ -105,26 +113,44 @@ export class NoteSkin {
     }
 
     private drawCompleteTiles(centerX: number, leastY: number, scaledWidth: number, scaledHeight: number,
-                              numTiles: number, p: p5) {
+                              numTiles: number, isReversed: boolean, p: p5) {
         for (let i = 0; i < numTiles; i++) {
-            p.image(this.connectorTile, centerX - scaledWidth / 2, leastY + i * scaledHeight, scaledWidth,
-                scaledHeight);
+            p.push();
+            p.angleMode(p.DEGREES);
+            let centerY = leastY + i * scaledHeight + scaledHeight / 2;
+            p.translate(centerX, centerY);
+            if (isReversed) {
+                p.rotate(180);
+            }
+            p.image(this.connectorTile, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+            p.pop();
         }
     }
 
     private drawPartialTile(centerX: number, topLeftY: number, scaledWidth: number, scaledHeight: number,
                             sourceWidth: number, sourceHeight: number, heightPercent: number, isDrawnFromBottom: boolean,
-                           p: p5) {
-        if (heightPercent > 0) {
-            if (isDrawnFromBottom) { // Draw from the bottom of the image
-                p.image(this.connectorTile, centerX - scaledWidth / 2, topLeftY, scaledWidth,
-                    heightPercent * scaledHeight, 0, sourceHeight - heightPercent * sourceHeight,
-                    sourceWidth, heightPercent * sourceHeight);
-            } else { // Draw from the top of the image
-                p.image(this.connectorTile, centerX - scaledWidth / 2, topLeftY, scaledWidth,
-                    heightPercent * scaledHeight, 0, 0, sourceWidth, heightPercent * sourceHeight);
-            }
+                           isReversed: boolean, p: p5) {
+        if (heightPercent <= 0) {
+            return;
         }
+
+        p.push();
+        let destinationHeight = heightPercent * scaledHeight;
+        let centerY = topLeftY + destinationHeight / 2;
+        p.translate(centerX, centerY);
+        if (isReversed) {
+            p.angleMode(p.DEGREES);
+            p.rotate(180);
+        }
+        if (isDrawnFromBottom) { // Draw from the bottom of the image
+            p.image(this.connectorTile, -scaledWidth / 2, -destinationHeight / 2, scaledWidth,
+                destinationHeight, 0, sourceHeight - heightPercent * sourceHeight,
+                sourceWidth, heightPercent * sourceHeight);
+        } else { // Draw from the top of the image
+            p.image(this.connectorTile, -scaledWidth / 2, -destinationHeight / 2, scaledWidth,
+                destinationHeight, 0, 0, sourceWidth, heightPercent * sourceHeight);
+        }
+        p.pop();
     }
 
     private drawNoteRotated(trackNumber: number, numTracks: number, centerX: number, centerY: number) {

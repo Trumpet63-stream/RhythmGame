@@ -34,7 +34,7 @@ export class PlayingDisplay {
     private gameEndTime: number;
     private showResultsScreen: boolean;
     private accuracyRecording: AccuracyRecording;
-    private isDebugMode: boolean = false;
+    private isDebugMode: boolean = true;
     public accuracyFeedbackDisplay: AccuracyFeedbackDisplay;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {

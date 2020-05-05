@@ -8,7 +8,6 @@ import {PlayingDisplay} from "../playing_display";
 import {Mode, Note} from "../parsing";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
-import {NoteSkin} from "../note_skin";
 
 export abstract class PlayFromFile {
     public static draw() {
