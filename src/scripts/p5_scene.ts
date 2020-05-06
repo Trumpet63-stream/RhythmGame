@@ -23,7 +23,7 @@ export class P5Scene {
             p.preload = function () {
                 global.noteSkin = new NoteSkin(
                     p.loadImage("../assets/80_arrow_up_solid.png"),
-                    p.loadImage("../assets/80_connector_tile_solid.png"),
+                    p.loadImage("../assets/80_connector_tile_gradient.png"),
                     p.loadImage("../assets/80_tail_solid.png")
                 );
             }

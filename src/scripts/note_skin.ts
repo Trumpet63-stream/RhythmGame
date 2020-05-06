@@ -44,7 +44,7 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    public drawHoldConnector(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number) {
+    private drawHoldConnector(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number) {
         let p: p5 = global.p5Scene.sketchInstance;
         let noteSize = global.config.noteSize;
         let sourceWidth = this.connectorTile.width;
@@ -53,7 +53,10 @@ export class NoteSkin {
         let scaledHeight = scaledWidth / sourceWidth * sourceHeight;
         let connectorHeight = Math.abs(drawEndY - drawStartY);
         let endYOffset = this.getNoteEndOffset(noteEndY, drawEndY);
+
         let endPartialTileHeight = scaledHeight - (endYOffset % scaledHeight);
+        endPartialTileHeight = Math.min(endPartialTileHeight, connectorHeight);
+
         let startPartialTileHeight = (connectorHeight - endPartialTileHeight) % scaledHeight;
         let numCompleteTiles = Math.round(
             (connectorHeight - startPartialTileHeight - endPartialTileHeight) / scaledHeight);
@@ -71,13 +74,17 @@ export class NoteSkin {
         let drawMinY = Math.min(drawStartY, drawEndY);
         let drawMaxY = Math.max(drawStartY, drawEndY);
         let isReversed = global.config.scrollDirection === ScrollDirection.Up;
+        let isDrawnFromBottom = global.config.scrollDirection === ScrollDirection.Up;
+        if (endPartialTileHeight === connectorHeight) {
+            isDrawnFromBottom = !isDrawnFromBottom;
+        }
 
         this.drawPartialTile(centerX, drawMinY, scaledWidth, scaledHeight, sourceWidth, sourceHeight,
-            topPartialTileHeight / scaledHeight, true, isReversed, p);
+            topPartialTileHeight / scaledHeight, !isDrawnFromBottom, isReversed, p);
         this.drawCompleteTiles(centerX, drawMinY + topPartialTileHeight, scaledWidth, scaledHeight,
             numCompleteTiles, isReversed, p);
         this.drawPartialTile(centerX, drawMaxY - bottomPartialTileHeight, scaledWidth, scaledHeight,
-            sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, false,
+            sourceWidth, sourceHeight, bottomPartialTileHeight / scaledHeight, isDrawnFromBottom,
             isReversed, p);
 
         return true;
