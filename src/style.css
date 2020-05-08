@@ -1,11 +1,65 @@
-.gameplay-option-label {
-    margin-right: 20px;
+input {
+    /*display: block;*/
+    /*text-align: center;*/
 }
 
-.key-binding-option {
-    white-space: nowrap;
+label {
+    /*display: block;*/
+    /*text-align: left;*/
 }
 
-.accuracy-settings-section * {
-    vertical-align: middle;
+div.labeled-input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+div.labeled-select {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+div.labeled-textarea {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+div.file-input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+div.keybinding-input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+label.labeled-input {
+    display: block;
+    margin-right: 15px;
+}
+label.labeled-select {
+    margin-right: 15px;
+}
+label.labeled-textarea {
+    margin-right: 15px;
+}
+label.file-input {
+    margin-left: 5px;
+}
+label.keybinding-input {
+    margin-right: 15px;
+}
+
+.options {
+
+}
+
+.options-scroll-div {
+    padding-left: 20px;
+    box-shadow: 0 4px 8px 0 rgba(73, 215, 83, 0.2), 0 6px 20px 0 rgba(37, 95, 32, 0.19);
+    width: 360px;
+    height: 420px;
+    overflow-y: scroll;
+}
+
+.options-free-text {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 18px;
 }

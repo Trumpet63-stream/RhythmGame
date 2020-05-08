@@ -10,16 +10,18 @@ import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
 
 export abstract class PlayFromFile {
+    public static PLAY_FROM_FILE_CLASS: string = "play-from-file";
+
     public static draw() {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
 
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
-            global.stepfile.load.bind(global.stepfile)).element;
+            global.stepfile.load.bind(global.stepfile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(stepfileInput, 0.25, 0.3);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3)", "audioFileInput",
-            global.audioFile.load.bind(global.audioFile)).element;
+            global.audioFile.load.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(audioFileInput, 0.75, 0.3);
 
         let playButtonId = "playButton";

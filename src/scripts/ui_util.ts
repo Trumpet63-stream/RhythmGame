@@ -41,17 +41,19 @@ export function setElementCenterPositionRelative(element: p5.Element, relativeX:
         canvasPosition.y + (relativeY * p.height) - (elementSize.height / 2));
 }
 
-export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string): { element: p5.Element, alreadyExists: boolean } {
+export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string, customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let input: p5.Element;
     let container = DOMWrapper.create(() => {
+        let labeledInputClass = "labeled-input";
         let container: p5.Element = p.createDiv();
-        container.style("margin-top", "10px");
-        container.style("margin-bottom", "10px");
+        container.addClass(customClass);
+        container.addClass(labeledInputClass);
 
         let label = createLabel(p, labelString, inputId);
-        label.style("margin-right","15px");
+        label.addClass(customClass);
+        label.addClass(labeledInputClass);
         label.parent(container);
 
         input = p.createInput(inputInitialValue);
@@ -72,18 +74,20 @@ function createLabel(p: p5, labelString: string, forId?: string): p5.Element {
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
-export function createLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any):
-    { element: p5.Element, alreadyExists: boolean } {
+export function createLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any,
+                                    customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let select: p5.Element;
     let container = DOMWrapper.create(() => {
+        let labeledSelectClass = "labeled-select";
         let container: p5.Element = p.createDiv();
-        container.style("margin-top", "10px");
-        container.style("margin-bottom", "10px");
+        container.addClass(customClass);
+        container.addClass(labeledSelectClass);
 
         let label = createLabel(p, labelString, selectId);
-        label.style("margin-right","15px");
+        label.addClass(customClass);
+        label.addClass(labeledSelectClass);
         label.parent(container);
 
         select = p.createSelect();
@@ -105,17 +109,19 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
     return {element: select, alreadyExists: container.alreadyExists};
 }
 
-export function createKeyBindingInput(trackNumber: number, numTracks: number): { element: p5.Element, alreadyExists: boolean } {
+export function createKeyBindingInput(trackNumber: number, numTracks: number, customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let setButtonId = getKeyBindingButtonId(trackNumber, numTracks);
     let container = DOMWrapper.create(() => {
+        let keybindingInputClass = "keybinding-input";
         let container: p5.Element = p.createDiv();
-        container.style("margin-top", "10px");
-        container.style("margin-bottom", "10px");
+        container.addClass(customClass);
+        container.addClass(keybindingInputClass);
 
         let label = createLabel(p, "", setButtonId);
-        label.style("margin-right","15px");
+        label.addClass(customClass);
+        label.addClass(keybindingInputClass);
         label.parent(container);
 
         let setButton = p.createButton("Set");
@@ -128,6 +134,8 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number): {
                 global.keyboardEventManager.unbindKey(-1);
             });
         });
+        setButton.addClass(customClass);
+        setButton.addClass(keybindingInputClass);
 
         return container;
     }, getKeyBindingContainerId(trackNumber, numTracks));
@@ -141,18 +149,20 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number): {
     return container;
 }
 
-export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string, rows: number = 4,
-                                      cols: number = 40): { element: p5.Element, alreadyExists: boolean } {
+export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string, customClass: string,
+                                      rows: number = 4, cols: number = 40): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let textArea: p5.Element;
     let container = DOMWrapper.create(() => {
+        let labeledTextareaClass = "labeled-textarea";
         let container: p5.Element = p.createDiv();
-        container.style("margin-top", "10px");
-        container.style("margin-bottom", "10px");
+        container.addClass(customClass);
+        container.addClass(labeledTextareaClass);
 
         let label = createLabel(p, labelString, inputId);
-        label.style("margin-right","15px");
+        label.addClass(customClass);
+        label.addClass(labeledTextareaClass);
         label.parent(container);
 
         textArea = p.createElement("textarea", inputInitialValue);
@@ -166,15 +176,17 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
     return {element: textArea, alreadyExists: container.alreadyExists};
 }
 
-export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: () => void): { element: p5.Element, alreadyExists: boolean } {
+export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: () => void,
+                                customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
     let buttonId = uniqueId + "Button";
     let containerId = uniqueId + "Container";
     let container = DOMWrapper.create(() => {
+        let fileInputClass = "file-input";
         let container: p5.Element = p.createDiv();
-        container.style("margin-top", "10px");
-        container.style("margin-bottom", "10px");
+        container.addClass(customClass);
+        container.addClass(fileInputClass);
 
         let fileInput = p.createFileInput(onFileLoad, "false");
         fileInput.parent(container);
@@ -186,9 +198,12 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
         button.mouseClicked(() => {
             fileInput.elt.click();
         });
+        button.addClass(customClass);
+        button.addClass(fileInputClass);
 
         let label = createLabel(p, labelString, buttonId);
-        label.style("margin-left:5px");
+        label.addClass(customClass)
+        label.addClass(fileInputClass);
         label.parent(container);
 
         return container;

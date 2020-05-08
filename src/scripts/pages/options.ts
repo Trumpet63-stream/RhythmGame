@@ -17,6 +17,8 @@ import {PreviewDisplay} from "../preview_display";
 import {DOMWrapper} from "../dom_wrapper";
 
 export abstract class Options {
+    public static OPTIONS_CLASS: string = "options";
+
     public static draw() {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
@@ -25,17 +27,15 @@ export abstract class Options {
             return p.createDiv();
         }, "scrollDiv");
         if (!scrollDiv.alreadyExists) {
-            scrollDiv.element.style("border:2px solid #ccc;");
-            scrollDiv.element.style("width:380px;");
-            scrollDiv.element.style("height:420px;");
-            scrollDiv.element.style("overflow-y: scroll;");
+            scrollDiv.element.addClass("options-scroll-div");
+            scrollDiv.element.addClass(Options.OPTIONS_CLASS);
         }
         // @ts-ignore
         let canvasPosition: { x: number, y: number } = p._renderer.position();
         scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
 
         let pauseAtStartInSecondsInput = createLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
-            global.config.pauseAtStartInSeconds.toString());
+            global.config.pauseAtStartInSeconds.toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(pauseAtStartInSecondsInput, () => {
             let value: string | number = pauseAtStartInSecondsInput.element.value();
             if (typeof value === "string") {
@@ -50,7 +50,7 @@ export abstract class Options {
         }
 
         let scrollSpeedInput = createLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
-            global.config.pixelsPerSecond.toString());
+            global.config.pixelsPerSecond.toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(scrollSpeedInput, () => {
             let value: string | number = scrollSpeedInput.element.value();
             if (typeof value === "string") {
@@ -65,7 +65,7 @@ export abstract class Options {
         }
 
         let scrollDirectionSelect = createLabeledSelect("Scroll Direction", "scrollDirectionSelect",
-            ScrollDirection, global.config.scrollDirection);
+            ScrollDirection, global.config.scrollDirection, Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(scrollDirectionSelect, () => {
             let value: string = String(scrollDirectionSelect.element.value());
             let enumOfValue = ScrollDirection[value as keyof typeof ScrollDirection];
@@ -78,7 +78,7 @@ export abstract class Options {
         }
 
         let receptorPositionInput = createLabeledInput("Receptor Position (%)", "receptorPositionInput",
-            global.config.receptorYPercent.toString());
+            global.config.receptorYPercent.toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(receptorPositionInput, () => {
             let value: string | number = receptorPositionInput.element.value();
             if (typeof value === "string") {
@@ -93,7 +93,7 @@ export abstract class Options {
         }
 
         let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
-            global.config.additionalOffsetInSeconds.toString());
+            global.config.additionalOffsetInSeconds.toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
             let value: string | number = additionalOffsetInSecondsInput.element.value();
             if (typeof value === "string") {
@@ -108,7 +108,7 @@ export abstract class Options {
         }
 
         let accuracySettingsInput = createLabeledTextArea("Accuracy Settings", "accuracySettingsInput",
-            JSON.stringify(global.config.accuracySettings, null, 3));
+            JSON.stringify(global.config.accuracySettings, null, 3), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(accuracySettingsInput, () => {
             let value: string | number = accuracySettingsInput.element.value();
             if (typeof value === "string") {
@@ -131,7 +131,7 @@ export abstract class Options {
             global.previewNumTracks = 4;
         }
         let previewNumTracks = createLabeledInput("Number of Tracks", "previewNumTracksInput",
-            global.previewNumTracks.toString());
+            global.previewNumTracks.toString(), Options.OPTIONS_CLASS);
         // @ts-ignore
         setOnInputUnlessItAlreadyExists(previewNumTracks, () => {
             let value: string | number = previewNumTracks.element.value();
@@ -152,6 +152,8 @@ export abstract class Options {
             return p.createButton("KeyBindings Quickstart");
         }, "keyBindingsQuickstartButton");
         if (!keyBindingsQuickstartButton.alreadyExists) {
+            keyBindingsQuickstartButton.element.addClass(Options.OPTIONS_CLASS);
+
             keyBindingsQuickstartButton.element.mousePressed(() => {
                 let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);
 
@@ -168,7 +170,7 @@ export abstract class Options {
             initializeKeyBindings(global.previewNumTracks);
         }
         for (let trackNumber = 0; trackNumber < global.previewNumTracks; trackNumber++) {
-            let keyBindingInput = createKeyBindingInput(trackNumber, global.previewNumTracks);
+            let keyBindingInput = createKeyBindingInput(trackNumber, global.previewNumTracks, Options.OPTIONS_CLASS);
             if (!keyBindingInput.alreadyExists) {
                 scrollDiv.element.child(keyBindingInput.element);
             }
@@ -185,7 +187,8 @@ function createKeyBindingsSectionHeader(): { element: p5.Element, alreadyExists:
         container.html(
             'Key Bindings <span style="font-size:12px">(track 1 is the leftmost track)</span>'
         );
-        container.style("margin-top:10px; margin-bottom:10px; font-size:18px");
+        container.addClass("options-free-text");
+        container.addClass(Options.OPTIONS_CLASS);
         return container;
     }, "keyBindingsSectionHeader");
 
