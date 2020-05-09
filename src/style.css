@@ -1,3 +1,27 @@
+.game {
+    color: white;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+button.game {
+    background: rgba(9, 26, 43, 0.9);
+    border-radius: 4px;
+    border: 2px solid #a0cd73;
+    cursor: pointer;
+    color: white;
+    padding: 7px 15px;
+}
+
+button:hover {
+    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+    background-color: #476e9e;
+}
+
+button:active {
+    position: relative;
+    top: 1px;
+}
+
 div.labeled-input {
     margin-top: 2px;
     margin-bottom: 2px;
@@ -14,11 +38,6 @@ div.labeled-textarea {
     margin-top: 2px;
     margin-bottom: 2px;
     background: rgba(41, 56, 78, 0.9);
-}
-
-div.file-input {
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
 
 div.keybinding-input {
@@ -62,11 +81,6 @@ label.keybinding-input {
     width: 150px;
 }
 
-label.options {
-    color: white;
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
-
 input.labeled-input {
     width: 50px;
     text-align: center;
@@ -92,24 +106,8 @@ span.keybinding-input {
     background: rgba(41, 56, 78, 0.9);
 }
 
-button.options {
-    /*background-color: #7892c2;*/
-    background: rgba(9, 26, 43, 0.9);
-    border-radius: 4px;
-    border: 2px solid #a0cd73;
-    cursor: pointer;
-    color: white;
-    padding: 7px 15px;
-}
-
-button.options:hover {
-    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
-    background-color: #476e9e;
-}
-
-button.options:active {
-    position: relative;
-    top: 1px;
+option.labeled-select {
+    background: black;
 }
 
 button.keybinding-input {
@@ -126,8 +124,6 @@ textarea.labeled-textarea {
     margin: 5px 0px 2px 5px;
     background: rgba(11, 34, 56, 0.1);
 }
-
-.options {}
 
 .options-scroll-div {
     padding-left: 2px;
@@ -146,6 +142,50 @@ textarea.labeled-textarea {
     text-align: center;
     font-size: 17px;
     background: rgba(9, 26, 43, 1);
+}
+
+button.navigation-heading {
+    background: rgba(9, 26, 43, 0.9);
+    border-radius: 0px 0px 25px 25px;
+    border: 2px solid #a0cd73;
+    cursor: pointer;
     color: white;
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    padding: 7px 20px;
+}
+
+button.navigation-heading:hover {
+    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+    background-color: #476e9e;
+}
+
+button.navigation-heading:active {
+    position: relative;
+    top: 1px;
+}
+
+div.mode-radio {
+    padding-left: 2px;
+    height: 120px;
+    width: 300px;
+    overflow-y: scroll;
+    background: rgba(0, 0, 0, 0);
+    text-align: left;
+}
+
+div.mode-radio-option {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background: rgba(41, 56, 78, 0.9);
+}
+
+label.mode-radio-option {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 10px 8px 10px 8px;
+}
+
+input.mode-radio-option {
+    display: inline-block;
+    background: rgba(209, 226, 243, 0.9);
+    margin-left: 10px;
 }

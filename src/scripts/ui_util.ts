@@ -14,31 +14,40 @@ import {DOMWrapper} from "./dom_wrapper";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
+    let headingClass = "navigation-heading";
 
-    let scene1Button = DOMWrapper.create(() => {
+    let playFromFileButton = DOMWrapper.create(() => {
         return p.createButton("Play From File");
-    }, "scene1Button").element;
-    setElementCenterPositionRelative(scene1Button, 0.3, 0.05);
-    scene1Button.mousePressed(() => {
+    }, "playFromFileButton");
+    setElementCenterPositionRelative(playFromFileButton.element, 0.3, 0.036, 130, 34);
+    playFromFileButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
     });
+    if (!playFromFileButton.alreadyExists) {
+        playFromFileButton.element.addClass(headingClass);
+        playFromFileButton.element.addClass(global.globalClass);
+    }
 
-    let scene2Button = DOMWrapper.create(() => {
+    let optionsButton = DOMWrapper.create(() => {
         return p.createButton("Options");
-    }, "scene2Button").element;
-    setElementCenterPositionRelative(scene2Button, 0.7, 0.05);
-    scene2Button.mousePressed(() => {
+    }, "optionsButton");
+    setElementCenterPositionRelative(optionsButton.element, 0.7, 0.036, 90, 34);
+    optionsButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.OPTIONS);
     });
+    if (!optionsButton.alreadyExists) {
+        optionsButton.element.addClass(headingClass);
+        optionsButton.element.addClass(global.globalClass);
+    }
 }
 
 // Expects relativeX and relative Y to be between 0 and 1
-export function setElementCenterPositionRelative(element: p5.Element, relativeX: number, relativeY: number) {
+export function setElementCenterPositionRelative(element: p5.Element, relativeX: number, relativeY: number,
+                                                 width: number, height: number) {
     let p = global.p5Scene.sketchInstance;
     let canvasPosition: { x: number, y: number } = p._renderer.position();
-    let elementSize: { width?: number, height?: number } = element.size();
-    element.position(canvasPosition.x + (relativeX * p.width) - (elementSize.width / 2),
-        canvasPosition.y + (relativeY * p.height) - (elementSize.height / 2));
+    element.position(canvasPosition.x + (relativeX * p.width) - (width / 2),
+        canvasPosition.y + (relativeY * p.height) - (height / 2));
 }
 
 export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string, customClass: string): { element: p5.Element, alreadyExists: boolean } {
@@ -50,15 +59,18 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(labeledInputClass);
+        container.addClass(global.globalClass);
 
         let label = createLabel(p, labelString, inputId);
         label.addClass(customClass);
         label.addClass(labeledInputClass);
+        label.addClass(global.globalClass);
         label.parent(container);
 
         input = p.createInput(inputInitialValue);
         input.addClass(customClass);
         input.addClass(labeledInputClass);
+        input.addClass(global.globalClass);
         input.parent(container);
         input.id(inputId);
 
@@ -82,20 +94,23 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
     let p: p5 = global.p5Scene.sketchInstance;
 
     let select: p5.Element;
+    let labeledSelectClass = "labeled-select";
     let container = DOMWrapper.create(() => {
-        let labeledSelectClass = "labeled-select";
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(labeledSelectClass);
+        container.addClass(global.globalClass);
 
         let label = createLabel(p, labelString, selectId);
         label.addClass(customClass);
         label.addClass(labeledSelectClass);
+        label.addClass(global.globalClass);
         label.parent(container);
 
         select = p.createSelect();
         select.addClass(customClass);
-        select.addClass(labeledSelectClass)
+        select.addClass(labeledSelectClass);
+        select.addClass(global.globalClass);
         select.parent(container);
         select.id(selectId);
 
@@ -110,6 +125,12 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
         }
         // @ts-ignore
         select.selected(optionsEnum[initialEnumValue as keyof typeof optionsEnum].toString());
+
+        let options: HTMLCollection = select.elt.children;
+        for (let i = 0; i < options.length; i++) {
+            options.item(i).setAttribute("class",
+                customClass + " " + labeledSelectClass + " " + global.globalClass);
+        }
     }
 
     return {element: select, alreadyExists: container.alreadyExists};
@@ -124,10 +145,12 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(keybindingInputClass);
+        container.addClass(global.globalClass);
 
         let label = createLabel(p, "");
         label.addClass(customClass);
         label.addClass(keybindingInputClass);
+        label.addClass(global.globalClass);
         label.parent(container);
 
         let setButton = p.createButton("Set");
@@ -142,14 +165,16 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
         });
         setButton.addClass(customClass);
         setButton.addClass(keybindingInputClass);
+        setButton.addClass(global.globalClass);
 
         return container;
     }, getKeyBindingContainerId(trackNumber, numTracks));
 
     let trackBindingInfo = findBindingInfoForTrack(trackNumber, global.config.keyBindings.get(numTracks));
     let keyString = trackBindingInfo.string;
-    let labelString = 'Track ' + (trackNumber + 1) + ': <span class="'
-        + keybindingInputClass + '">' + keyString + '</span>';
+    let labelString = 'Track ' + (trackNumber + 1) + ': <span class="' +
+        keybindingInputClass + " " + customClass + " " + global.globalClass +
+        '">' + keyString + '</span>';
     let labelElement = getFirstElementByTagName(container.element, "LABEL");
     labelElement.html(labelString);
 
@@ -166,15 +191,18 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(labeledTextareaClass);
+        container.addClass(global.globalClass);
 
         let label = createLabel(p, labelString, inputId);
         label.addClass(customClass);
         label.addClass(labeledTextareaClass);
+        label.addClass(global.globalClass);
         label.parent(container);
 
         textArea = p.createElement("textarea", inputInitialValue);
         textArea.addClass(customClass);
         textArea.addClass(labeledTextareaClass);
+        textArea.addClass(global.globalClass);
         textArea.parent(container);
         textArea.id(inputId);
         textArea.attribute("rows", rows.toString());
@@ -197,6 +225,7 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(fileInputClass);
+        container.addClass(global.globalClass);
 
         let fileInput = p.createFileInput(onFileLoad, "false");
         fileInput.parent(container);
@@ -210,10 +239,12 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
         });
         button.addClass(customClass);
         button.addClass(fileInputClass);
+        button.addClass(global.globalClass);
 
         let label = createLabel(p, labelString, buttonId);
         label.addClass(customClass)
         label.addClass(fileInputClass);
+        label.addClass(global.globalClass);
         label.parent(container);
 
         return container;

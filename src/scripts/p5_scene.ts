@@ -26,11 +26,13 @@ export class P5Scene {
                     p.loadImage("../assets/80_connector_tile_gradient.png"),
                     p.loadImage("../assets/80_tail_solid.png")
                 );
-                global.optionsBackground = p.loadImage("../assets/background.jpg");
+                global.playFromFileBackground = p.loadImage("../assets/play_from_file_background.jpg");
+                global.optionsBackground = global.playFromFileBackground;
             }
 
             p.setup = function () {
                 renderer = p.createCanvas(width, height);
+                renderer.addClass(global.globalClass);
                 global.keyboardEventManager = new KeyboardEventManager(p);
                 global.previewDisplay = new PreviewDisplay(generatePreviewNotes(4), global.config, global.p5Scene);
                 renderer.style('display', 'block'); // Makes the canvas be able to fill the whole browser window

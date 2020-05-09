@@ -15,14 +15,15 @@ export abstract class PlayFromFile {
     public static draw() {
         drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
+        p.background(global.playFromFileBackground);
 
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
             global.stepfile.load.bind(global.stepfile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(stepfileInput, 0.25, 0.3);
+        setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 344, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3)", "audioFileInput",
             global.audioFile.load.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(audioFileInput, 0.75, 0.3);
+        setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 368, 34);
 
         let playButtonId = "playButton";
         let modeRadioId = "modeRadio";
@@ -31,14 +32,17 @@ export abstract class PlayFromFile {
             if (modeRadio.value() !== "") { // user has selected a mode
                 let playButton = DOMWrapper.create(() => {
                     return p.createButton("Play");
-                }, playButtonId).element;
-                setElementCenterPositionRelative(playButton, 0.5, 0.8);
-                playButton.mouseClicked(() => {
-                    let selectedMode: Mode = getSelectedMode(modeRadio);
-                    global.stepfile.finishParsing(selectedMode.id);
-                    initPlayingDisplay(global.stepfile.fullParse.tracks);
-                    PageManager.setCurrentScene(PAGES.PLAY);
-                });
+                }, playButtonId);
+                setElementCenterPositionRelative(playButton.element, 0.5, 0.88, 60, 34);
+                if (!playButton.alreadyExists) {
+                    playButton.element.addClass(global.globalClass);
+                    playButton.element.mouseClicked(() => {
+                        let selectedMode: Mode = getSelectedMode(modeRadio);
+                        global.stepfile.finishParsing(selectedMode.id);
+                        initPlayingDisplay(global.stepfile.fullParse.tracks);
+                        PageManager.setCurrentScene(PAGES.PLAY);
+                    });
+                }
             } else {
                 DOMWrapper.removeElementById(playButtonId);
             }
@@ -57,8 +61,9 @@ function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Eleme
     const labels = p.selectAll('label', radioDivP5Element);
     const len = inputs.length;
 
-    for (let i = 0; i < len; ++i)
+    for (let i = 0; i < len; ++i) {
         p.createDiv().parent(radioDivP5Element).child(inputs[i]).child(labels[i]);
+    }
 }
 
 // https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
@@ -69,16 +74,38 @@ function fixRadioDivElement(radioDivP5Element: p5.Element) {
     }
 }
 
+function styleModeOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
+    // @ts-ignore
+    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
+    for(let i = 0; i < divs.length; i++) {
+        divs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        inputs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        labels[i].addClass(styleClasses.join(" "));
+    }
+}
+
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
     if (global.page1ModeOptions === undefined) {
         global.page1ModeOptions = getModeOptionsForDisplay(global.stepfile.partialParse.modes);
     }
+
+    let modeRadioClass = "mode-radio"
+    let modeRadioOptionClass = "mode-radio-option";
     let modeRadioCreateResult = DOMWrapper.create(() => {
         return p.createRadio();
     }, uniqueId);
     let modeRadio = modeRadioCreateResult.element;
-    p.textAlign(p.CENTER);
     if (!modeRadioCreateResult.alreadyExists) {
         for (let i = 0; i < global.page1ModeOptions.length; i++) {
             let mode = global.page1ModeOptions[i];
@@ -92,15 +119,14 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
         }
 
         // This style is being set on the div containing the radio elements to make it a scrollable box
-        modeRadio.style("border:2px solid #ccc;");
-        modeRadio.style("width:300px;");
-        modeRadio.style("height:80px;");
-        modeRadio.style("overflow-y: scroll;");
+        modeRadio.addClass(modeRadioClass);
+        modeRadio.addClass(global.globalClass);
 
         encloseEachInputLabelPairIntoASubDiv(p, modeRadio);
         fixRadioDivElement(modeRadio);
+        styleModeOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
     }
-    setElementCenterPositionRelative(modeRadio, 0.5, 0.7);
+    setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 302, 120);
     p.pop();
     return modeRadio;
 }
@@ -128,7 +154,7 @@ function getStepfileInputLabel() {
         case StepfileState.DONE_READING:
         case StepfileState.PARTIALLY_PARSED:
         case StepfileState.FULLY_PARSED:
-            return truncateFileNameIfTooLong(global.stepfile.file.name, 21);
+            return truncateFileNameIfTooLong(global.stepfile.file.name, 30);
             break;
         default:
             return "Error";
@@ -142,7 +168,7 @@ function getAudioFileInputLabel() {
             break;
         case AudioFileState.DONE_READING:
         case AudioFileState.BUFFERED:
-            return truncateFileNameIfTooLong(global.audioFile.file.name, 21);
+            return truncateFileNameIfTooLong(global.audioFile.file.name, 30);
             break;
         default:
             return "Error";

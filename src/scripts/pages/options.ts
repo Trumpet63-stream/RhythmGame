@@ -30,6 +30,7 @@ export abstract class Options {
         if (!scrollDiv.alreadyExists) {
             scrollDiv.element.addClass("options-scroll-div");
             scrollDiv.element.addClass(Options.OPTIONS_CLASS);
+            scrollDiv.element.addClass(global.globalClass);
         }
         // @ts-ignore
         let canvasPosition: { x: number, y: number } = p._renderer.position();
@@ -155,6 +156,7 @@ export abstract class Options {
         if (!keyBindingsQuickstartButton.alreadyExists) {
             keyBindingsQuickstartButton.element.addClass(Options.OPTIONS_CLASS);
             keyBindingsQuickstartButton.element.addClass("keybindings-quickstart");
+            keyBindingsQuickstartButton.element.addClass(global.globalClass);
 
 
             keyBindingsQuickstartButton.element.mousePressed(() => {
@@ -192,6 +194,7 @@ function createKeyBindingsSectionHeader(): { element: p5.Element, alreadyExists:
         );
         container.addClass("options-free-text");
         container.addClass(Options.OPTIONS_CLASS);
+        container.addClass(global.globalClass);
         return container;
     }, "keyBindingsSectionHeader");
 

@@ -12,6 +12,7 @@ export class AudioFile {
     public file: File;
     public audioSource: AudioBufferSourceNode;
     public audioContext: AudioContext;
+    public audioBuffer: AudioBuffer;
 
     public constructor() {
         this.state = AudioFileState.NO_AUDIO_FILE;
@@ -25,6 +26,7 @@ export class AudioFile {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.audioSource = this.audioContext.createBufferSource();
             this.audioContext.decodeAudioData(<ArrayBuffer>onFileRead.target.result).then(((buffer: AudioBuffer) => {
+                    this.audioBuffer = buffer;
                     this.audioSource.buffer = buffer;
                     this.audioSource.connect(this.audioContext.destination);
                     this.state = AudioFileState.BUFFERED;
@@ -50,6 +52,15 @@ export class AudioFile {
 
     public stop() {
         this.audioSource.stop(0);
+        AudioFileState.DONE_READING;
+        this.recreateSourceNode();
+    }
+
+    private recreateSourceNode() {
+        this.audioSource = this.audioContext.createBufferSource();
+        this.audioSource.buffer = this.audioBuffer;
+        this.audioSource.connect(this.audioContext.destination);
+        AudioFileState.BUFFERED;
     }
 }
 

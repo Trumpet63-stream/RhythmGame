@@ -66,7 +66,7 @@ export class AccuracyFeedbackDisplay {
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
         p.textAlign(p.CENTER, p.CENTER);
-        p.fill("black");
+        p.fill("white");
         p.textSize(textSize);
         p.text(text, this.centerX, this.centerY);
         p.pop();

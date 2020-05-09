@@ -55,6 +55,7 @@ export function drawAccuracyBar(p: p5, centerX: number, centerY: number, label1:
 
 export function drawRightAlignedLabel(p: p5, rightmostX: number, centerY: number, text: string, textSize: number) {
     p.push();
+    p.fill("white");
     p.textSize(textSize);
     p.textAlign(p.RIGHT, p.CENTER);
     p.text(text, rightmostX, centerY);
@@ -65,6 +66,7 @@ export function drawPartiallyFilledBar(p: p5, centerX: number, centerY: number, 
                                        percentFilled: number, textSize: number, startLabel: string, endLabel: string) {
     p.push();
     p.rectMode(p.CENTER);
+    p.stroke("white");
 
     // draw the filled part of the bar
     p.fill("gray");
@@ -76,7 +78,7 @@ export function drawPartiallyFilledBar(p: p5, centerX: number, centerY: number, 
 
     // draw the labels on the ends of the bar
     let labelSize = 1.5 * textSize;
-    p.fill("black");
+    p.fill("white");
     p.textSize(labelSize);
     p.textAlign(p.LEFT, p.CENTER);
     p.text(startLabel, centerX - width / 2, centerY + 2);
