@@ -9,41 +9,97 @@ label {
 }
 
 div.labeled-input {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background: #3b435e;
 }
 div.labeled-select {
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background: #3b435e;
 }
 div.labeled-textarea {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background: #3b435e;
 }
 div.file-input {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 div.keybinding-input {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background: #3b435e;
 }
 
 label.labeled-input {
-    display: block;
-    margin-right: 15px;
+    margin-right: 50px;
+    display: inline-block;
+    width: 170px;
+    background: #19153e;
+    padding: 10px 0px 10px 8px;
 }
 label.labeled-select {
-    margin-right: 15px;
+    margin-right: 47px;
+    display: inline-block;
+    width: 170px;
+    background: #19153e;
+    padding: 10px 0px 10px 8px;
 }
 label.labeled-textarea {
+    background: #19153e;
     margin-right: 15px;
+    display: inline-block;
+    padding: 10px 44px 6px 8px;
 }
 label.file-input {
     margin-left: 5px;
 }
 label.keybinding-input {
+    background: #19153e;
     margin-right: 15px;
+    display: inline-block;
+    padding: 10px 44px 6px 8px;
+}
+label.options {
+    color: white;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+input.labeled-input {
+    width: 50px;
+    text-align: center;
+    color: white;
+    border: none;
+    border-bottom: 3px solid #85d71b;
+    background: #3b435e;
+}
+
+select.labeled-select {
+    color: white;
+    border: none;
+    border-bottom: 3px solid #85d71b;
+    background: #3b435e;
+}
+
+span.keybinding-input {
+    display: inline-block;
+    margin-left: 29px;
+    padding: 7px;
+    width: 20px;
+    text-align: center;
+    background: #3b435e;
+}
+
+button.keybinding-input {
+    margin-left: 42px;
+}
+
+textarea.labeled-textarea {
+    color: white;
+    border: 2px solid #85d71b;
+    background: #3b435e;
 }
 
 .options {
@@ -51,15 +107,21 @@ label.keybinding-input {
 }
 
 .options-scroll-div {
-    padding-left: 20px;
-    box-shadow: 0 4px 8px 0 rgba(73, 215, 83, 0.2), 0 6px 20px 0 rgba(37, 95, 32, 0.19);
+    padding-left: 2px;
     width: 360px;
     height: 420px;
     overflow-y: scroll;
+    background: #e2e2e2;
 }
 
 .options-free-text {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 17px;
+    background: #19153e;
+    color: white;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
 }

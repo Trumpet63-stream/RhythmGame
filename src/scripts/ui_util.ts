@@ -57,8 +57,11 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
         label.parent(container);
 
         input = p.createInput(inputInitialValue);
+        input.addClass(customClass);
+        input.addClass(labeledInputClass);
         input.parent(container);
         input.id(inputId);
+
         return container;
     }, inputId + "Container");
 
@@ -91,8 +94,11 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
         label.parent(container);
 
         select = p.createSelect();
+        select.addClass(customClass);
+        select.addClass(labeledSelectClass)
         select.parent(container);
         select.id(selectId);
+
         return container;
     }, selectId + "Container");
 
@@ -113,8 +119,8 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
     let p: p5 = global.p5Scene.sketchInstance;
 
     let setButtonId = getKeyBindingButtonId(trackNumber, numTracks);
+    let keybindingInputClass = "keybinding-input";
     let container = DOMWrapper.create(() => {
-        let keybindingInputClass = "keybinding-input";
         let container: p5.Element = p.createDiv();
         container.addClass(customClass);
         container.addClass(keybindingInputClass);
@@ -142,7 +148,8 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
 
     let trackBindingInfo = findBindingInfoForTrack(trackNumber, global.config.keyBindings.get(numTracks));
     let keyString = trackBindingInfo.string;
-    let labelString = 'Track ' + (trackNumber + 1) + ': ' + keyString;
+    let labelString = 'Track ' + (trackNumber + 1) + ': <span class="'
+        + keybindingInputClass + '">' + keyString + '</span>';
     let labelElement = getFirstElementByTagName(container.element, "LABEL");
     labelElement.html(labelString);
 
@@ -166,10 +173,13 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
         label.parent(container);
 
         textArea = p.createElement("textarea", inputInitialValue);
+        textArea.addClass(customClass);
+        textArea.addClass(labeledTextareaClass);
         textArea.parent(container);
         textArea.id(inputId);
         textArea.attribute("rows", rows.toString());
         textArea.attribute("cols", cols.toString());
+
         return container;
     }, inputId + "Container");
 
