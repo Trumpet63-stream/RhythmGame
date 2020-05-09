@@ -20,8 +20,9 @@ export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
 
     public static draw() {
-        drawHeading();
         let p: p5 = global.p5Scene.sketchInstance;
+        p.background(global.optionsBackground);
+        drawHeading();
 
         let scrollDiv = DOMWrapper.create(() => {
             return p.createDiv();
@@ -92,15 +93,15 @@ export abstract class Options {
             scrollDiv.element.child(receptorPositionInput.element.parent());
         }
 
-        let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (sec)", "additionalOffsetInSecondsInput",
+        let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (ms)", "additionalOffsetInSecondsInput",
             global.config.additionalOffsetInSeconds.toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
             let value: string | number = additionalOffsetInSecondsInput.element.value();
             if (typeof value === "string") {
                 value = parseFloat(value);
             }
-            if (!isNaN(value) && value > 0) {
-                global.config.additionalOffsetInSeconds = value;
+            if (!isNaN(value)) {
+                global.config.additionalOffsetInSeconds = value / 1000;
             }
         });
         if (!additionalOffsetInSecondsInput.alreadyExists) {
@@ -153,6 +154,8 @@ export abstract class Options {
         }, "keyBindingsQuickstartButton");
         if (!keyBindingsQuickstartButton.alreadyExists) {
             keyBindingsQuickstartButton.element.addClass(Options.OPTIONS_CLASS);
+            keyBindingsQuickstartButton.element.addClass("keybindings-quickstart");
+
 
             keyBindingsQuickstartButton.element.mousePressed(() => {
                 let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);

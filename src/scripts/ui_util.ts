@@ -125,7 +125,7 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
         container.addClass(customClass);
         container.addClass(keybindingInputClass);
 
-        let label = createLabel(p, "", setButtonId);
+        let label = createLabel(p, "");
         label.addClass(customClass);
         label.addClass(keybindingInputClass);
         label.parent(container);

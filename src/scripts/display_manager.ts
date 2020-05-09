@@ -113,10 +113,14 @@ export class DisplayManager {
     }
 
     draw(currentTimeInSeconds: number) {
+        let p: p5 = this.sketchInstance;
+        p.push();
+        p.fill("black");
         this.currentTimeInSeconds = currentTimeInSeconds;
         this.sketchInstance.rect(this.topLeftX, this.topLeftY, this.width, this.height);
         this.drawNotesAndConnectors();
         this.drawReceptors();
+        p.pop();
     }
 
     private drawNotesAndConnectors() {

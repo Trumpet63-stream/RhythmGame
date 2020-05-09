@@ -26,6 +26,7 @@ export class P5Scene {
                     p.loadImage("../assets/80_connector_tile_gradient.png"),
                     p.loadImage("../assets/80_tail_solid.png")
                 );
+                global.optionsBackground = p.loadImage("../assets/background.jpg");
             }
 
             p.setup = function () {
@@ -38,7 +39,6 @@ export class P5Scene {
 
             p.draw = function () {
                 p.clear();
-                p.background(200);
                 PageManager.draw();
             };
 

@@ -1,67 +1,67 @@
-input {
-    /*display: block;*/
-    /*text-align: center;*/
-}
-
-label {
-    /*display: block;*/
-    /*text-align: left;*/
-}
-
 div.labeled-input {
     margin-top: 2px;
     margin-bottom: 2px;
-    background: #3b435e;
+    background: rgba(41, 56, 78, 0.9);
 }
+
 div.labeled-select {
     margin-top: 2px;
     margin-bottom: 2px;
-    background: #3b435e;
+    background: rgba(41, 56, 78, 0.9);
 }
+
 div.labeled-textarea {
     margin-top: 2px;
     margin-bottom: 2px;
-    background: #3b435e;
+    background: rgba(41, 56, 78, 0.9);
 }
+
 div.file-input {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
 div.keybinding-input {
     margin-top: 2px;
     margin-bottom: 2px;
-    background: #3b435e;
+    background: rgba(41, 56, 78, 0.9);
 }
 
 label.labeled-input {
     margin-right: 50px;
     display: inline-block;
     width: 170px;
-    background: #19153e;
+    background: rgba(9, 26, 43, 0.90);
     padding: 10px 0px 10px 8px;
 }
+
 label.labeled-select {
     margin-right: 47px;
     display: inline-block;
     width: 170px;
-    background: #19153e;
+    background: rgba(9, 26, 43, 0.9);
     padding: 10px 0px 10px 8px;
 }
+
 label.labeled-textarea {
-    background: #19153e;
+    background: rgba(9, 26, 43, 0.9);
     margin-right: 15px;
     display: inline-block;
     padding: 10px 44px 6px 8px;
 }
+
 label.file-input {
     margin-left: 5px;
 }
+
 label.keybinding-input {
-    background: #19153e;
+    background: rgba(9, 26, 43, 0.9);
     margin-right: 15px;
     display: inline-block;
-    padding: 10px 44px 6px 8px;
+    padding: 8px 20px 8px 8px;
+    width: 150px;
 }
+
 label.options {
     color: white;
     font-family: "Trebuchet MS", Helvetica, sans-serif;
@@ -72,15 +72,15 @@ input.labeled-input {
     text-align: center;
     color: white;
     border: none;
-    border-bottom: 3px solid #85d71b;
-    background: #3b435e;
+    border-bottom: 3px solid #a0cd73;
+    background: rgba(11, 34, 56, 0.0);
 }
 
 select.labeled-select {
     color: white;
     border: none;
-    border-bottom: 3px solid #85d71b;
-    background: #3b435e;
+    border-bottom: 3px solid #a0cd73;
+    background: rgba(11, 34, 56, 0.0);
 }
 
 span.keybinding-input {
@@ -89,29 +89,53 @@ span.keybinding-input {
     padding: 7px;
     width: 20px;
     text-align: center;
-    background: #3b435e;
+    background: rgba(41, 56, 78, 0.9);
+}
+
+button.options {
+    /*background-color: #7892c2;*/
+    background: rgba(9, 26, 43, 0.9);
+    border-radius: 4px;
+    border: 2px solid #a0cd73;
+    cursor: pointer;
+    color: white;
+    padding: 7px 15px;
+}
+
+button.options:hover {
+    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+    background-color: #476e9e;
+}
+
+button.options:active {
+    position: relative;
+    top: 1px;
 }
 
 button.keybinding-input {
-    margin-left: 42px;
+    margin-left: 32px;
+}
+
+button.keybindings-quickstart {
+    width: 100%;
 }
 
 textarea.labeled-textarea {
     color: white;
-    border: 2px solid #85d71b;
-    background: #3b435e;
+    border: 2px solid #a0cd73;
+    margin: 5px 0px 2px 5px;
+    background: rgba(11, 34, 56, 0.1);
 }
 
-.options {
-
-}
+.options {}
 
 .options-scroll-div {
     padding-left: 2px;
     width: 360px;
     height: 420px;
     overflow-y: scroll;
-    background: #e2e2e2;
+    background: rgba(0, 0, 0, 0);
+    text-align: left;
 }
 
 .options-free-text {
@@ -121,7 +145,7 @@ textarea.labeled-textarea {
     padding-bottom: 10px;
     text-align: center;
     font-size: 17px;
-    background: #19153e;
+    background: rgba(9, 26, 43, 1);
     color: white;
     font-family: "Trebuchet MS", Helvetica, sans-serif;
 }
