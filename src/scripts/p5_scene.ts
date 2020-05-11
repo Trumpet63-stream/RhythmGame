@@ -17,7 +17,7 @@ export class P5Scene {
             let renderer: p5.Renderer;
 
             function centerCanvas() {
-                renderer.center();
+                // renderer.center(); // Disable this for now to make embedding work
             }
 
             p.preload = function () {
