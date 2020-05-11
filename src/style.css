@@ -1,3 +1,28 @@
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,1);
+    background-color: rgb(41, 56, 78);
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-image: -webkit-gradient(linear,
+    left bottom,
+    left top,
+    color-stop(0.23, rgb(2,0,36)),
+    color-stop(0.87, rgb(73,125,189)),
+    color-stop(1.00, rgb(28,58,148)));
+}
+
+::-webkit-resizer {
+    border-top: 20px solid rgb(35, 49, 70);
+    border-right: 20px solid #a0cd73;
+}
+
 .game {
     color: white;
     font-family: "Trebuchet MS", Helvetica, sans-serif;
