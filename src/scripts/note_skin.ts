@@ -6,6 +6,7 @@ import {ScrollDirection} from "./scroll_direction";
 export class NoteSkin {
     public note: p5.Image;
     public connectorTile: p5.Image;
+    public receptor: p5.Image;
 
     /* Requires that the tail be half the height and same width as note image */
     public tail: p5.Image;
@@ -15,10 +16,11 @@ export class NoteSkin {
         [6, [270, 315, 180, 0, 45, 90]]
     ]);
 
-    constructor(note: p5.Image, connector: p5.Image, tail: p5.Image) {
+    constructor(note: p5.Image, connector: p5.Image, tail: p5.Image, receptor: p5.Image) {
         this.note = note;
         this.connectorTile = connector;
         this.tail = tail;
+        this.receptor = receptor;
     }
 
     // Returns true if able to draw note type, otherwise returns false
@@ -26,7 +28,7 @@ export class NoteSkin {
         switch (noteType) {
             case NoteType.NORMAL:
             case NoteType.HOLD_HEAD:
-                this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
+                this.drawImageRotated(this.note, trackNumber, numTracks, centerX, centerY);
                 break;
             case NoteType.TAIL:
                 this.drawTail(trackNumber, numTracks, centerX, centerY);
@@ -39,7 +41,7 @@ export class NoteSkin {
 
     // Returns true if able to draw note type, otherwise returns false
     public drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
-        this.drawNoteRotated(trackNumber, numTracks, centerX, centerY);
+        this.drawImageRotated(this.receptor, trackNumber, numTracks, centerX, centerY);
         return true;
     }
 
@@ -160,14 +162,14 @@ export class NoteSkin {
         p.pop();
     }
 
-    private drawNoteRotated(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+    private drawImageRotated(image: p5.Image, trackNumber: number, numTracks: number, centerX: number, centerY: number) {
         let p: p5 = global.p5Scene.sketchInstance;
         let noteSize = global.config.noteSize;
         p.push();
         p.angleMode(p.DEGREES);
         p.translate(centerX, centerY);
         this.rotate(p, trackNumber, numTracks);
-        p.image(this.note, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
+        p.image(image, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
         p.pop();
     }
 

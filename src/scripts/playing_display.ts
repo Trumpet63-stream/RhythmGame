@@ -60,8 +60,8 @@ export class PlayingDisplay {
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
 
-        let width = 200;
-        let height = 400;
+        let width = 240;
+        let height = 480;
         let topLeftX = (this.scene.sketchInstance.width - width) / 2;
         let topLeftY = (this.scene.sketchInstance.height - height) / 2;
         this.displayManager = new DisplayManager(this.noteManager, this.config, this.scene.sketchInstance,

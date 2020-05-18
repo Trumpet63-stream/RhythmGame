@@ -22,9 +22,10 @@ export class P5Scene {
 
             p.preload = function () {
                 global.noteSkin = new NoteSkin(
-                    p.loadImage("../assets/80_arrow_up_solid.png"),
-                    p.loadImage("../assets/80_connector_tile_gradient.png"),
-                    p.loadImage("../assets/80_tail_solid.png")
+                    p.loadImage("../assets/arrow_blue_resize.png"),
+                    p.loadImage("../assets/connector_tile_resize.png"),
+                    p.loadImage("../assets/tail_resize.png"),
+                    p.loadImage("../assets/arrow_receptor.png")
                 );
                 global.playFromFileBackground = p.loadImage("../assets/play_from_file_background.jpg");
                 global.optionsBackground = global.playFromFileBackground;
