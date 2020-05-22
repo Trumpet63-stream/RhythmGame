@@ -1,10 +1,26 @@
-import {Note} from "./parsing";
+import {Note, NoteType} from "./parsing";
 
 export class NoteManager {
     tracks: Note[][];
 
     constructor(tracks: Note[][]) {
         this.tracks = tracks;
+        this.removeUnsupportedNoteTypes();
+    }
+
+    private removeUnsupportedNoteTypes() {
+        let supportedNoteTypes: NoteType[] = [NoteType.TAIL, NoteType.HOLD_HEAD, NoteType.NORMAL];
+
+        for (let trackNumber = 0; trackNumber < this.tracks.length; trackNumber++) {
+            let track: Note[] = this.tracks[trackNumber];
+            for (let noteNumber = 0; noteNumber < track.length; noteNumber++) {
+                let note: Note = track[noteNumber];
+                if (!supportedNoteTypes.includes(note.type)) {
+                    track.splice(noteNumber, 1);
+                    noteNumber--; // decrement note number so next iteration it starts at the right note
+                }
+            }
+        }
     }
 
     getNotesByTimeRange(leastTime: number, greatestTime: number, trackNumber: number): { startIndex: number, endIndexNotInclusive: number } {

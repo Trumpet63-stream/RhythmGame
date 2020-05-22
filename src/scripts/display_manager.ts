@@ -89,7 +89,6 @@ class Receptor {
     }
 }
 
-//TODO: Display missed notes differently than hit notes
 export class DisplayManager {
     private config: Config;
     noteManager: NoteManager;

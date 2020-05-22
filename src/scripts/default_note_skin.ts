@@ -35,18 +35,18 @@ export abstract class DefaultNoteSkin {
                 p.text("x", centerX, centerY + 6);
                 break;
             case NoteType.MINE:
-                p.fill("black");
+                p.fill("white");
                 p.circle(centerX, centerY, 24);
                 p.textSize(20);
                 p.textFont("Arial");
                 p.textAlign(p.CENTER);
-                p.fill("white");
+                p.fill("black");
                 p.text("X", centerX, centerY + 8);
                 break;
             default:
                 p.noFill();
                 p.rect(centerX - width / 2, centerY - height / 2, width, height);
-                p.fill("black");
+                p.fill("white");
                 p.textSize(20);
                 p.textFont("Arial");
                 p.textAlign(p.CENTER);
