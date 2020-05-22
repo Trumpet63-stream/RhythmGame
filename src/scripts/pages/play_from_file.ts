@@ -19,11 +19,11 @@ export abstract class PlayFromFile {
 
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
             global.stepfile.load.bind(global.stepfile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 344, 34);
+        setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
 
-        let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3)", "audioFileInput",
+        let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
             global.audioFile.load.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 368, 34);
+        setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
 
         let playButtonId = "playButton";
         let modeRadioId = "modeRadio";
