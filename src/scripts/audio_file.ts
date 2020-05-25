@@ -10,6 +10,7 @@ export enum AudioFileState {
 export class AudioFile {
     public state: AudioFileState;
     public file: File;
+    public blob: Blob
     public audioSource: AudioBufferSourceNode;
     public audioContext: AudioContext;
     public audioBuffer: AudioBuffer;
@@ -18,24 +19,37 @@ export class AudioFile {
         this.state = AudioFileState.NO_AUDIO_FILE;
     }
 
-    public load(file: p5.File) {
+    public loadFile(file: p5.File) {
         this.file = file.file; // this unwraps the p5.File wrapper to get the original DOM file
-        loadSoundFile(this.file, ((onFileRead: ProgressEvent<FileReader>) => {
+        this.loadAudioData(this.file);
+    }
+
+    public loadBlob(blob: Blob) {
+        this.blob = blob;
+        this.loadAudioData(this.blob);
+    }
+
+    private loadAudioData(audioData: File | Blob) {
+        this.loadSoundFile(audioData, ((onFileRead: ProgressEvent<FileReader>) => {
             this.state = AudioFileState.DONE_READING;
             // @ts-ignore
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.audioSource = this.audioContext.createBufferSource();
-            this.audioContext.decodeAudioData(<ArrayBuffer>onFileRead.target.result).then(((buffer: AudioBuffer) => {
-                    this.audioBuffer = buffer;
-                    this.audioSource.buffer = buffer;
-                    this.audioSource.connect(this.audioContext.destination);
-                    this.state = AudioFileState.BUFFERED;
-                }),
-                (e: any) => {
-                    console.log("Error with decoding audio data" + e.err);
-                    this.state = AudioFileState.ERROR;
-                });
+            this.decodeAudioData(<ArrayBuffer>onFileRead.target.result);
         }));
+    }
+
+    private decodeAudioData(audioData: ArrayBuffer) {
+        this.audioContext.decodeAudioData(audioData).then(((buffer: AudioBuffer) => {
+            this.audioBuffer = buffer;
+            this.audioSource.buffer = buffer;
+            this.audioSource.connect(this.audioContext.destination);
+            this.state = AudioFileState.BUFFERED;
+        }),
+        (e: any) => {
+            console.log("Error with decoding audio data" + e.err);
+            this.state = AudioFileState.ERROR;
+        });
     }
 
     public getDuration(): number | undefined {
@@ -62,14 +76,15 @@ export class AudioFile {
         this.audioSource.connect(this.audioContext.destination);
         AudioFileState.BUFFERED;
     }
+
+    private loadSoundFile(
+        data: Blob | File,
+        listener: (event: ProgressEvent<FileReader>) => any,
+        options?: boolean | AddEventListenerOptions
+    ) {
+        let fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(data);
+        fileReader.addEventListener("loadend", listener, options);
+    }
 }
 
-function loadSoundFile(
-    file: File,
-    listener: (event: ProgressEvent<FileReader>) => any,
-    options?: boolean | AddEventListenerOptions
-) {
-    let fileReader = new FileReader();
-    fileReader.readAsArrayBuffer(file);
-    fileReader.addEventListener("loadend", listener, options);
-}

@@ -22,7 +22,7 @@ export abstract class PlayFromFile {
         setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
-            global.audioFile.load.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
+            global.audioFile.loadFile.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
 
         let playButtonId = "playButton";

@@ -1,5 +1,6 @@
 import * as p5 from "p5";
 import {FullParse, getFullParse, getPartialParse, PartialParse} from "./parsing";
+import {parseSwf} from "./parse_swf";
 
 export enum StepfileState {
     NO_SIMFILE,
@@ -17,6 +18,11 @@ export class Stepfile {
 
     public constructor() {
         this.state = StepfileState.NO_SIMFILE;
+    }
+
+    public loadSwf(file: p5.File) {
+        this.file = file.file; // this unwraps the p5.File wrapper to get the original DOM file
+        parseSwf(this.file);
     }
 
     public load(file: p5.File) {
