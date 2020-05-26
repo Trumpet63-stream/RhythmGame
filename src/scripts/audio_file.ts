@@ -45,6 +45,7 @@ export class AudioFile {
             this.audioSource.buffer = buffer;
             this.audioSource.connect(this.audioContext.destination);
             this.state = AudioFileState.BUFFERED;
+            console.log("AUDIO BUFFERED!");
         }),
         (e: any) => {
             console.log("Error with decoding audio data" + e.err);

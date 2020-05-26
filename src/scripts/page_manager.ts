@@ -15,7 +15,7 @@ export enum PAGES {
 }
 
 export abstract class PageManager {
-    private static currentScene: PAGES = PAGES.PLAY_FROM_SWF;
+    private static currentScene: PAGES = PAGES.PLAY_FROM_FILE;
 
     public static getCurrentScene() {
         return this.currentScene;

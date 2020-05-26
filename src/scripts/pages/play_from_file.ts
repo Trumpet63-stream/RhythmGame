@@ -131,14 +131,14 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     return modeRadio;
 }
 
-function isFilesReady() {
+export function isFilesReady() {
     let stepfileReady = global.stepfile.state === StepfileState.PARTIALLY_PARSED ||
         global.stepfile.state === StepfileState.FULLY_PARSED;
     let audioFileReady = global.audioFile.state === AudioFileState.BUFFERED;
     return stepfileReady && audioFileReady;
 }
 
-function initPlayingDisplay(tracks: Note[][]) {
+export function initPlayingDisplay(tracks: Note[][]) {
     global.playingDisplay = new PlayingDisplay(tracks, global.config, global.p5Scene);
 }
 

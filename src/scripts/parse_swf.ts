@@ -1,5 +1,6 @@
 import * as pako from "pako";
 import {AudioFile, AudioFileState} from "./audio_file";
+import {global} from "./index";
 
 /**
  * Defines constants on exports object
@@ -389,20 +390,8 @@ function swfFile_Ready(array_buffer) {
     // $("#audio")[0].load();//suspends and restores all audio element
     //$("#audio")[0].oncanplaythrough =  $("#audio")[0].play();
 
-    if(chartPreview) {
-        // chartPreview.setChartAudio(blob);
-        let audioFile = new AudioFile();
-        audioFile.loadBlob(blob);
-        let audioChecker = setInterval(() => {
-            if (audioFile.state !== AudioFileState.BUFFERED) {
-                console.log(audioFile.state)
-            } else {
-                console.log(audioFile);
-                audioFile.play();
-                clearInterval(audioChecker);
-            }
-        }, 1000);
-    }
+    global.audioFile.loadBlob(blob);
+    global.stepfile.loadBeatmap(chart_data);
 }
 
 /**

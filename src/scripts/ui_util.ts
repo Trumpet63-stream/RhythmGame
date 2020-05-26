@@ -19,7 +19,7 @@ export function drawHeading() {
     let playFromFileButton = DOMWrapper.create(() => {
         return p.createButton("Play From File");
     }, "playFromFileButton");
-    setElementCenterPositionRelative(playFromFileButton.element, 0.3, 0.036, 130, 34);
+    setElementCenterPositionRelative(playFromFileButton.element, 0.2, 0.036, 130, 34);
     playFromFileButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
     });
@@ -28,10 +28,22 @@ export function drawHeading() {
         playFromFileButton.element.addClass(global.globalClass);
     }
 
+    let FFRButton = DOMWrapper.create(() => {
+        return p.createButton("Play From FFR");
+    }, "FFRButton");
+    setElementCenterPositionRelative(FFRButton.element, 0.5, 0.036, 90, 34);
+    FFRButton.element.mousePressed(() => {
+        PageManager.setCurrentScene(PAGES.PLAY_FROM_SWF);
+    });
+    if (!FFRButton.alreadyExists) {
+        FFRButton.element.addClass(headingClass);
+        FFRButton.element.addClass(global.globalClass);
+    }
+
     let optionsButton = DOMWrapper.create(() => {
         return p.createButton("Options");
     }, "optionsButton");
-    setElementCenterPositionRelative(optionsButton.element, 0.7, 0.036, 90, 34);
+    setElementCenterPositionRelative(optionsButton.element, 0.8, 0.036, 90, 34);
     optionsButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.OPTIONS);
     });
@@ -214,7 +226,7 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
     return {element: textArea, alreadyExists: container.alreadyExists};
 }
 
-export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: () => void,
+export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: (file: p5.File) => void,
                                 customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
