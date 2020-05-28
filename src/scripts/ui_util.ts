@@ -214,7 +214,7 @@ export function createLabeledTextArea(labelString: string, inputId: string, inpu
     return {element: textArea, alreadyExists: container.alreadyExists};
 }
 
-export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: () => void,
+export function createFileInput(labelString: string, buttonText: string, uniqueId: string, onFileLoad: (file: p5.File) => void,
                                 customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 

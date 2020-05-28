@@ -1,5 +1,6 @@
 import * as p5 from "p5";
 import {FullParse, getFullParse, getPartialParse, PartialParse} from "./parsing";
+import {global} from "./index";
 
 export enum StepfileState {
     NO_SIMFILE,

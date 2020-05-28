@@ -3,9 +3,9 @@ import {global} from "./index";
 import * as p5 from "p5";
 
 export abstract class DefaultNoteSkin {
-    public static drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType) {
+    public static drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType,
+                           noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         let width = noteSize;
         let height = noteSize;
         p.push();
@@ -56,9 +56,8 @@ export abstract class DefaultNoteSkin {
         p.pop();
     }
 
-    public static drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+    public static drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         let width = noteSize;
         let height = noteSize;
         p.push();

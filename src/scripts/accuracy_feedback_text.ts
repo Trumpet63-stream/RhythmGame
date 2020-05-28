@@ -4,7 +4,7 @@ import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
 import {Config} from "./config";
 import {getAccuracyEventName} from "./util";
 
-export class AccuracyFeedbackDisplay {
+export class AccuracyFeedbackText {
     private accuracyRecording: AccuracyRecording;
     private centerX: number;
     private centerY: number;

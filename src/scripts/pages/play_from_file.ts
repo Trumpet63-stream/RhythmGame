@@ -11,6 +11,7 @@ import {DOMWrapper} from "../dom_wrapper";
 
 export abstract class PlayFromFile {
     public static PLAY_FROM_FILE_CLASS: string = "play-from-file";
+    public static MODE_RADIO_ID: string = "modeRadio";
 
     public static draw() {
         drawHeading();
@@ -18,7 +19,7 @@ export abstract class PlayFromFile {
         p.background(global.playFromFileBackground);
 
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
-            global.stepfile.load.bind(global.stepfile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
+            loadStepfileAndUpdateModeOptions, PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
@@ -26,10 +27,9 @@ export abstract class PlayFromFile {
         setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
 
         let playButtonId = "playButton";
-        let modeRadioId = "modeRadio";
         if (isFilesReady()) {
-            let modeRadio = drawModeSelect(p, modeRadioId);
-            if (modeRadio.value() !== "") { // user has selected a mode
+            let modeRadio = drawModeSelect(p, PlayFromFile.MODE_RADIO_ID);
+            if (modeRadio.value() !== "") { // if user has selected a mode
                 let playButton = DOMWrapper.create(() => {
                     return p.createButton("Play");
                 }, playButtonId);
@@ -47,10 +47,16 @@ export abstract class PlayFromFile {
                 DOMWrapper.removeElementById(playButtonId);
             }
         } else {
-            DOMWrapper.removeElementById(modeRadioId);
+            DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
             DOMWrapper.removeElementById(playButtonId);
         }
     }
+}
+
+function loadStepfileAndUpdateModeOptions(file: p5.File) {
+    global.stepfile.load.call(global.stepfile, file);
+    global.stepfileModeOptions = undefined;
+    DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
 }
 
 // https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
@@ -96,8 +102,8 @@ function styleModeOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: st
 
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
-    if (global.page1ModeOptions === undefined) {
-        global.page1ModeOptions = getModeOptionsForDisplay(global.stepfile.partialParse.modes);
+    if (global.stepfileModeOptions === undefined) {
+        global.stepfileModeOptions = getModeOptionsForDisplay(global.stepfile.partialParse.modes);
     }
 
     let modeRadioClass = "mode-radio"
@@ -107,8 +113,8 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     }, uniqueId);
     let modeRadio = modeRadioCreateResult.element;
     if (!modeRadioCreateResult.alreadyExists) {
-        for (let i = 0; i < global.page1ModeOptions.length; i++) {
-            let mode = global.page1ModeOptions[i];
+        for (let i = 0; i < global.stepfileModeOptions.length; i++) {
+            let mode = global.stepfileModeOptions[i];
             let radioLabel = mode.type + ", " + mode.difficulty + ", " + mode.meter;
             // @ts-ignore
             let radioOption = modeRadio.option(radioLabel);
@@ -143,7 +149,7 @@ function initPlayingDisplay(tracks: Note[][]) {
 }
 
 function getSelectedMode(modeRadio: p5.Element) {
-    return global.page1ModeOptions[modeRadio.value()];
+    return global.stepfileModeOptions[modeRadio.value()];
 }
 
 function getStepfileInputLabel() {

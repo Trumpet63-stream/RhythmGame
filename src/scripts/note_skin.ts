@@ -24,11 +24,12 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    public drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType): boolean {
+    public drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType,
+                    noteSize: number): boolean {
         switch (noteType) {
             case NoteType.NORMAL:
             case NoteType.HOLD_HEAD:
-                this.drawImageRotated(this.note, trackNumber, numTracks, centerX, centerY);
+                this.drawImageRotated(this.note, trackNumber, numTracks, centerX, centerY, noteSize);
                 break;
             case NoteType.TAIL:
                 this.drawTail(trackNumber, numTracks, centerX, centerY);
@@ -40,8 +41,8 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    public drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
-        this.drawImageRotated(this.receptor, trackNumber, numTracks, centerX, centerY);
+    public drawReceptor(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
+        this.drawImageRotated(this.receptor, trackNumber, numTracks, centerX, centerY, noteSize);
         return true;
     }
 
@@ -162,9 +163,9 @@ export class NoteSkin {
         p.pop();
     }
 
-    private drawImageRotated(image: p5.Image, trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+    private drawImageRotated(image: p5.Image, trackNumber: number, numTracks: number, centerX: number, centerY: number,
+                             noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         p.push();
         p.angleMode(p.DEGREES);
         p.translate(centerX, centerY);

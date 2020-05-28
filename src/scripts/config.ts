@@ -4,7 +4,7 @@ import {defaultIfUndefined} from "./util";
 import {DEFAULT_CONFIG} from "./default_config";
 import {KeyBinding} from "./key_binding_helper";
 
-// Essential config: scroll speed, scroll direction, game width/height, additional offset, pause at start
+/* Stores user settings. Expected not to change during play */
 export class Config {
     pixelsPerSecond: number;
     receptorYPercent: number;
