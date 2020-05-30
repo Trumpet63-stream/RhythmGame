@@ -20,9 +20,11 @@ import {global} from "./index";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {KeyBinding} from "./key_binding_helper";
 import {PageManager, PAGES} from "./page_manager";
-import {AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
+import {AccuracyEvent, AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
 import {AccuracyFeedbackText} from "./accuracy_feedback_text";
 import {ReceptorVisualFeedback} from "./receptor_visual_feedback";
+import {AccuracyFeedbackFlash} from "./accuracy_feedback_flash";
+import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -39,6 +41,8 @@ export class PlayingDisplay {
     private accuracyFeedbackDisplay: AccuracyFeedbackText;
     private displayConfig: DisplayConfig;
     private receptorVisualFeedback: ReceptorVisualFeedback;
+    private accuracyFeedbackFlash: AccuracyFeedbackFlash;
+    private accuracyFeedbackParticles: AccuracyFeedbackParticles;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
         this.showResultsScreen = false;
@@ -61,8 +65,10 @@ export class PlayingDisplay {
         }
 
         this.gameEndTime = this.calculateGameEnd(global.audioFile.getDuration(), this.getNotesEndTime());
-        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.accuracyRecording, holdManager);
-        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager);
+        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, holdManager,
+            this.handleAccuracyEvent.bind(this));
+        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager,
+            this.handleAccuracyEvent.bind(this));
 
         let width = 240;
         let height = 480;
@@ -73,7 +79,10 @@ export class PlayingDisplay {
         this.displayConfig = new DisplayConfig(this.config, numTracks);
         this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
             topLeftX, topLeftY, width, height);
+        this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.accuracyRecording, this.config, this.displayManager,
+            numTracks);
         this.receptorVisualFeedback = new ReceptorVisualFeedback(this.config, this.displayConfig, numTracks);
+        this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
 
         if (!isKeyBindingsDefined(numTracks)) {
             initializeKeyBindings(numTracks);
@@ -81,6 +90,15 @@ export class PlayingDisplay {
         this.bindKeyBindingsToActions();
         setAllNotesToDefaultState(this.noteManager.tracks);
         replaceNotYetImplementedNoteTypes(this.noteManager.tracks);
+    }
+
+    private handleAccuracyEvent(accuracyEvent: AccuracyEvent) {
+        console.log("Track #" + (accuracyEvent.trackNumber + 1) + " " + accuracyEvent.accuracyName +
+            (Math.abs(accuracyEvent.accuracyMillis) == Infinity ?
+                "" :
+                " (" + Math.round(accuracyEvent.accuracyMillis) + " ms)"));
+        this.accuracyRecording.recordAccuracyEvent(accuracyEvent);
+        this.accuracyFeedbackParticles.addParticlesForAccuracyEvent(accuracyEvent);
     }
 
     public draw() {
@@ -93,6 +111,8 @@ export class PlayingDisplay {
         this.displayManager.draw(currentTimeInSeconds);
         this.accuracyFeedbackDisplay.draw(currentTimeInSeconds);
         this.receptorVisualFeedback.draw();
+        this.accuracyFeedbackFlash.draw(currentTimeInSeconds);
+        this.accuracyFeedbackParticles.draw(currentTimeInSeconds);
     }
 
     private getNotesEndTime() {

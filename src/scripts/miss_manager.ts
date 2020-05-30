@@ -1,10 +1,9 @@
 import {NoteManager} from "./note_manager";
 import {Config} from "./config";
-import {handleAccuracyEvent} from "./handle_accuracy_event";
 import {getMissBoundary} from "./util";
 import {Note, NoteState, NoteType} from "./parsing";
 import {HoldManager} from "./hold_manager";
-import {AccuracyRecording} from "./accuracy_recording";
+import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
 
 export class MissManager {
     private config: Config;
@@ -12,9 +11,10 @@ export class MissManager {
     private lastCheckedNoteIndices: number[];
     private accuracyRecording: AccuracyRecording;
     private holdManager: HoldManager;
+    private handleAccuracyEvent: (accuracyEvent: AccuracyEvent) => void;
 
     constructor(config: Config, noteManager: NoteManager, accuracyRecording: AccuracyRecording,
-                holdManager: HoldManager) {
+                holdManager: HoldManager, handleAccuracyEvent: (accuracyEvent: AccuracyEvent) => void) {
         this.config = config;
         this.noteManager = noteManager;
         this.lastCheckedNoteIndices = [];
@@ -23,6 +23,7 @@ export class MissManager {
         }
         this.accuracyRecording = accuracyRecording;
         this.holdManager = holdManager;
+        this.handleAccuracyEvent = handleAccuracyEvent;
     }
 
     update(currentTime: number) {
@@ -70,13 +71,19 @@ export class MissManager {
     private handleMissedNote(trackNumber: number, indexOfMissedNote: number, currentTime: number) {
         let track = this.noteManager.tracks[trackNumber];
         let missedNote = track[indexOfMissedNote];
-        handleAccuracyEvent(this.config.accuracySettings[0].name, trackNumber, -Infinity, currentTime, missedNote.type, this.accuracyRecording);
+        this.handleAccuracyEvent({
+            accuracyName: this.config.accuracySettings[0].name,
+            trackNumber: trackNumber,
+            accuracyMillis: -Infinity,
+            timeInSeconds: currentTime,
+            noteType: missedNote.type
+        });
         missedNote.state = NoteState.MISSED;
         if (missedNote.type === NoteType.TAIL) {
             if (this.holdManager.isTrackHeld(trackNumber)) {
                 this.holdManager.unholdTrack(trackNumber) // Force a hold release upon missing the tail
             }
-        } else if(missedNote.type === NoteType.HOLD_HEAD) {
+        } else if (missedNote.type === NoteType.HOLD_HEAD) {
             let nextNote = track[indexOfMissedNote + 1];
             if (nextNote !== undefined) {
                 if (nextNote.type === NoteType.TAIL) {

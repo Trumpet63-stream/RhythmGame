@@ -6,6 +6,14 @@ export enum AccuracyRecordingState {
 }
 
 export interface AccuracyEvent {
+    accuracyName: string,
+    trackNumber: number,
+    timeInSeconds: number,
+    accuracyMillis: number,
+    noteType: NoteType
+}
+
+export interface AccuracyRecordingEntry {
     timeInSeconds: number,
     accuracyMillis: number,
     noteType: NoteType
@@ -13,7 +21,7 @@ export interface AccuracyEvent {
 
 export class AccuracyRecording {
     public state: AccuracyRecordingState;
-    public recording: AccuracyEvent[][];
+    public recording: AccuracyRecordingEntry[][];
 
     constructor(numTracks: number) {
         this.state = AccuracyRecordingState.INCOMPLETE;
@@ -23,8 +31,12 @@ export class AccuracyRecording {
         }
     }
 
-    public recordAccuracyEvent(trackNumber: number, accuracyMillis: number, currentTime: number, noteType: NoteType) {
-        this.recording[trackNumber].push(
-            {timeInSeconds: currentTime, accuracyMillis: accuracyMillis, noteType: noteType});
+    public recordAccuracyEvent(accuracyEvent: AccuracyEvent) {
+        this.recording[accuracyEvent.trackNumber].push(
+            {
+                timeInSeconds: accuracyEvent.timeInSeconds,
+                accuracyMillis: accuracyEvent.accuracyMillis,
+                noteType: accuracyEvent.noteType
+            });
     }
 }

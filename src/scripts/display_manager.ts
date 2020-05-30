@@ -29,7 +29,7 @@ class NoteDisplay {
 
     draw() {
         let isNoteDrawSuccessful = global.noteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX,
-            this.centerY, this.noteType);
+            this.centerY, this.noteType, this.noteSize);
         if (!isNoteDrawSuccessful) {
             DefaultNoteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX, this.centerY, this.noteType,
                 this.noteSize);
@@ -83,7 +83,7 @@ class Receptor {
 
     draw() {
         let isReceptorDrawSuccessful = global.noteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX,
-            this.centerY);
+            this.centerY, this.noteSize);
         if (!isReceptorDrawSuccessful) {
             DefaultNoteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX, this.centerY, this.noteSize);
         }
@@ -184,14 +184,14 @@ export class DisplayManager {
         return currentTime + (1 - this.displayConfig.receptorYPercent / 100) * totalDisplaySeconds;
     }
 
-    private getNoteCenterX(trackNumber: number, numTracks: number) {
+    public getNoteCenterX(trackNumber: number, numTracks: number) {
         let receptorSpacing = this.getDisplayWidth() / numTracks - this.displayConfig.noteSize;
         return (2 * trackNumber + 1) / 2 * (this.displayConfig.noteSize + receptorSpacing) + this.topLeftX;
     }
 
     // This essentially defines a conversion from seconds to pixels
-    private getNoteCenterY(noteTime: number, currentTime: number) {
-        let noteYOffset = this.displayConfig.pixelsPerSecond * (noteTime - currentTime);
+    public getNoteCenterY(noteTimeInSeconds: number, currentTimeInSeconds: number) {
+        let noteYOffset = this.displayConfig.pixelsPerSecond * (noteTimeInSeconds - currentTimeInSeconds);
         let receptorYOffset = this.displayConfig.receptorYPercent / 100 * this.getDisplayHeight();
         if (this.displayConfig.scrollDirection == ScrollDirection.Up) {
             return receptorYOffset + noteYOffset + this.topLeftY;

@@ -1,6 +1,6 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
+import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
 import {getAccuracyEventName} from "./util";
 
@@ -18,7 +18,7 @@ export class AccuracyFeedbackText {
     }
 
     public draw(currentTimeInSeconds: number) {
-        let lastEvent: AccuracyEvent = this.getMostRecentAccuracyEvent();
+        let lastEvent: AccuracyRecordingEntry = this.getMostRecentAccuracyRecordingEntry();
         if (lastEvent === null) {
             return;
         }
@@ -31,8 +31,8 @@ export class AccuracyFeedbackText {
         this.drawEventText(eventName, textSize);
     }
 
-    private getMostRecentAccuracyEvent(): AccuracyEvent {
-        let mostRecentTrack: AccuracyEvent[] = [];
+    private getMostRecentAccuracyRecordingEntry(): AccuracyRecordingEntry {
+        let mostRecentTrack: AccuracyRecordingEntry[] = [];
         let greatestTime = Number.NEGATIVE_INFINITY;
         for (let trackNumber = 0; trackNumber < this.accuracyRecording.recording.length; trackNumber++) {
             let track = this.accuracyRecording.recording[trackNumber];
