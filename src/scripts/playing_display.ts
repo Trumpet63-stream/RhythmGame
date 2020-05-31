@@ -22,9 +22,11 @@ import {KeyBinding} from "./key_binding_helper";
 import {PageManager, PAGES} from "./page_manager";
 import {AccuracyEvent, AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
 import {AccuracyFeedbackText} from "./accuracy_feedback_text";
-import {ReceptorVisualFeedback} from "./receptor_visual_feedback";
+import {ReceptorShrinkReaction} from "./receptor_shrink_reaction";
 import {AccuracyFeedbackFlash} from "./accuracy_feedback_flash";
 import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
+import {HoldParticles} from "./hold_particles";
+import {HoldGlow} from "./hold_glow";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -38,11 +40,14 @@ export class PlayingDisplay {
     private showResultsScreen: boolean;
     private accuracyRecording: AccuracyRecording;
     private isDebugMode: boolean = false;
-    private accuracyFeedbackDisplay: AccuracyFeedbackText;
+    private accuracyFeedbackText: AccuracyFeedbackText;
+    private holdManager: HoldManager;
     private displayConfig: DisplayConfig;
-    private receptorVisualFeedback: ReceptorVisualFeedback;
+    private receptorShrinkReaction: ReceptorShrinkReaction;
     private accuracyFeedbackFlash: AccuracyFeedbackFlash;
     private accuracyFeedbackParticles: AccuracyFeedbackParticles;
+    private holdParticles: HoldParticles;
+    private holdGlow: HoldGlow;
 
     constructor(tracks: Note[][], config: Config, scene: P5Scene) {
         this.showResultsScreen = false;
@@ -58,30 +63,34 @@ export class PlayingDisplay {
         this.noteManager = new NoteManager(tracks);
         let numTracks: number = this.noteManager.tracks.length;
         this.accuracyRecording = new AccuracyRecording(numTracks);
-        let holdManager = new HoldManager(numTracks);
+
+        let width = 240;
+        let height = 480;
+        let topLeftX = (this.scene.sketchInstance.width - width) / 2;
+        let topLeftY = (this.scene.sketchInstance.height - height) / 2;
+        this.displayConfig = new DisplayConfig(this.config, numTracks);
+        this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
+            topLeftX, topLeftY, width, height);
+
+        this.holdParticles = new HoldParticles(this.config, numTracks, this.displayManager);
+        this.holdGlow = new HoldGlow(this.config, numTracks, this.displayManager);
+        this.holdManager = new HoldManager(numTracks, this.onTrackHold.bind(this), this.onTrackUnhold.bind(this));
 
         if (this.isDebugMode) {
             this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
         }
 
         this.gameEndTime = this.calculateGameEnd(global.audioFile.getDuration(), this.getNotesEndTime());
-        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, holdManager,
+        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.holdManager,
             this.handleAccuracyEvent.bind(this));
-        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, holdManager,
+        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
             this.handleAccuracyEvent.bind(this));
 
-        let width = 240;
-        let height = 480;
-        let topLeftX = (this.scene.sketchInstance.width - width) / 2;
-        let topLeftY = (this.scene.sketchInstance.height - height) / 2;
-        this.accuracyFeedbackDisplay = new AccuracyFeedbackText(this.accuracyRecording, topLeftX + width / 2,
+        this.accuracyFeedbackText = new AccuracyFeedbackText(this.accuracyRecording, topLeftX + width / 2,
             topLeftY + height / 2, this.config);
-        this.displayConfig = new DisplayConfig(this.config, numTracks);
-        this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
-            topLeftX, topLeftY, width, height);
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.accuracyRecording, this.config, this.displayManager,
             numTracks);
-        this.receptorVisualFeedback = new ReceptorVisualFeedback(this.config, this.displayConfig, numTracks);
+        this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
 
         if (!isKeyBindingsDefined(numTracks)) {
@@ -109,10 +118,22 @@ export class PlayingDisplay {
         }
         this.missManager.update(currentTimeInSeconds);
         this.displayManager.draw(currentTimeInSeconds);
-        this.accuracyFeedbackDisplay.draw(currentTimeInSeconds);
-        this.receptorVisualFeedback.draw();
-        this.accuracyFeedbackFlash.draw(currentTimeInSeconds);
-        this.accuracyFeedbackParticles.draw(currentTimeInSeconds);
+        this.receptorShrinkReaction.draw();
+        if (this.config.isAccuracyTextEnabled) {
+            this.accuracyFeedbackText.draw(currentTimeInSeconds);
+        }
+        if (this.config.isHoldGlowEnabled) {
+            this.holdGlow.draw(currentTimeInSeconds);
+        }
+        if (this.config.isAccuracyFlashEnabled) {
+            this.accuracyFeedbackFlash.draw(currentTimeInSeconds);
+        }
+        if (this.config.isAccuracyParticlesEnabled) {
+            this.accuracyFeedbackParticles.draw(currentTimeInSeconds);
+        }
+        if (this.config.isHoldParticlesEnabled) {
+            this.holdParticles.draw(currentTimeInSeconds);
+        }
     }
 
     private getNotesEndTime() {
@@ -146,11 +167,9 @@ export class PlayingDisplay {
             global.keyboardEventManager.bindKeyToAction(keyBinding.keyCode,
                 () => {
                     this.keyDownActionForTrack(keyBinding.trackNumber)
-                    this.receptorVisualFeedback.holdTrack(keyBinding.trackNumber);
                 },
                 () => {
                     this.keyUpActionForTrack(keyBinding.trackNumber)
-                    this.receptorVisualFeedback.releaseTrack(keyBinding.trackNumber);
                 })
         }
 
@@ -160,14 +179,34 @@ export class PlayingDisplay {
     }
 
     private keyDownActionForTrack(trackNumber: number) {
+        this.receptorShrinkReaction.holdTrack(trackNumber);
         let playerKeyAction: PlayerKeyAction =
             new PlayerKeyAction(this.timeManager.getGameTime(performance.now()), trackNumber, KeyState.DOWN);
         this.accuracyManager.handlePlayerAction(playerKeyAction);
     }
 
     private keyUpActionForTrack(trackNumber: number) {
+        this.receptorShrinkReaction.releaseTrack(trackNumber);
         let playerKeyAction: PlayerKeyAction =
             new PlayerKeyAction(this.timeManager.getGameTime(performance.now()), trackNumber, KeyState.UP);
         this.accuracyManager.handlePlayerAction(playerKeyAction);
+    }
+
+    private onTrackHold(trackNumber: number, currentTimeInSeconds: number) {
+        if (this.config.isHoldGlowEnabled) {
+            this.holdGlow.holdTrack.call(this.holdGlow, trackNumber, currentTimeInSeconds);
+        }
+        if (this.config.isHoldParticlesEnabled) {
+            this.holdParticles.holdTrack.call(this.holdParticles, trackNumber, currentTimeInSeconds);
+        }
+    }
+
+    private onTrackUnhold(trackNumber: number, currentTimeInSeconds: number) {
+        if (this.config.isHoldGlowEnabled) {
+            this.holdGlow.unholdTrack.call(this.holdGlow, trackNumber, currentTimeInSeconds);
+        }
+        if (this.config.isHoldParticlesEnabled) {
+            this.holdParticles.unholdTrack.call(this.holdParticles, trackNumber, currentTimeInSeconds);
+        }
     }
 }

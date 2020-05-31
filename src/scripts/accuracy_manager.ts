@@ -32,12 +32,12 @@ export class AccuracyManager {
         this.handleAccuracyEvent = handleAccuracyEvent;
     }
 
-    handlePlayerAction(action: PlayerKeyAction): void {
+    public handlePlayerAction(action: PlayerKeyAction): void {
         if (action.keyState == KeyState.DOWN) {
             this.tryToHitNote(action.gameTime, action.track);
         } else if (action.keyState === KeyState.UP) {
             if (this.holdManager.isTrackHeld(action.track)) {
-                this.holdManager.unholdTrack(action.track);
+                this.holdManager.unholdTrack(action.track, action.gameTime);
                 this.tryToReleaseNote(action.gameTime, action.track);
             }
         }
@@ -67,7 +67,7 @@ export class AccuracyManager {
                     timeInSeconds: currentTimeInSeconds,
                     noteType: note.type,
                 });
-                this.holdManager.holdTrack(trackNumber);
+                this.holdManager.holdTrack(trackNumber, currentTimeInSeconds);
             }
         } else if (this.isConfiguredForBoos()) {
             this.handleAccuracyEvent({

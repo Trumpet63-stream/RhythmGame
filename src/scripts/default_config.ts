@@ -26,4 +26,9 @@ export let DEFAULT_CONFIG = {
     gameAreaWidth: 400,
     noteSize: 30,
     quitKey: 27, // Quit defaults to escape key
+    isAccuracyFlashEnabled: true,
+    isAccuracyParticlesEnabled: true,
+    isAccuracyTextEnabled: true,
+    isHoldParticlesEnabled: true,
+    isHoldGlowEnabled: true,
 };

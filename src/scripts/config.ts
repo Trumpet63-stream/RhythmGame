@@ -17,6 +17,11 @@ export class Config {
     gameAreaWidth: number;
     noteSize: number;
     quitKey: number;
+    isAccuracyFlashEnabled: boolean;
+    isAccuracyParticlesEnabled: boolean;
+    isAccuracyTextEnabled: boolean;
+    isHoldParticlesEnabled: boolean;
+    isHoldGlowEnabled: boolean;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -30,34 +35,35 @@ export class Config {
                     gameAreaWidth?: number,
                     noteSize?: number,
                     quitKey?: number,
+                    isAccuracyFlashEnabled?: boolean,
+                    isAccuracyParticlesEnabled?: boolean,
+                    isAccuracyTextEnabled?: boolean,
+                    isHoldParticlesEnabled?: boolean,
+                    isHoldGlowEnabled?: boolean,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
         this.gameAreaWidth = defaultIfUndefined(args.gameAreaWidth, DEFAULT_CONFIG.gameAreaWidth);
-
         this.pixelsPerSecond = defaultIfUndefined(args.pixelsPerSecond, DEFAULT_CONFIG.pixelsPerSecond);
-        // this.setSecondsPerPixel();
-
         this.scrollDirection = defaultIfUndefined(args.scrollDirection, DEFAULT_CONFIG.scrollDirection);
-        // this.setScrollDirection();
 
         // NOTE: Scroll direction and gameAreaHeight must be set BEFORE setting receptorYPosition
         this.receptorYPercent = defaultIfUndefined(args.receptorYPercent, DEFAULT_CONFIG.receptorYPercent);
-        // this.setReceptorYPosition();
 
         this.additionalOffsetInSeconds = defaultIfUndefined(args.additionalOffsetInSeconds, DEFAULT_CONFIG.additionalOffsetInSeconds);
-        // this.setAdditionalOffsetInSeconds();
-
         this.accuracySettings = defaultIfUndefined(args.accuracySettings, DEFAULT_CONFIG.accuracySettings);
-        // this.setAccuracySettings();
-
         this.pauseAtStartInSeconds = defaultIfUndefined(args.pauseAtStartInSeconds, DEFAULT_CONFIG.pauseAtStartInSeconds);
-        // this.setPauseAtStartInSeconds();
-
         this.noteSize = defaultIfUndefined(args.noteSize, DEFAULT_CONFIG.noteSize);
-
         this.keyBindings = defaultIfUndefined(args.keyBindings, DEFAULT_CONFIG.keyBindings);
-
         this.quitKey = defaultIfUndefined(args.quitKey, DEFAULT_CONFIG.quitKey);
+        this.isAccuracyFlashEnabled = defaultIfUndefined(args.isAccuracyFlashEnabled,
+            DEFAULT_CONFIG.isAccuracyFlashEnabled);
+        this.isAccuracyParticlesEnabled = defaultIfUndefined(args.isAccuracyParticlesEnabled,
+            DEFAULT_CONFIG.isAccuracyParticlesEnabled);
+        this.isAccuracyTextEnabled = defaultIfUndefined(args.isAccuracyTextEnabled,
+            DEFAULT_CONFIG.isAccuracyTextEnabled);
+        this.isHoldParticlesEnabled = defaultIfUndefined(args.isHoldParticlesEnabled,
+            DEFAULT_CONFIG.isHoldParticlesEnabled);
+        this.isHoldGlowEnabled = defaultIfUndefined(args.isHoldGlowEnabled, DEFAULT_CONFIG.isHoldGlowEnabled);
     }
 }

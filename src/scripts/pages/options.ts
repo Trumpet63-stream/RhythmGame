@@ -2,7 +2,7 @@ import * as p5 from "p5";
 import {ScrollDirection} from "../scroll_direction";
 import {KeyBindingHelper} from "../key_binding_helper";
 import {
-    createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
+    createKeyBindingInput, createLabeledCheckbox, createLabeledInput, createLabeledSelect, createLabeledTextArea,
     drawHeading
 } from "../ui_util";
 import {global} from "../index";

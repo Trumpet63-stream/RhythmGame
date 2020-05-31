@@ -68,20 +68,20 @@ export class MissManager {
         return note.timeInSeconds < missBoundary && note.state === NoteState.DEFAULT;
     }
 
-    private handleMissedNote(trackNumber: number, indexOfMissedNote: number, currentTime: number) {
+    private handleMissedNote(trackNumber: number, indexOfMissedNote: number, currentTimeInSeconds: number) {
         let track = this.noteManager.tracks[trackNumber];
         let missedNote = track[indexOfMissedNote];
         this.handleAccuracyEvent({
             accuracyName: this.config.accuracySettings[0].name,
             trackNumber: trackNumber,
             accuracyMillis: -Infinity,
-            timeInSeconds: currentTime,
+            timeInSeconds: currentTimeInSeconds,
             noteType: missedNote.type
         });
         missedNote.state = NoteState.MISSED;
         if (missedNote.type === NoteType.TAIL) {
             if (this.holdManager.isTrackHeld(trackNumber)) {
-                this.holdManager.unholdTrack(trackNumber) // Force a hold release upon missing the tail
+                this.holdManager.unholdTrack(trackNumber, currentTimeInSeconds) // Force a hold release upon missing the tail
             }
         } else if (missedNote.type === NoteType.HOLD_HEAD) {
             let nextNote = track[indexOfMissedNote + 1];

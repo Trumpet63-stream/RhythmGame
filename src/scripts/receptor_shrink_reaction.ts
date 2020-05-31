@@ -1,8 +1,7 @@
 import {Config} from "./config";
-import {global} from "./index";
 import {DisplayConfig} from "./display_manager";
 
-export class ReceptorVisualFeedback {
+export class ReceptorShrinkReaction {
     private trackHoldStates: boolean[];
     private config: Config;
     private displayConfig: DisplayConfig;

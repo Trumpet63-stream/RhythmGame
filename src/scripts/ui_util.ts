@@ -88,6 +88,12 @@ function createLabel(p: p5, labelString: string, forId?: string): p5.Element {
     return label;
 }
 
+function createCheckbox(p: p5, initialState: boolean): p5.Element {
+    let checkbox = p.createElement("checkbox");
+    checkbox.elt.checked = initialState;
+    return checkbox;
+}
+
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
 export function createLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any,
                                     customClass: string): { element: p5.Element, alreadyExists: boolean } {
@@ -254,4 +260,35 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
     label.html(labelString);
 
     return container;
+}
+
+export function createLabeledCheckbox(labelString: string, checkboxId: string, isChecked: boolean, customClass: string):
+    { element: p5.Element, alreadyExists: boolean } {
+    let p: p5 = global.p5Scene.sketchInstance;
+
+    let checkbox: p5.Element;
+    let container = DOMWrapper.create(() => {
+        let labeledCheckboxClass = "labeled-checkbox";
+        let container: p5.Element = p.createDiv();
+        container.addClass(customClass);
+        container.addClass(labeledCheckboxClass);
+        container.addClass(global.globalClass);
+
+        let label = createLabel(p, labelString, checkboxId);
+        label.addClass(customClass);
+        label.addClass(labeledCheckboxClass);
+        label.addClass(global.globalClass);
+        label.parent(container);
+
+        checkbox = createCheckbox(p, isChecked);
+        checkbox.addClass(customClass);
+        checkbox.addClass(labeledCheckboxClass);
+        checkbox.addClass(global.globalClass);
+        checkbox.parent(container);
+        checkbox.id(checkboxId);
+
+        return container;
+    }, checkboxId + "Container");
+
+    return {element: checkbox, alreadyExists: container.alreadyExists};
 }
