@@ -2,16 +2,16 @@ import * as p5 from "p5";
 import {ScrollDirection} from "../scroll_direction";
 import {KeyBindingHelper} from "../key_binding_helper";
 import {
-    createKeyBindingInput, createLabeledCheckbox, createLabeledInput, createLabeledSelect, createLabeledTextArea,
-    drawHeading
+    booleanToYesNo,
+    createKeyBindingInput,
+    createLabeledInput,
+    createLabeledSelect,
+    createLabeledTextArea,
+    drawHeading,
+    YesNo
 } from "../ui_util";
 import {global} from "../index";
-import {
-    generatePreviewNotes,
-    getKeyBindingContainerId,
-    initializeKeyBindings,
-    isKeyBindingsDefined
-} from "../util";
+import {generatePreviewNotes, getKeyBindingContainerId, initializeKeyBindings, isKeyBindingsDefined} from "../util";
 import {Accuracy} from "../accuracy_manager";
 import {PreviewDisplay} from "../preview_display";
 import {DOMWrapper} from "../dom_wrapper";
@@ -45,6 +45,7 @@ export abstract class Options {
             }
             if (!isNaN(value) && value >= 0) {
                 global.config.pauseAtStartInSeconds = value;
+                global.config.save();
             }
         });
         if (!pauseAtStartInSecondsInput.alreadyExists) {
@@ -60,6 +61,7 @@ export abstract class Options {
             }
             if (!isNaN(value) && value > 0) {
                 global.config.pixelsPerSecond = value;
+                global.config.save();
             }
         });
         if (!scrollSpeedInput.alreadyExists) {
@@ -73,6 +75,7 @@ export abstract class Options {
             let enumOfValue = ScrollDirection[value as keyof typeof ScrollDirection];
             if (enumOfValue !== undefined) {
                 global.config.scrollDirection = enumOfValue;
+                global.config.save();
             }
         });
         if (!scrollDirectionSelect.alreadyExists) {
@@ -88,6 +91,7 @@ export abstract class Options {
             }
             if (!isNaN(value)) {
                 global.config.receptorYPercent = value;
+                global.config.save();
             }
         });
         if (!receptorPositionInput.alreadyExists) {
@@ -103,6 +107,7 @@ export abstract class Options {
             }
             if (!isNaN(value)) {
                 global.config.additionalOffsetInSeconds = value / 1000;
+                global.config.save();
             }
         });
         if (!additionalOffsetInSecondsInput.alreadyExists) {
@@ -117,11 +122,97 @@ export abstract class Options {
                 let newAccuracySettings: Accuracy[] = parseAccuracySettingsJson(value);
                 if (newAccuracySettings !== null) {
                     global.config.accuracySettings = newAccuracySettings;
+                    global.config.save();
                 }
             }
         })
         if (!accuracySettingsInput.alreadyExists) {
             scrollDiv.element.child(accuracySettingsInput.element.parent());
+        }
+
+        let accuracyFlashEnabledSelect = createLabeledSelect("Accuracy Flash","accuracyFlashEnabledSelect",
+            YesNo, booleanToYesNo(global.config.isAccuracyFlashEnabled), Options.OPTIONS_CLASS);
+        setOnInputUnlessItAlreadyExists(accuracyFlashEnabledSelect, () => {
+            let value: string = String(accuracyFlashEnabledSelect.element.value());
+            let enumOfValue = YesNo[value as keyof typeof YesNo];
+            if (enumOfValue === YesNo.Yes) {
+                global.config.isAccuracyFlashEnabled = true;
+                global.config.save();
+            } else if (enumOfValue === YesNo.No) {
+                global.config.isAccuracyFlashEnabled = false;
+                global.config.save();
+            }
+        });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(accuracyFlashEnabledSelect.element.parent());
+        }
+
+        let accuracyParticlesEnabledSelect = createLabeledSelect("Accuracy Particles", "accuracyParticlesEnabledSelect",
+            YesNo, booleanToYesNo(global.config.isAccuracyParticlesEnabled), Options.OPTIONS_CLASS);
+        setOnInputUnlessItAlreadyExists(accuracyParticlesEnabledSelect, () => {
+            let value: string = String(accuracyParticlesEnabledSelect.element.value());
+            let enumOfValue = YesNo[value as keyof typeof YesNo];
+            if (enumOfValue === YesNo.Yes) {
+                global.config.isAccuracyParticlesEnabled = true;
+                global.config.save();
+            } else if (enumOfValue === YesNo.No) {
+                global.config.isAccuracyParticlesEnabled = false;
+                global.config.save();
+            }
+        });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(accuracyParticlesEnabledSelect.element.parent());
+        }
+
+        let accuracyTextEnabledSelect = createLabeledSelect("Accuracy Text","accuracyTextEnabledSelect",
+            YesNo, booleanToYesNo(global.config.isAccuracyTextEnabled), Options.OPTIONS_CLASS);
+        setOnInputUnlessItAlreadyExists(accuracyTextEnabledSelect, () => {
+            let value: string = String(accuracyTextEnabledSelect.element.value());
+            let enumOfValue = YesNo[value as keyof typeof YesNo];
+            if (enumOfValue === YesNo.Yes) {
+                global.config.isAccuracyTextEnabled = true;
+                global.config.save();
+            } else if (enumOfValue === YesNo.No) {
+                global.config.isAccuracyTextEnabled = false;
+                global.config.save();
+            }
+        });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(accuracyTextEnabledSelect.element.parent());
+        }
+
+        let holdParticlesEnabledSelect = createLabeledSelect("Hold Particles", "holdParticlesEnabledSelect",
+            YesNo, booleanToYesNo(global.config.isHoldParticlesEnabled), Options.OPTIONS_CLASS);
+        setOnInputUnlessItAlreadyExists(holdParticlesEnabledSelect, () => {
+            let value: string = String(holdParticlesEnabledSelect.element.value());
+            let enumOfValue = YesNo[value as keyof typeof YesNo];
+            if (enumOfValue === YesNo.Yes) {
+                global.config.isHoldParticlesEnabled = true;
+                global.config.save();
+            } else if (enumOfValue === YesNo.No) {
+                global.config.isHoldParticlesEnabled = false;
+                global.config.save();
+            }
+        });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(holdParticlesEnabledSelect.element.parent());
+        }
+
+        let holdGlowEnabledSelect = createLabeledSelect("Hold Glow", "holdGlowEnabledSelect",
+            YesNo, booleanToYesNo(global.config.isHoldGlowEnabled), Options.OPTIONS_CLASS);
+        setOnInputUnlessItAlreadyExists(holdGlowEnabledSelect, () => {
+            let value: string = String(holdGlowEnabledSelect.element.value());
+            let enumOfValue = YesNo[value as keyof typeof YesNo];
+            if (enumOfValue === YesNo.Yes) {
+                global.config.isHoldGlowEnabled = true;
+                global.config.save();
+            } else if (enumOfValue === YesNo.No) {
+                global.config.isHoldGlowEnabled = false;
+                global.config.save();
+            }
+        });
+        if (!scrollDirectionSelect.alreadyExists) {
+            scrollDiv.element.child(holdGlowEnabledSelect.element.parent());
         }
 
         let keyBindingsSectionHeader = createKeyBindingsSectionHeader();

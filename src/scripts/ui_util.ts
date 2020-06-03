@@ -292,3 +292,16 @@ export function createLabeledCheckbox(labelString: string, checkboxId: string, i
 
     return {element: checkbox, alreadyExists: container.alreadyExists};
 }
+
+export enum YesNo {
+    Yes,
+    No
+}
+
+export function booleanToYesNo(boolean: boolean): YesNo {
+    if (boolean) {
+        return YesNo.Yes;
+    } else {
+        return YesNo.No;
+    }
+}

@@ -66,4 +66,37 @@ export class Config {
             DEFAULT_CONFIG.isHoldParticlesEnabled);
         this.isHoldGlowEnabled = defaultIfUndefined(args.isHoldGlowEnabled, DEFAULT_CONFIG.isHoldGlowEnabled);
     }
+
+    public save() {
+        // let expires = this.getDateOfOneYearFromNow();
+        // let path = '/';
+        // let cookieString = escape(JSON.stringify(this))
+        //     + ';path=' + path
+        //     + ';expires=' + expires.toUTCString();
+        // document.cookie = cookieString;
+        // console.log("Config saved to cookie!");
+        // console.log(document.cookie);
+    }
+
+    public static load(): Config {
+        // let cookie: string[] = document.cookie.split(';');
+        // if (cookie[0]) {
+        //     try {
+        //         let cookieString: string = unescape(cookie[0]);
+        //         let config: Config = JSON.parse(cookieString);
+        //         console.log("Config loaded from cookie!");
+        //         console.log(config);
+        //         return config;
+        //     } catch (e) {}
+        // }
+        // console.log(cookie);
+        // console.log("No valid cookie found, returning default config!");
+        return new Config({});
+    }
+
+    private getDateOfOneYearFromNow() {
+        let date = new Date();
+        date.setFullYear(date.getFullYear() + 1);
+        return date;
+    }
 }
