@@ -180,8 +180,8 @@ export function getFirstElementByTagName(div: p5.Element, tagName: string): p5.E
     return undefined;
 }
 
-export function findBindingInfoForTrack(trackNumber: number, bindings: {trackNumber: number, keyCode: number, string: string}[]) {
-    for(let i = 0; i < bindings.length; i++) {
+export function findBindingInfoForTrack(trackNumber: number, bindings: { trackNumber: number, keyCode: number, string: string }[]) {
+    for (let i = 0; i < bindings.length; i++) {
         if (bindings[i].trackNumber === trackNumber) {
             return bindings[i];
         }
@@ -197,12 +197,21 @@ export function generatePreviewNotes(numTracks: number): Note[][] {
     for (let i = 0; i < numTracks; i++) {
         let track: Note[] = [];
         if (isHold) {
-            track.push({type: NoteType.HOLD_HEAD, typeString: "Don't Care", timeInSeconds: currentTime,
-                state: NoteState.DEFAULT});
-            track.push({type: NoteType.TAIL, typeString: "Don't Care", timeInSeconds: currentTime + 0.25,
-                state: NoteState.DEFAULT});
+            track.push({
+                type: NoteType.HOLD_HEAD, typeString: "Don't Care", timeInSeconds: currentTime,
+                state: NoteState.DEFAULT
+            });
+            track.push({
+                type: NoteType.TAIL, typeString: "Don't Care", timeInSeconds: currentTime + 0.25,
+                state: NoteState.DEFAULT
+            });
         } else {
-            track.push({type: NoteType.NORMAL, typeString: "Don't Care", timeInSeconds: currentTime,state: NoteState.DEFAULT});
+            track.push({
+                type: NoteType.NORMAL,
+                typeString: "Don't Care",
+                timeInSeconds: currentTime,
+                state: NoteState.DEFAULT
+            });
         }
         notes.push(track);
         isHold = !isHold;

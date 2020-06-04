@@ -15,6 +15,7 @@ export class AccuracyFeedbackParticles {
     private static particlesLifetimeInSeconds: number = 1.5;
     private particleSettings: [number, number, number, number][];
     private particleSystems: ParticleSystem[];
+    private gravityDirection: number;
 
     constructor(config: Config, displayManager: DisplayManager, numTracks: number) {
         this.config = config;
@@ -35,8 +36,8 @@ export class AccuracyFeedbackParticles {
         }
 
         let p: p5 = global.p5Scene.sketchInstance;
-        let gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
-        let gravity: p5.Vector = p.createVector(0, 2000 * gravityDirection);
+        this.gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
+        let gravity: p5.Vector = p.createVector(0, 2000 * this.gravityDirection);
         this.particleSystems = [];
         for (let i = 0; i < this.numTracks; i++) {
             this.particleSystems.push(new ParticleSystem(AccuracyFeedbackParticles.particlesLifetimeInSeconds, gravity));
@@ -59,7 +60,7 @@ export class AccuracyFeedbackParticles {
             let receptorTimePosition = accuracyEvent.timeInSeconds - accuracyEvent.accuracyMillis / 1000;
             let initialPosition = this.getInitialPosition(p, accuracyEvent.trackNumber, this.numTracks,
                 receptorTimePosition);
-            let initialVelocity = p.createVector(0, -500);
+            let initialVelocity = p.createVector(0, -500 * this.gravityDirection);
             let particleSettings: {color: p5.Color, numParticles: number } = this.getParticleSettings(accuracyEvent);
             this.particleSystems[accuracyEvent.trackNumber].addRandomizedParticles(initialPosition, initialVelocity,
                 accuracyEvent.timeInSeconds, particleSettings.numParticles, particleSettings.color);

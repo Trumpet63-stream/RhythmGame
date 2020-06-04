@@ -90,24 +90,33 @@ class Receptor {
     }
 }
 
-/* A set of options that intersect with the user Config, but are expected to be changed during play */
-export class DisplayConfig {
-    public noteSize: number;
-    public pixelsPerSecond: number;
-    public receptorYPercent: number;
-    public scrollDirection: ScrollDirection;
-    public receptorSizes: number[];
+// export class DisplayConfig {
+//     public noteSize: number;
+//     public pixelsPerSecond: number;
+//     public receptorYPercent: number;
+//     public scrollDirection: ScrollDirection;
+//     public receptorSizes: number[];
+//
+//     constructor(config: Config, numTracks: number) {
+//         this.noteSize = config.noteSize;
+//         this.pixelsPerSecond = config.pixelsPerSecond;
+//         this.receptorYPercent = config.receptorYPercent;
+//         this.scrollDirection = config.scrollDirection;
+//         this.receptorSizes = [];
+//         for (let i = 0; i < numTracks; i++) {
+//             this.receptorSizes.push(config.noteSize);
+//         }
+//     }
+// }
 
-    constructor(config: Config, numTracks: number) {
-        this.noteSize = config.noteSize;
-        this.pixelsPerSecond = config.pixelsPerSecond;
-        this.receptorYPercent = config.receptorYPercent;
-        this.scrollDirection = config.scrollDirection;
-        this.receptorSizes = [];
-        for (let i = 0; i < numTracks; i++) {
-            this.receptorSizes.push(config.noteSize);
-        }
-    }
+/* A set of options that intersect with the user Config, but are expected to be changed during play */
+export interface DisplayConfig {
+    getNoteSize: () => number;
+    getPixelsPerSecond: () => number;
+    getReceptorYPercent: () => number;
+    getScrollDirection: () => ScrollDirection;
+    getReceptorSizes: () => number[];
+    setReceptorSize: (trackNumber: number, receptorSize: number) => void;
 }
 
 export class DisplayManager {
@@ -170,30 +179,30 @@ export class DisplayManager {
         if (note.state == NoteState.DEFAULT) {
             let x = this.getNoteCenterX(trackNumber, numTracks);
             let y = this.getNoteCenterY(note.timeInSeconds, currentTime);
-            new NoteDisplay(x, y, note.type, this.sketchInstance, this.displayConfig.noteSize, trackNumber, numTracks).draw();
+            new NoteDisplay(x, y, note.type, this.sketchInstance, this.displayConfig.getNoteSize(), trackNumber, numTracks).draw();
         }
     }
 
     private getLeastTime(currentTime: number) {
-        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.pixelsPerSecond;
-        return currentTime - this.displayConfig.receptorYPercent / 100 * totalDisplaySeconds;
+        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.getPixelsPerSecond();
+        return currentTime - this.displayConfig.getReceptorYPercent() / 100 * totalDisplaySeconds;
     }
 
     private getGreatestTime(currentTime: number) {
-        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.pixelsPerSecond;
-        return currentTime + (1 - this.displayConfig.receptorYPercent / 100) * totalDisplaySeconds;
+        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.getPixelsPerSecond();
+        return currentTime + (1 - this.displayConfig.getReceptorYPercent() / 100) * totalDisplaySeconds;
     }
 
     public getNoteCenterX(trackNumber: number, numTracks: number) {
-        let receptorSpacing = this.getDisplayWidth() / numTracks - this.displayConfig.noteSize;
-        return (2 * trackNumber + 1) / 2 * (this.displayConfig.noteSize + receptorSpacing) + this.topLeftX;
+        let receptorSpacing = this.getDisplayWidth() / numTracks - this.displayConfig.getNoteSize();
+        return (2 * trackNumber + 1) / 2 * (this.displayConfig.getNoteSize() + receptorSpacing) + this.topLeftX;
     }
 
     // This essentially defines a conversion from seconds to pixels
     public getNoteCenterY(noteTimeInSeconds: number, currentTimeInSeconds: number) {
-        let noteYOffset = this.displayConfig.pixelsPerSecond * (noteTimeInSeconds - currentTimeInSeconds);
-        let receptorYOffset = this.displayConfig.receptorYPercent / 100 * this.getDisplayHeight();
-        if (this.displayConfig.scrollDirection == ScrollDirection.Up) {
+        let noteYOffset = this.displayConfig.getPixelsPerSecond() * (noteTimeInSeconds - currentTimeInSeconds);
+        let receptorYOffset = this.displayConfig.getReceptorYPercent() / 100 * this.getDisplayHeight();
+        if (this.displayConfig.getScrollDirection() == ScrollDirection.Up) {
             return receptorYOffset + noteYOffset + this.topLeftY;
         } else {
             return this.getDisplayHeight() - (receptorYOffset + noteYOffset) + this.topLeftY;
@@ -293,7 +302,7 @@ export class DisplayManager {
         let numTracks = this.noteManager.tracks.length;
         for (let i = 0; i < numTracks; i++) {
             new Receptor(this.getNoteCenterX(i, numTracks), this.getNoteCenterY(this.currentTimeInSeconds, this.currentTimeInSeconds),
-                this.sketchInstance, this.displayConfig.receptorSizes[i], i, numTracks).draw();
+                this.sketchInstance, this.displayConfig.getReceptorSizes()[i], i, numTracks).draw();
         }
     }
 }

@@ -99,7 +99,7 @@ export abstract class Options {
         }
 
         let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (ms)", "additionalOffsetInSecondsInput",
-            global.config.additionalOffsetInSeconds.toString(), Options.OPTIONS_CLASS);
+            (global.config.additionalOffsetInSeconds * 1000).toString(), Options.OPTIONS_CLASS);
         setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
             let value: string | number = additionalOffsetInSecondsInput.element.value();
             if (typeof value === "string") {

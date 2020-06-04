@@ -26,11 +26,11 @@ export class ReceptorShrinkReaction {
     }
 
     public draw() {
-        let receptorSizes = this.displayConfig.receptorSizes;
+        let numReceptors = this.displayConfig.getReceptorSizes().length;
         let shrink = 0.7;
-        for (let i = 0; i < receptorSizes.length; i++) {
+        for (let i = 0; i < numReceptors; i++) {
             let sizeRatio = this.isTrackHeld(i) ? shrink : 1.0;
-            receptorSizes[i] = this.config.noteSize * sizeRatio;
+            this.displayConfig.setReceptorSize(i, this.config.noteSize * sizeRatio);
         }
     }
 

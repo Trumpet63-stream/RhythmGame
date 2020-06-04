@@ -13,13 +13,14 @@ export class HoldParticles {
     private static particlesLifetimeInSeconds: number = 1.5;
     private static dontDrawFlag: number = -1;
     private static particlePeriodInSeconds: number = 0.05;
+    private gravityDirection: number
 
     constructor(config: Config, numTracks: number, displayManager: DisplayManager) {
         this.numTracks = numTracks;
         this.displayManager = displayManager;
         let p: p5 = global.p5Scene.sketchInstance;
-        let gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
-        let gravity: p5.Vector = p.createVector(0, 2000 * gravityDirection);
+        this.gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
+        let gravity: p5.Vector = p.createVector(0, 2000 * this.gravityDirection);
 
         this.particleSystems = [];
         for (let i = 0; i < numTracks; i++) {
@@ -46,7 +47,7 @@ export class HoldParticles {
                 let newTimestamp = this.previousParticleTimestamps[trackNumber] + HoldParticles.particlePeriodInSeconds;
                 let receptorTimePosition = currentTimeInSeconds;
                 let initialPosition = this.getInitialPosition(p, trackNumber, this.numTracks, receptorTimePosition);
-                let initialVelocity = p.createVector(0, -500);
+                let initialVelocity = p.createVector(0, -500 * this.gravityDirection);
                 this.particleSystems[trackNumber].addRandomizedParticles(initialPosition, initialVelocity, newTimestamp,
                     1, p.color(0, 255, 0, 150));
                 this.previousParticleTimestamps[trackNumber] = newTimestamp;

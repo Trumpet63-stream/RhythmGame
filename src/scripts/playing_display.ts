@@ -27,6 +27,7 @@ import {AccuracyFeedbackFlash} from "./accuracy_feedback_flash";
 import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
 import {HoldParticles} from "./hold_particles";
 import {HoldGlow} from "./hold_glow";
+import {ScrollDirection} from "./scroll_direction";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -68,7 +69,7 @@ export class PlayingDisplay {
         let height = 480;
         let topLeftX = (this.scene.sketchInstance.width - width) / 2;
         let topLeftY = (this.scene.sketchInstance.height - height) / 2;
-        this.displayConfig = new DisplayConfig(this.config, numTracks);
+        this.displayConfig = new PlayingConfig(this.config, numTracks);
         this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
             topLeftX, topLeftY, width, height);
 
@@ -208,5 +209,48 @@ export class PlayingDisplay {
         if (this.config.isHoldParticlesEnabled) {
             this.holdParticles.unholdTrack.call(this.holdParticles, trackNumber, currentTimeInSeconds);
         }
+    }
+}
+
+class PlayingConfig implements DisplayConfig {
+    public noteSize: number;
+    public pixelsPerSecond: number;
+    public receptorYPercent: number;
+    public scrollDirection: ScrollDirection;
+    public receptorSizes: number[];
+
+    constructor(config: Config, numTracks: number) {
+        this.noteSize = config.noteSize;
+        this.pixelsPerSecond = config.pixelsPerSecond;
+        this.receptorYPercent = config.receptorYPercent;
+        this.scrollDirection = config.scrollDirection;
+        this.receptorSizes = [];
+        for (let i = 0; i < numTracks; i++) {
+            this.receptorSizes.push(config.noteSize);
+        }
+    }
+
+    getNoteSize(): number {
+        return this.noteSize;
+    }
+
+    getPixelsPerSecond(): number {
+        return this.pixelsPerSecond;
+    }
+
+    getReceptorSizes(): number[] {
+        return this.receptorSizes;
+    }
+
+    getReceptorYPercent(): number {
+        return this.receptorYPercent;
+    }
+
+    getScrollDirection(): ScrollDirection {
+        return this.scrollDirection;
+    }
+
+    setReceptorSize(trackNumber: number, receptorSize: number): void {
+        this.receptorSizes[trackNumber] = receptorSize;
     }
 }

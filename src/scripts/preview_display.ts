@@ -22,7 +22,7 @@ export class PreviewDisplay {
         this.scene = scene;
         this.noteManager = new NoteManager(tracks);
         this.scrollManager = new ScrollManager(this.config, this.scene.sketchInstance, this.getBounds());
-        this.displayConfig = new DisplayConfig(this.config, this.noteManager.tracks.length);
+        this.displayConfig = this.getDisplayConfig(this.config, this.noteManager.tracks.length);
         this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
             this.topLeftX, this.topLeftY, this.width, this.height);
     }
@@ -33,5 +33,31 @@ export class PreviewDisplay {
 
     private getBounds() {
         return {topLeftX: this.topLeftX, topLeftY: this.topLeftY, width: this.width, height: this.height};
+    }
+
+    private getDisplayConfig(config: Config, numTracks: number): DisplayConfig {
+        let receptorSizes: number[] = [];
+        for (let i = 0; i < numTracks; i++) {
+            receptorSizes.push(config.noteSize);
+        }
+
+        return {
+            getNoteSize: () => {
+                return config.noteSize;
+            },
+            getPixelsPerSecond: () => {
+                return config.pixelsPerSecond;
+            },
+            getReceptorYPercent: () => {
+                return config.receptorYPercent;
+            },
+            getScrollDirection: () => {
+                return config.scrollDirection;
+            },
+            getReceptorSizes: () => {
+                return receptorSizes;
+            },
+            setReceptorSize: (trackNumber: number, receptorSize: number) => {}
+        };
     }
 }
