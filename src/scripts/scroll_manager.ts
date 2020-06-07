@@ -31,6 +31,8 @@ export class ScrollManager implements GameTimeProvider {
                 } else {
                     this.systemTimeMillis += timeChangeMillis;
                 }
+                // Equivalent to event.preventDefault
+                return false;
             }
         }.bind(this);
     }

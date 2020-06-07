@@ -21,6 +21,8 @@ export class KeyboardEventManager {
                     }
                 }
             }
+            // Equivalent to event.preventDefault
+            return false;
         }.bind(this);
 
         p.keyReleased = function() {
@@ -30,6 +32,8 @@ export class KeyboardEventManager {
                     actions.keyUpAction();
                 }
             }
+            // Equivalent to event.preventDefault
+            return false;
         }.bind(this);
     }
 
