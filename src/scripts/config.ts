@@ -68,29 +68,38 @@ export class Config {
     }
 
     public save() {
-        // let expires = this.getDateOfOneYearFromNow();
-        // let path = '/';
-        // let cookieString = escape(JSON.stringify(this))
-        //     + ';path=' + path
-        //     + ';expires=' + expires.toUTCString();
-        // document.cookie = cookieString;
-        // console.log("Config saved to cookie!");
-        // console.log(document.cookie);
+        let configString = this.getConfigAsString();
+        let expires = this.getDateOfOneYearFromNow();
+        let path = '/';
+        let cookieString = "config=" + escape(configString)
+            + ';path=' + path
+            + ';expires=' + expires.toUTCString();
+        console.log(cookieString);
+        document.cookie = cookieString;
+        console.log("Config saved to cookie!");
+    }
+
+    private getConfigAsString() {
+        let string: string = JSON.stringify(this);
+        string = string.replace(',"keyBindings":{},',
+            ',"keyBindings":' + this.stringifyKeyBindings() + ',');
+        return string;
     }
 
     public static load(): Config {
-        // let cookie: string[] = document.cookie.split(';');
-        // if (cookie[0]) {
-        //     try {
-        //         let cookieString: string = unescape(cookie[0]);
-        //         let config: Config = JSON.parse(cookieString);
-        //         console.log("Config loaded from cookie!");
-        //         console.log(config);
-        //         return config;
-        //     } catch (e) {}
-        // }
-        // console.log(cookie);
-        // console.log("No valid cookie found, returning default config!");
+        let configCookie = Config.getFromCookie("config");
+        console.log(configCookie);
+        if (configCookie !== null) {
+            try {
+                let configJSON = JSON.parse(unescape(configCookie));
+                configJSON.keyBindings = new Map(configJSON.keyBindings);
+                let config: Config = new Config(configJSON);
+                console.log("Config loaded from cookie!");
+                console.log(config);
+                return config;
+            } catch(e) {}
+        }
+        console.log("No valid cookie found, returning default config!");
         return new Config({});
     }
 
@@ -98,5 +107,25 @@ export class Config {
         let date = new Date();
         date.setFullYear(date.getFullYear() + 1);
         return date;
+    }
+
+    private stringifyKeyBindings(): string {
+        let string = "[";
+        this.keyBindings.forEach((value: KeyBinding[], key: number) => {
+            string += "["+ key + "," + JSON.stringify(value) +"]";
+        })
+        string += "]";
+        return string;
+    }
+
+    private static getFromCookie(key: string): string {
+        try {
+            return document.cookie
+                .split("; ")
+                .find(row => row.startsWith(key))
+                .split("=")[1];
+        } catch (e) {
+            return null;
+        }
     }
 }

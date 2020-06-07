@@ -74,11 +74,13 @@ export function initializeKeyBindings(numTracks: number) {
     }
 
     global.config.keyBindings.set(numTracks, mapping);
+    global.config.save();
 }
 
 export function setConfigKeyBinding(trackNumber: number, numTracks: number, keyBinding: KeyBinding) {
     let bindingIndex = getIndexOfTrackNumberBinding(trackNumber, global.config.keyBindings.get(numTracks));
     global.config.keyBindings.get(numTracks)[bindingIndex] = keyBinding;
+    global.config.save();
 }
 
 // Expects e to be an enum
