@@ -164,9 +164,12 @@ export function createKeyBindingInput(trackNumber: number, numTracks: number, cu
         setButton.id(setButtonId);
         setButton.mousePressed(() => {
             global.keyboardEventManager.bindKeyToAction(-1, () => {
-                setConfigKeyBinding(trackNumber, numTracks,
-                    {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)});
-                global.keyboardEventManager.unbindKey(-1);
+                // Ignore this code because it's used to indicate input that's not yet finished processing
+                if (p.keyCode !== 229) {
+                    setConfigKeyBinding(trackNumber, numTracks,
+                        {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)});
+                    global.keyboardEventManager.unbindKey(-1);
+                }
             });
         });
         setButton.addClass(customClass);

@@ -255,7 +255,10 @@ export abstract class Options {
 
                 // Bind this action to the "-1" key so that it happens on any key press
                 global.keyboardEventManager.bindKeyToAction(-1, () => {
-                    keybindingHelper.bindNext(p);
+                    // Ignore this code because it's used to indicate input that's not yet finished processing
+                    if (p.keyCode !== 229) {
+                        keybindingHelper.bindNext(p);
+                    }
                 });
             });
 
