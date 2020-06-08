@@ -143,6 +143,10 @@ button.keybindings-quickstart {
     width: 100%;
 }
 
+button.reset-config {
+    width: 100%;
+}
+
 textarea.labeled-textarea {
     color: white;
     border: 2px solid #a0cd73;

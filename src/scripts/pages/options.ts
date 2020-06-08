@@ -15,6 +15,7 @@ import {generatePreviewNotes, getKeyBindingContainerId, initializeKeyBindings, i
 import {Accuracy} from "../accuracy_manager";
 import {PreviewDisplay} from "../preview_display";
 import {DOMWrapper} from "../dom_wrapper";
+import {Config} from "../config";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -35,6 +36,22 @@ export abstract class Options {
         // @ts-ignore
         let canvasPosition: { x: number, y: number } = p._renderer.position();
         scrollDiv.element.position(canvasPosition.x + 335, canvasPosition.y + 45);
+
+        let resetConfigButton = DOMWrapper.create(() => {
+            return p.createButton("Reset To Default");
+        }, "resetConfigButton");
+        if (!resetConfigButton.alreadyExists) {
+            resetConfigButton.element.addClass(Options.OPTIONS_CLASS);
+            resetConfigButton.element.addClass("reset-config");
+            resetConfigButton.element.addClass(global.globalClass);
+
+            resetConfigButton.element.mousePressed(() => {
+                global.config = new Config({});
+                global.config.save();
+            });
+
+            scrollDiv.element.child(resetConfigButton.element);
+        }
 
         let pauseAtStartInSecondsInput = createLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
             global.config.pauseAtStartInSeconds.toString(), Options.OPTIONS_CLASS);

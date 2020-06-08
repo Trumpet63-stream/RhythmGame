@@ -5,7 +5,6 @@ import {Config} from "./config";
 import {NoteManager} from "./note_manager";
 import {AccuracyRecording} from "./accuracy_recording";
 
-//TODO: take holds and releases into account
 export class ResultsDisplay {
     private config: Config;
     private noteManager: NoteManager;
@@ -36,7 +35,7 @@ export class ResultsDisplay {
         let leftLabelHeight = 0.8 * barHeight;
         let accuracyListForResults = this.getResultsAccuracyList(accuracySettings);
         drawAccuracyBars(p, accuracyListForResults, accuracyRecording, centerX, centerY, leftLabelHeight, barWidth,
-            barHeight, noteManager, accuracyManager);
+            barHeight, noteManager, accuracyManager, accuracyManager.isConfiguredForBoos());
     }
 
     // return a list of unique accuracies sorted by the offset, with the best accuracy being first

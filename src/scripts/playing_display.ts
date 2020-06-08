@@ -159,6 +159,7 @@ export class PlayingDisplay {
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
             this.scene.sketchInstance, this.accuracyRecording);
         PageManager.setCurrentScene(PAGES.RESULTS);
+        this.unbindKeys();
     }
 
     private bindKeyBindingsToActions() {
@@ -208,6 +209,14 @@ export class PlayingDisplay {
         }
         if (this.config.isHoldParticlesEnabled) {
             this.holdParticles.unholdTrack.call(this.holdParticles, trackNumber, currentTimeInSeconds);
+        }
+    }
+
+    private unbindKeys() {
+        let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
+        for (let i = 0; i < keyBindings.length; i++) {
+            let keyBinding: KeyBinding = keyBindings[i];
+            global.keyboardEventManager.unbindKey(keyBinding.keyCode);
         }
     }
 }

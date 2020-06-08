@@ -12,17 +12,19 @@ export class KeyboardEventManager {
             if (globalActions !== undefined) {
                 if (globalActions.keyDownAction !== undefined) {
                     globalActions.keyDownAction();
+                    // Equivalent to event.preventDefault
+                    return false;
                 }
             } else {
                 let actions = this.actionBindings.get(p.keyCode);
                 if (actions !== undefined) {
                     if (actions.keyDownAction !== undefined) {
                         actions.keyDownAction();
+                        // Equivalent to event.preventDefault
+                        return false;
                     }
                 }
             }
-            // Equivalent to event.preventDefault
-            return false;
         }.bind(this);
 
         p.keyReleased = function() {
@@ -30,10 +32,10 @@ export class KeyboardEventManager {
             if (actions !== undefined) {
                 if (actions.keyUpAction !== undefined) {
                     actions.keyUpAction();
+                    // Equivalent to event.preventDefault
+                    return false;
                 }
             }
-            // Equivalent to event.preventDefault
-            return false;
         }.bind(this);
     }
 

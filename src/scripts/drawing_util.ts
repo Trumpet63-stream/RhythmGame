@@ -8,18 +8,27 @@ import {getAccuracyEventName} from "./util";
 export function drawAccuracyBars(p: p5, accuracyLabels: string[],
                                  accuracyRecording: AccuracyRecording,
                                  centerX: number, centerY: number, textSize: number, barWidth: number,
-                                 barHeight: number, noteManager: NoteManager, accuracyManager: AccuracyManager) {
+                                 barHeight: number, noteManager: NoteManager, accuracyManager: AccuracyManager,
+                                 isBooForLastAccuracy: boolean) {
     let maxTextWidth = getMaxTextWidth(p, accuracyLabels, textSize);
     let totalNotes = noteManager.getTotalNotes();
     let barSpacing = 10;
     let totalHeight = accuracyLabels.length * barHeight + (accuracyLabels.length - 1) * barSpacing;
     let startY = (p.height - totalHeight) / 2 + barHeight / 2;
     startY *= 0.8; // shift the results up to make room for exit button
+
     for (let i = 0; i < accuracyLabels.length; i++) {
         let accuracyLabel = accuracyLabels[i];
         let numAccuracyEvents = getNumAccuracyEvents(accuracyLabel, accuracyRecording, accuracyManager);
         let percentFilled = numAccuracyEvents / totalNotes;
-        drawAccuracyBar(p, centerX, startY + i * (barHeight + barSpacing), accuracyLabel, numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+
+        if (isBooForLastAccuracy && i === accuracyLabels.length - 1) {
+            drawAccuracyWithNoBar(p, centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
+                numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+        } else {
+            drawAccuracyBar(p, centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
+                numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+        }
     }
 }
 
@@ -39,7 +48,7 @@ function getMaxTextWidth(p: p5, textArray: string[], textSize: number) {
     return maxTextWidth;
 }
 
-export function drawAccuracyBar(p: p5, centerX: number, centerY: number, label1: string, label2: string, label3: string,
+function drawAccuracyBar(p: p5, centerX: number, centerY: number, label1: string, label2: string, label3: string,
                                 textSize: number, largestTextWidth: number, barWidth: number, barHeight: number,
                                 percentFilled: number) {
     let spacingBetweenBarAndLabel = 8;
@@ -53,7 +62,7 @@ export function drawAccuracyBar(p: p5, centerX: number, centerY: number, label1:
     drawPartiallyFilledBar(p, barCenterX, centerY, barWidth, barHeight, percentFilled, textSize, label2, label3);
 }
 
-export function drawRightAlignedLabel(p: p5, rightmostX: number, centerY: number, text: string, textSize: number) {
+function drawRightAlignedLabel(p: p5, rightmostX: number, centerY: number, text: string, textSize: number) {
     p.push();
     p.fill("white");
     p.textSize(textSize);
@@ -62,7 +71,7 @@ export function drawRightAlignedLabel(p: p5, rightmostX: number, centerY: number
     p.pop();
 }
 
-export function drawPartiallyFilledBar(p: p5, centerX: number, centerY: number, width: number, height: number,
+function drawPartiallyFilledBar(p: p5, centerX: number, centerY: number, width: number, height: number,
                                        percentFilled: number, textSize: number, startLabel: string, endLabel: string) {
     p.push();
     p.rectMode(p.CENTER);
@@ -84,5 +93,26 @@ export function drawPartiallyFilledBar(p: p5, centerX: number, centerY: number, 
     p.text(startLabel, centerX - width / 2, centerY + 2);
     p.textAlign(p.RIGHT, p.CENTER);
     p.text(endLabel, centerX + width / 2, centerY + 2);
+    p.pop();
+}
+
+function drawAccuracyWithNoBar(p: p5, centerX: number, centerY: number, label1: string, label2: string, label3: string,
+                         textSize: number, largestTextWidth: number, barWidth: number, barHeight: number,
+                         percentFilled: number) {
+    let spacingBetweenBarAndLabel = 8;
+    let totalWidth = largestTextWidth + spacingBetweenBarAndLabel + barWidth;
+    let labelRightmostX = centerX - totalWidth / 2 + largestTextWidth;
+    drawRightAlignedLabel(p, labelRightmostX, centerY, label1, textSize);
+
+    // draw the accuracy count label on the left end of the bar
+    let labelSize = 1.5 * textSize;
+    let barRightX = centerX + totalWidth / 2;
+    let barLeftX = barRightX - barWidth;
+    let barCenterX = (barLeftX + barRightX) / 2;
+    p.push();
+    p.fill("white");
+    p.textSize(labelSize);
+    p.textAlign(p.LEFT, p.CENTER);
+    p.text(label2, barCenterX - barWidth / 2, centerY + 2);
     p.pop();
 }
