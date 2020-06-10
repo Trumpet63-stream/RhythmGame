@@ -71,6 +71,10 @@ div.keybinding-input {
     background: rgba(41, 56, 78, 0.9);
 }
 
+div.play-from-online {
+    width: 600px;
+}
+
 label.labeled-input {
     margin-right: 50px;
     display: inline-block;
@@ -113,6 +117,10 @@ input.labeled-input {
     border: none;
     border-bottom: 3px solid #a0cd73;
     background: rgba(11, 34, 56, 0.0);
+}
+
+input.play-from-online {
+    width: 250px;
 }
 
 select.labeled-select {

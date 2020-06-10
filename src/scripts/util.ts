@@ -167,8 +167,8 @@ function difficultyRank(difficulty: string) {
     }
 }
 
-export function getFirstElementByTagName(div: p5.Element, tagName: string): p5.Element {
-    let childrenNodes = div.child();
+export function getFirstElementByTagName(parent: p5.Element, tagName: string): p5.Element {
+    let childrenNodes = parent.child();
     for (let i = 0; i < childrenNodes.length; i++) {
         let node: Node = childrenNodes[i];
         // @ts-ignore

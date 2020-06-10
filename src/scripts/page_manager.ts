@@ -29,7 +29,6 @@ export abstract class PageManager {
     }
 
     public static draw() {
-        console.log(this.currentScene);
         switch (this.currentScene) {
             case PAGES.PLAY_FROM_FILE:
                 PlayFromFile.draw();
@@ -48,8 +47,9 @@ export abstract class PageManager {
                 break;
             case PAGES.PLAY_FROM_ONLINE:
                 PlayFromOnline.draw();
+                break;
             default:
-                throw new Error("Unexpected scene: " + global.currentScene);
+                throw new Error("Unexpected scene: " + this.currentScene);
         }
     }
 }

@@ -1,6 +1,5 @@
 import * as p5 from "p5";
 import {FullParse, getFullParse, getPartialParse, Note, NoteState, NoteType, PartialParse} from "./parsing";
-import {parseSwf} from "./parse_swf";
 
 export enum StepfileState {
     NO_SIMFILE,

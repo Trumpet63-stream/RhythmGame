@@ -351,7 +351,11 @@ var swf_write_buffer = null;
 // This isn't normally declared here
 var chartPreview = true;
 
-export function parseSwf(inputFile: File) {
+export function parseSwf(input: File | ArrayBuffer) {
+    if (input.constructor === ArrayBuffer) {
+        return swfFile_Ready(<ArrayBuffer> input);
+    }
+    input = <File> input;
     var reader = new FileReader();
     reader.onload = function(event) {
         swfFile_Ready(event.target.result);
@@ -359,7 +363,7 @@ export function parseSwf(inputFile: File) {
     reader.onerror = function(event) {
         alert("I AM ERROR: " + event.target.error.code);
     };
-    reader.readAsArrayBuffer(inputFile);
+    reader.readAsArrayBuffer(input);
 }
 
 function swfFile_Ready(array_buffer) {

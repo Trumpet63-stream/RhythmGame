@@ -1,6 +1,12 @@
 import {global} from "../index";
 import * as p5 from "p5";
-import {createFileInput, drawHeading, setElementCenterPositionRelative} from "../ui_util";
+import {
+    createFileInput,
+    createLabeledInput,
+    drawHeading,
+    setElementCenterPositionRelative,
+    setOnInputUnlessItAlreadyExists
+} from "../ui_util";
 import {StepfileState} from "../stepfile";
 import {parseSwf} from "../parse_swf";
 import {DOMWrapper} from "../dom_wrapper";
@@ -15,9 +21,26 @@ export abstract class PlayFromOnline {
         let p: p5 = global.p5Scene.sketchInstance;
         p.background(global.playFromFileBackground);
 
-        let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Level (.swf)", "stepfileInput",
-            loadSwf, PlayFromOnline.PLAY_FROM_ONLINE_CLASS).element;
-        setElementCenterPositionRelative(stepfileInput, 0.43, 0.5, 268, 34);
+        let urlInput = createLabeledInput("Engine URL", "urlInput", "",
+            PlayFromOnline.PLAY_FROM_ONLINE_CLASS);
+        // @ts-ignore
+        let urlInputDiv = new p5.Element(urlInput.element.parent());
+        setElementCenterPositionRelative(urlInputDiv, 0.50, 0.5, 600, 38);
+
+        let loadButton = DOMWrapper.create(() => {
+            return p.createButton("Load");
+        }, "loadButton");
+        setElementCenterPositionRelative(loadButton.element, 0.85, 0.505, 62, 33);
+        if (!loadButton.alreadyExists) {
+            loadButton.element.addClass(global.globalClass);
+            loadButton.element.addClass(PlayFromOnline.PLAY_FROM_ONLINE_CLASS);
+            loadButton.element.mouseClicked(() => {
+                let value: string | number = urlInput.element.value();
+                if (typeof value === "string") {
+                    global.onlinePlaylist.kickOffLoadPlaylist(value);
+                }
+            });
+        }
 
         let playButtonId = "playButton";
         if (isFilesReady()) {

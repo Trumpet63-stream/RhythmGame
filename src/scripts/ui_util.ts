@@ -77,7 +77,6 @@ export function setElementCenterPositionRelative(element: p5.Element, relativeX:
 export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string, customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
-    let input: p5.Element;
     let container = DOMWrapper.create(() => {
         let labeledInputClass = "labeled-input";
         let container: p5.Element = p.createDiv();
@@ -91,7 +90,7 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
         label.addClass(global.globalClass);
         label.parent(container);
 
-        input = p.createInput(inputInitialValue);
+        let input = p.createInput(inputInitialValue);
         input.addClass(customClass);
         input.addClass(labeledInputClass);
         input.addClass(global.globalClass);
@@ -100,6 +99,8 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
 
         return container;
     }, inputId + "Container");
+
+    let input = getFirstElementByTagName(container.element, "INPUT");
 
     return {element: input, alreadyExists: container.alreadyExists};
 }
@@ -278,4 +279,11 @@ export function createFileInput(labelString: string, buttonText: string, uniqueI
     label.html(labelString);
 
     return container;
+}
+
+export function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
+    if (!inputElement.alreadyExists) {
+        // @ts-ignore
+        inputElement.element.input(onInput);
+    }
 }

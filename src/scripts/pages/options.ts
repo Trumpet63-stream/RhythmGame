@@ -3,7 +3,7 @@ import {ScrollDirection} from "../scroll_direction";
 import {KeyBindingHelper} from "../key_binding_helper";
 import {
     createKeyBindingInput, createLabeledInput, createLabeledSelect, createLabeledTextArea,
-    drawHeading
+    drawHeading, setOnInputUnlessItAlreadyExists
 } from "../ui_util";
 import {global} from "../index";
 import {
@@ -199,13 +199,6 @@ function createKeyBindingsSectionHeader(): { element: p5.Element, alreadyExists:
     }, "keyBindingsSectionHeader");
 
     return container;
-}
-
-function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
-    if (!inputElement.alreadyExists) {
-        // @ts-ignore
-        inputElement.element.input(onInput);
-    }
 }
 
 function removeOldBindingButtons(numTracks: number) {
