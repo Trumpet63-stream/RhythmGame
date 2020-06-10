@@ -19,7 +19,7 @@ export function drawHeading() {
     let playFromFileButton = DOMWrapper.create(() => {
         return p.createButton("Play From File");
     }, "playFromFileButton");
-    setElementCenterPositionRelative(playFromFileButton.element, 0.2, 0.036, 130, 34);
+    setElementCenterPositionRelative(playFromFileButton.element, 0.15, 0.036, 130, 34);
     playFromFileButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
     });
@@ -28,22 +28,34 @@ export function drawHeading() {
         playFromFileButton.element.addClass(global.globalClass);
     }
 
-    let FFRButton = DOMWrapper.create(() => {
-        return p.createButton("Play From FFR");
-    }, "FFRButton");
-    setElementCenterPositionRelative(FFRButton.element, 0.5, 0.036, 90, 34);
-    FFRButton.element.mousePressed(() => {
+    let swfButton = DOMWrapper.create(() => {
+        return p.createButton("Play From SWF");
+    }, "swfButton");
+    setElementCenterPositionRelative(swfButton.element, 0.35, 0.036, 90, 34);
+    swfButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PLAY_FROM_SWF);
     });
-    if (!FFRButton.alreadyExists) {
-        FFRButton.element.addClass(headingClass);
-        FFRButton.element.addClass(global.globalClass);
+    if (!swfButton.alreadyExists) {
+        swfButton.element.addClass(headingClass);
+        swfButton.element.addClass(global.globalClass);
+    }
+
+    let onlineButton = DOMWrapper.create(() => {
+        return p.createButton("Play From Online");
+    }, "onlineButton");
+    setElementCenterPositionRelative(onlineButton.element, 0.6, 0.036, 90, 34);
+    onlineButton.element.mousePressed(() => {
+        PageManager.setCurrentScene(PAGES.PLAY_FROM_ONLINE);
+    });
+    if (!onlineButton.alreadyExists) {
+        onlineButton.element.addClass(headingClass);
+        onlineButton.element.addClass(global.globalClass);
     }
 
     let optionsButton = DOMWrapper.create(() => {
         return p.createButton("Options");
     }, "optionsButton");
-    setElementCenterPositionRelative(optionsButton.element, 0.8, 0.036, 90, 34);
+    setElementCenterPositionRelative(optionsButton.element, 0.85, 0.036, 90, 34);
     optionsButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.OPTIONS);
     });

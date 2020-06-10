@@ -5,6 +5,7 @@ import {Play} from "./pages/play";
 import {Results} from "./pages/results";
 import {DOMWrapper} from "./dom_wrapper";
 import {PlayFromSwf} from "./pages/play_from_swf";
+import {PlayFromOnline} from "./pages/play_from_online";
 
 export enum PAGES {
     PLAY_FROM_FILE,
@@ -12,6 +13,7 @@ export enum PAGES {
     PLAY,
     RESULTS,
     PLAY_FROM_SWF,
+    PLAY_FROM_ONLINE,
 }
 
 export abstract class PageManager {
@@ -27,6 +29,7 @@ export abstract class PageManager {
     }
 
     public static draw() {
+        console.log(this.currentScene);
         switch (this.currentScene) {
             case PAGES.PLAY_FROM_FILE:
                 PlayFromFile.draw();
@@ -43,6 +46,8 @@ export abstract class PageManager {
             case PAGES.PLAY_FROM_SWF:
                 PlayFromSwf.draw();
                 break;
+            case PAGES.PLAY_FROM_ONLINE:
+                PlayFromOnline.draw();
             default:
                 throw new Error("Unexpected scene: " + global.currentScene);
         }
