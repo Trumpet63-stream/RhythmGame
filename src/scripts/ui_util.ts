@@ -287,3 +287,44 @@ export function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Elem
         inputElement.element.input(onInput);
     }
 }
+
+// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
+export function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
+    // @ts-ignore
+    const inputs = p.selectAll('input', radioDivP5Element);
+    // @ts-ignore
+    const labels = p.selectAll('label', radioDivP5Element);
+    const len = inputs.length;
+
+    for (let i = 0; i < len; ++i) {
+        p.createDiv().parent(radioDivP5Element).child(inputs[i]).child(labels[i]);
+    }
+}
+
+// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
+export function fixRadioDivElement(radioDivP5Element: p5.Element) {
+    // @ts-ignore
+    radioDivP5Element._getInputChildrenArray = function () {
+        return this.elt.getElementsByTagName('input');
+    }
+}
+
+export function styleRadioOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
+    // @ts-ignore
+    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
+    for(let i = 0; i < divs.length; i++) {
+        divs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        inputs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        labels[i].addClass(styleClasses.join(" "));
+    }
+}

@@ -1,5 +1,10 @@
 import * as p5 from "p5";
-import {drawHeading, setElementCenterPositionRelative, createFileInput} from "../ui_util";
+import {
+    drawHeading,
+    setElementCenterPositionRelative,
+    createFileInput,
+    encloseEachInputLabelPairIntoASubDiv, fixRadioDivElement, styleRadioOptions
+} from "../ui_util";
 import {global} from "../index";
 import {StepfileState} from "../stepfile";
 import {AudioFileState} from "../audio_file";
@@ -53,47 +58,6 @@ export abstract class PlayFromFile {
     }
 }
 
-// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
-function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
-    // @ts-ignore
-    const inputs = p.selectAll('input', radioDivP5Element);
-    // @ts-ignore
-    const labels = p.selectAll('label', radioDivP5Element);
-    const len = inputs.length;
-
-    for (let i = 0; i < len; ++i) {
-        p.createDiv().parent(radioDivP5Element).child(inputs[i]).child(labels[i]);
-    }
-}
-
-// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
-function fixRadioDivElement(radioDivP5Element: p5.Element) {
-    // @ts-ignore
-    radioDivP5Element._getInputChildrenArray = function () {
-        return this.elt.getElementsByTagName('input');
-    }
-}
-
-function styleModeOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
-    // @ts-ignore
-    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
-    for(let i = 0; i < divs.length; i++) {
-        divs[i].addClass(styleClasses.join(" "));
-    }
-
-    // @ts-ignore
-    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
-        inputs[i].addClass(styleClasses.join(" "));
-    }
-
-    // @ts-ignore
-    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
-        labels[i].addClass(styleClasses.join(" "));
-    }
-}
-
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
     if (global.page1ModeOptions === undefined) {
@@ -124,7 +88,7 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
 
         encloseEachInputLabelPairIntoASubDiv(p, modeRadio);
         fixRadioDivElement(modeRadio);
-        styleModeOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
+        styleRadioOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
     }
     setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 302, 120);
     p.pop();

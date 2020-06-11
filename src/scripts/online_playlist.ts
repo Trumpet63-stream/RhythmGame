@@ -26,32 +26,42 @@ class Song {
         song.level = getContentsByTagName(xml, "level");
         return song;
     }
+
+    public toString(): string {
+        return this.songDifficulty + " " + this.songName;
+    }
 }
 
-function getContentsByTagName(xml: Element | Document, tag) {
-    return xml.getElementsByTagName(tag)[0].innerHTML;
+export enum OnlinePlaylistState {
+    NO_PLAYLIST,
+    LOADING,
+    PLAYLIST_READY,
+    ERROR,
 }
 
 export class OnlinePlaylist {
     private indexUrl: string;
     private songUrl: string;
     private playlistUrl: string;
+    private fullPlaylist: Song[];
+    private static DEFAULT_PAGE_SIZE: number = 50;
+    public state: OnlinePlaylistState;
     public playlist: Song[];
 
-    constructor() { }
+    constructor() {
+        this.state = OnlinePlaylistState.NO_PLAYLIST;
+    }
 
     public kickOffLoadPlaylist(indexUrl: string) {
+        this.state = OnlinePlaylistState.LOADING;
         this.indexUrl = indexUrl;
         this.get(this.indexUrl, this.parseIndexAndLoadPlaylist.bind(this));
     }
 
     private parseIndexAndLoadPlaylist(event: ProgressEvent) {
         let playlistMetadata: Document = (<XMLHttpRequest> event.target).responseXML;
-        console.log(playlistMetadata);
         this.songUrl = getContentsByTagName(playlistMetadata, "songURL");
-        console.log(this.songUrl);
         this.playlistUrl = getContentsByTagName(playlistMetadata, "playlistURL");
-        console.log(this.playlistUrl);
         this.get(this.playlistUrl, this.loadPlaylist.bind(this));
     }
 
@@ -63,29 +73,27 @@ export class OnlinePlaylist {
         let text = playlistText.replace(/&/g, '&amp;');
 
         let playlistXml = parser.parseFromString(text, "text/xml");
-        console.log(playlistXml);
         this.parsePlaylist(playlistXml);
-        this.kickOffLoadSong(0);
     }
 
     private parsePlaylist(playlistXml: Document) {
         let songs: HTMLCollection = playlistXml.getElementsByTagName("song");
-        this.playlist = [];
+        this.fullPlaylist = [];
         for (let i = 0; i < songs.length; i++) {
             let songXml: Element = songs.item(i);
             if (i === 0) {
-                console.log(songXml);
             }
             let song: Song = Song.ofXml(songXml);
             if (i === 0) {
-                console.log(song);
             }
-            this.playlist.push(song);
+            this.fullPlaylist.push(song);
         }
+        this.state = OnlinePlaylistState.PLAYLIST_READY;
+        this.setPage(0);
     }
 
-    private kickOffLoadSong(songIndex: number) {
-        let song: Song = this.playlist[songIndex];
+    public kickOffLoadSong(songIndex: number) {
+        let song: Song = this.fullPlaylist[songIndex];
         let level: string = song.level;
         let levelUrl = this.songUrl + "level_" + level + ".swf";
         this.get(levelUrl, this.loadSong.bind(this), "arraybuffer");
@@ -107,4 +115,20 @@ export class OnlinePlaylist {
         }
         request.send();
     }
+
+    public setPage(pageNumber: number, pageSize?: number) {
+        if (pageSize === undefined) {
+            pageSize = OnlinePlaylist.DEFAULT_PAGE_SIZE;
+        }
+        let minIndex = pageNumber * pageSize;
+        let maxIndex = minIndex + pageSize;
+        this.playlist = [];
+        for (let i = minIndex; i < maxIndex; i++) {
+            this.playlist.push(this.fullPlaylist[i]);
+        }
+    }
+}
+
+function getContentsByTagName(xml: Element | Document, tag) {
+    return xml.getElementsByTagName(tag)[0].innerHTML;
 }
