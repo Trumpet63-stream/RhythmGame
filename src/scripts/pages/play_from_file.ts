@@ -1,11 +1,15 @@
 import * as p5 from "p5";
-import {drawHeading, setElementCenterPositionRelative, createFileInput} from "../ui_util";
+import {
+    drawHeading,
+    setElementCenterPositionRelative,
+    createFileInput,
+    encloseEachInputLabelPairIntoASubDiv, fixRadioDivElement, styleRadioOptions
+} from "../ui_util";
 import {global} from "../index";
 import {StepfileState} from "../stepfile";
 import {AudioFileState} from "../audio_file";
-import {getModeOptionsForDisplay} from "../util";
-import {PlayingDisplay} from "../playing_display";
-import {Mode, Note} from "../parsing";
+import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../util";
+import {Mode} from "../parse_sm";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
 
@@ -23,7 +27,7 @@ export abstract class PlayFromFile {
         setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
-            global.audioFile.load.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
+            global.audioFile.loadFile.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
 
         let playButtonId = "playButton";
@@ -59,47 +63,6 @@ function loadStepfileAndUpdateModeOptions(file: p5.File) {
     DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
 }
 
-// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
-function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
-    // @ts-ignore
-    const inputs = p.selectAll('input', radioDivP5Element);
-    // @ts-ignore
-    const labels = p.selectAll('label', radioDivP5Element);
-    const len = inputs.length;
-
-    for (let i = 0; i < len; ++i) {
-        p.createDiv().parent(radioDivP5Element).child(inputs[i]).child(labels[i]);
-    }
-}
-
-// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
-function fixRadioDivElement(radioDivP5Element: p5.Element) {
-    // @ts-ignore
-    radioDivP5Element._getInputChildrenArray = function () {
-        return this.elt.getElementsByTagName('input');
-    }
-}
-
-function styleModeOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
-    // @ts-ignore
-    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
-    for(let i = 0; i < divs.length; i++) {
-        divs[i].addClass(styleClasses.join(" "));
-    }
-
-    // @ts-ignore
-    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
-        inputs[i].addClass(styleClasses.join(" "));
-    }
-
-    // @ts-ignore
-    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
-        labels[i].addClass(styleClasses.join(" "));
-    }
-}
-
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
     if (global.stepfileModeOptions === undefined) {
@@ -130,22 +93,11 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
 
         encloseEachInputLabelPairIntoASubDiv(p, modeRadio);
         fixRadioDivElement(modeRadio);
-        styleModeOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
+        styleRadioOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
     }
     setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 302, 120);
     p.pop();
     return modeRadio;
-}
-
-function isFilesReady() {
-    let stepfileReady = global.stepfile.state === StepfileState.PARTIALLY_PARSED ||
-        global.stepfile.state === StepfileState.FULLY_PARSED;
-    let audioFileReady = global.audioFile.state === AudioFileState.BUFFERED;
-    return stepfileReady && audioFileReady;
-}
-
-function initPlayingDisplay(tracks: Note[][]) {
-    global.playingDisplay = new PlayingDisplay(tracks, global.config, global.p5Scene);
 }
 
 function getSelectedMode(modeRadio: p5.Element) {

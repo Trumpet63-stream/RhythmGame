@@ -4,12 +4,14 @@ import {Options} from "./pages/options";
 import {Play} from "./pages/play";
 import {Results} from "./pages/results";
 import {DOMWrapper} from "./dom_wrapper";
+import {PlayFromOnline} from "./pages/play_from_online";
 
 export enum PAGES {
     PLAY_FROM_FILE,
     OPTIONS,
     PLAY,
     RESULTS,
+    PLAY_FROM_ONLINE,
 }
 
 export abstract class PageManager {
@@ -37,6 +39,9 @@ export abstract class PageManager {
                 break;
             case PAGES.RESULTS:
                 Results.draw();
+                break;
+            case PAGES.PLAY_FROM_ONLINE:
+                PlayFromOnline.draw();
                 break;
             default:
                 throw new Error("Unexpected scene: " + global.currentScene);

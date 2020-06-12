@@ -19,7 +19,7 @@ export function drawHeading() {
     let playFromFileButton = DOMWrapper.create(() => {
         return p.createButton("Play From File");
     }, "playFromFileButton");
-    setElementCenterPositionRelative(playFromFileButton.element, 0.3, 0.036, 130, 34);
+    setElementCenterPositionRelative(playFromFileButton.element, 0.25, 0.036, 130, 34);
     playFromFileButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
     });
@@ -28,10 +28,23 @@ export function drawHeading() {
         playFromFileButton.element.addClass(global.globalClass);
     }
 
+    let playFromOnlineButton = DOMWrapper.create(() => {
+        return p.createButton("Play From Online");
+    }, "playFromOnlineButton");
+    setElementCenterPositionRelative(playFromOnlineButton.element, 0.5, 0.036, 90, 34);
+    playFromOnlineButton.element.mousePressed(() => {
+        PageManager.setCurrentScene(PAGES.PLAY_FROM_ONLINE);
+    });
+    if (!playFromOnlineButton.alreadyExists) {
+        playFromOnlineButton.element.addClass(headingClass);
+        playFromOnlineButton.element.addClass(global.globalClass);
+    }
+
+
     let optionsButton = DOMWrapper.create(() => {
         return p.createButton("Options");
     }, "optionsButton");
-    setElementCenterPositionRelative(optionsButton.element, 0.7, 0.036, 90, 34);
+    setElementCenterPositionRelative(optionsButton.element, 0.8, 0.036, 90, 34);
     optionsButton.element.mousePressed(() => {
         PageManager.setCurrentScene(PAGES.OPTIONS);
     });
@@ -53,7 +66,6 @@ export function setElementCenterPositionRelative(element: p5.Element, relativeX:
 export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string, customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
-    let input: p5.Element;
     let container = DOMWrapper.create(() => {
         let labeledInputClass = "labeled-input";
         let container: p5.Element = p.createDiv();
@@ -67,7 +79,7 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
         label.addClass(global.globalClass);
         label.parent(container);
 
-        input = p.createInput(inputInitialValue);
+        let input = p.createInput(inputInitialValue);
         input.addClass(customClass);
         input.addClass(labeledInputClass);
         input.addClass(global.globalClass);
@@ -76,6 +88,8 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
 
         return container;
     }, inputId + "Container");
+
+    let input = getFirstElementByTagName(container.element, "INPUT");
 
     return {element: input, alreadyExists: container.alreadyExists};
 }
@@ -306,5 +320,46 @@ export function booleanToYesNo(boolean: boolean): YesNo {
         return YesNo.Yes;
     } else {
         return YesNo.No;
+    }
+}
+
+// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
+export function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
+    // @ts-ignore
+    const inputs = p.selectAll('input', radioDivP5Element);
+    // @ts-ignore
+    const labels = p.selectAll('label', radioDivP5Element);
+    const len = inputs.length;
+
+    for (let i = 0; i < len; ++i) {
+        p.createDiv().parent(radioDivP5Element).child(inputs[i]).child(labels[i]);
+    }
+}
+
+// https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
+export function fixRadioDivElement(radioDivP5Element: p5.Element) {
+    // @ts-ignore
+    radioDivP5Element._getInputChildrenArray = function () {
+        return this.elt.getElementsByTagName('input');
+    }
+}
+
+export function styleRadioOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
+    // @ts-ignore
+    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
+    for(let i = 0; i < divs.length; i++) {
+        divs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        inputs[i].addClass(styleClasses.join(" "));
+    }
+
+    // @ts-ignore
+    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
+    for(let i = 0; i < inputs.length; i++) {
+        labels[i].addClass(styleClasses.join(" "));
     }
 }

@@ -1,9 +1,12 @@
-import {Mode, Note, NoteState, NoteType} from "./parsing";
+import {Mode, Note, NoteState, NoteType} from "./parse_sm";
 import {Config} from "./config";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import * as p5 from "p5";
 import {Accuracy} from "./accuracy_manager";
+import {StepfileState} from "./stepfile";
+import {AudioFileState} from "./audio_file";
+import {PlayingDisplay} from "./playing_display";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -240,4 +243,15 @@ export function getAccuracyEventName(timeDifferenceInMilliseconds: number, confi
         }
     }
     return "ERROR: Unknown accuracy";
+}
+
+export function isFilesReady() {
+    let stepfileReady = global.stepfile.state === StepfileState.PARTIALLY_PARSED ||
+        global.stepfile.state === StepfileState.FULLY_PARSED;
+    let audioFileReady = global.audioFile.state === AudioFileState.BUFFERED;
+    return stepfileReady && audioFileReady;
+}
+
+export function initPlayingDisplay(tracks: Note[][]) {
+    global.playingDisplay = new PlayingDisplay(tracks, global.config, global.p5Scene);
 }

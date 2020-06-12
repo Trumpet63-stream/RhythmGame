@@ -2,7 +2,7 @@ import * as p5 from "p5";
 
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
-import {Note, NoteState, NoteType} from "./parsing";
+import {Note, NoteState, NoteType} from "./parse_sm";
 import {Config} from "./config";
 import {global} from "./index";
 import {DefaultNoteSkin} from "./default_note_skin";
