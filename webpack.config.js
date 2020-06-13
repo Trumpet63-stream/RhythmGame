@@ -5,7 +5,8 @@ module.exports = {
     devtool: 'inline-source-map',
     mode: 'development',
     externals: {
-        p5: 'p5'
+        p5: 'p5',
+        pako: 'pako',
     },
     module: {
         rules: [
@@ -23,6 +24,6 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'var',
-        library: 'simparser'
+        library: 'rhythmgame'
     },
 };

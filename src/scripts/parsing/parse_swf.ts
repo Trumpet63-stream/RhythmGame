@@ -1,4 +1,4 @@
-import {global} from "./index";
+import {global} from "../index";
 import {SWFTags} from "./swf-tags";
 import {SWF, uncompress} from "./swf-reader";
 

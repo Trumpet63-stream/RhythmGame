@@ -1,5 +1,5 @@
 import * as p5 from "p5";
-import {FullParse, getFullParse, getPartialParse, Note, NoteState, NoteType, PartialParse} from "./parse_sm";
+import {FullParse, getFullParse, getPartialParse, Note, NoteState, NoteType, PartialParse} from "./parsing/parse_sm";
 
 export enum StepfileState {
     NO_SIMFILE,

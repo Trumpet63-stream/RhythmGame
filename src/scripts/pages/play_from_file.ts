@@ -9,7 +9,7 @@ import {global} from "../index";
 import {StepfileState} from "../stepfile";
 import {AudioFileState} from "../audio_file";
 import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../util";
-import {Mode} from "../parse_sm";
+import {Mode} from "../parsing/parse_sm";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
 

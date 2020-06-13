@@ -1,7 +1,7 @@
 import {NoteManager} from "./note_manager";
 import {Config} from "./config";
 import {getMissBoundary} from "./util";
-import {Note, NoteState, NoteType} from "./parse_sm";
+import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {HoldManager} from "./hold_manager";
 import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
 

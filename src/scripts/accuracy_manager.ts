@@ -2,7 +2,7 @@ import {NoteManager} from "./note_manager";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {Config} from "./config";
 import {HoldManager} from "./hold_manager";
-import {Note, NoteState, NoteType} from "./parse_sm";
+import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
 import {getAccuracyEventName} from "./util";
 

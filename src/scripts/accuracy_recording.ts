@@ -1,4 +1,4 @@
-import {NoteType} from "./parse_sm";
+import {NoteType} from "./parsing/parse_sm";
 
 export enum AccuracyRecordingState {
     INCOMPLETE,

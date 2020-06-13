@@ -6,7 +6,7 @@ import {MissManager} from "./miss_manager";
 import {AccuracyManager} from "./accuracy_manager";
 import {ScrollManager} from "./scroll_manager";
 import {ResultsDisplay} from "./results_display";
-import {Note} from "./parse_sm";
+import {Note} from "./parsing/parse_sm";
 import {HoldManager} from "./hold_manager";
 import {GameTimeProvider} from "./game_time_provider";
 import {Config} from "./config";

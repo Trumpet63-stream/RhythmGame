@@ -1,4 +1,4 @@
-import {parseSwf} from "./parse_swf";
+import {parseSwf} from "./parsing/parse_swf";
 
 class Song {
     public genre: number;

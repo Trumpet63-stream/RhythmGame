@@ -1,4 +1,4 @@
-import {Mode, Note, NoteState, NoteType} from "./parse_sm";
+import {Mode, Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {Config} from "./config";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";

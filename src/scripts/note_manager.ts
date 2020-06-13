@@ -1,4 +1,4 @@
-import {Note, NoteType} from "./parse_sm";
+import {Note, NoteType} from "./parsing/parse_sm";
 
 export class NoteManager {
     tracks: Note[][];

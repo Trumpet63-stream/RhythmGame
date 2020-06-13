@@ -1,6 +1,6 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {NoteType} from "./parse_sm";
+import {NoteType} from "./parsing/parse_sm";
 import {ScrollDirection} from "./scroll_direction";
 
 export class NoteSkin {
