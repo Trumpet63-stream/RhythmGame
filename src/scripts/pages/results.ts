@@ -18,7 +18,7 @@ export abstract class Results {
         if (!returnButton.alreadyExists) {
             returnButton.element.addClass(global.globalClass);
             returnButton.element.mouseClicked(() => {
-                PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
+                PageManager.return();
             })
         }
     }

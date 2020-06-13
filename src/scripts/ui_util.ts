@@ -21,7 +21,7 @@ export function drawHeading() {
     }, "playFromFileButton");
     setElementCenterPositionRelative(playFromFileButton.element, 0.25, 0.036, 130, 34);
     playFromFileButton.element.mousePressed(() => {
-        PageManager.setCurrentScene(PAGES.PLAY_FROM_FILE);
+        PageManager.setCurrentPage(PAGES.PLAY_FROM_FILE);
     });
     if (!playFromFileButton.alreadyExists) {
         playFromFileButton.element.addClass(headingClass);
@@ -33,7 +33,7 @@ export function drawHeading() {
     }, "playFromOnlineButton");
     setElementCenterPositionRelative(playFromOnlineButton.element, 0.5, 0.036, 90, 34);
     playFromOnlineButton.element.mousePressed(() => {
-        PageManager.setCurrentScene(PAGES.PLAY_FROM_ONLINE);
+        PageManager.setCurrentPage(PAGES.PLAY_FROM_ONLINE);
     });
     if (!playFromOnlineButton.alreadyExists) {
         playFromOnlineButton.element.addClass(headingClass);
@@ -46,7 +46,7 @@ export function drawHeading() {
     }, "optionsButton");
     setElementCenterPositionRelative(optionsButton.element, 0.8, 0.036, 90, 34);
     optionsButton.element.mousePressed(() => {
-        PageManager.setCurrentScene(PAGES.OPTIONS);
+        PageManager.setCurrentPage(PAGES.OPTIONS);
     });
     if (!optionsButton.alreadyExists) {
         optionsButton.element.addClass(headingClass);

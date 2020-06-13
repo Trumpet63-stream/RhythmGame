@@ -28,6 +28,7 @@ import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
 import {HoldParticles} from "./hold_particles";
 import {HoldGlow} from "./hold_glow";
 import {ScrollDirection} from "./scroll_direction";
+import {AudioFile} from "./audio_file";
 
 export class PlayingDisplay {
     private scene: P5Scene;
@@ -49,16 +50,18 @@ export class PlayingDisplay {
     private accuracyFeedbackParticles: AccuracyFeedbackParticles;
     private holdParticles: HoldParticles;
     private holdGlow: HoldGlow;
+    private audioFile: AudioFile;
 
-    constructor(tracks: Note[][], config: Config, scene: P5Scene) {
+    constructor(tracks: Note[][], audioFile: AudioFile, config: Config, scene: P5Scene) {
         this.showResultsScreen = false;
+        this.audioFile = audioFile;
         this.config = config;
         this.scene = scene;
 
         // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
         if (!this.isDebugMode) {
             this.timeManager = new TimeManager(performance.now(), this.config);
-            global.audioFile.play(config.pauseAtStartInSeconds);
+            this.audioFile.play(config.pauseAtStartInSeconds);
         }
 
         this.noteManager = new NoteManager(tracks);
@@ -81,7 +84,7 @@ export class PlayingDisplay {
             this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
         }
 
-        this.gameEndTime = this.calculateGameEnd(global.audioFile.getDuration(), this.getNotesEndTime());
+        this.gameEndTime = this.calculateGameEnd(this.audioFile.getDuration(), this.getNotesEndTime());
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.holdManager,
             this.handleAccuracyEvent.bind(this));
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
@@ -155,17 +158,22 @@ export class PlayingDisplay {
     }
 
     private endSong() {
-        global.audioFile.stop();
+        this.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
             this.scene.sketchInstance, this.accuracyRecording);
-        PageManager.setCurrentScene(PAGES.RESULTS);
+        PageManager.setCurrentPage(PAGES.RESULTS);
         this.unbindKeys();
     }
 
     private bindKeyBindingsToActions() {
         let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
+        let isSpacebarBound: boolean = false;
+        let spacebarKeyCode: number = 32;
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];
+            if (keyBinding.keyCode === spacebarKeyCode) {
+                isSpacebarBound = true;
+            }
             global.keyboardEventManager.bindKeyToAction(keyBinding.keyCode,
                 () => {
                     this.keyDownActionForTrack(keyBinding.trackNumber)
@@ -178,6 +186,11 @@ export class PlayingDisplay {
         global.keyboardEventManager.bindKeyToAction(global.config.quitKey, () => {
             this.endSong();
         });
+
+        if (!isSpacebarBound) {
+            // bind key to nothing to make sure the default behavior is prevented
+            global.keyboardEventManager.bindKeyToAction(spacebarKeyCode, () => {});
+        }
     }
 
     private keyDownActionForTrack(trackNumber: number) {

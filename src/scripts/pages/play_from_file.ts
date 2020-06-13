@@ -6,12 +6,15 @@ import {
     encloseEachInputLabelPairIntoASubDiv, fixRadioDivElement, styleRadioOptions
 } from "../ui_util";
 import {global} from "../index";
-import {StepfileState} from "../stepfile";
-import {AudioFileState} from "../audio_file";
+import {Stepfile, StepfileState} from "../stepfile";
+import {AudioFile, AudioFileState} from "../audio_file";
 import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../util";
 import {Mode} from "../parsing/parse_sm";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
+
+const playFromFileStepfile = new Stepfile();
+const playFromFileAudioFile = new AudioFile();
 
 export abstract class PlayFromFile {
     public static PLAY_FROM_FILE_CLASS: string = "play-from-file";
@@ -27,11 +30,11 @@ export abstract class PlayFromFile {
         setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
-            global.audioFile.loadFile.bind(global.audioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
+            playFromFileAudioFile.loadFile.bind(playFromFileAudioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
         setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
 
         let playButtonId = "playButton";
-        if (isFilesReady()) {
+        if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
             let modeRadio = drawModeSelect(p, PlayFromFile.MODE_RADIO_ID);
             if (modeRadio.value() !== "") { // if user has selected a mode
                 let playButton = DOMWrapper.create(() => {
@@ -42,9 +45,9 @@ export abstract class PlayFromFile {
                     playButton.element.addClass(global.globalClass);
                     playButton.element.mouseClicked(() => {
                         let selectedMode: Mode = getSelectedMode(modeRadio);
-                        global.stepfile.finishParsing(selectedMode.id);
-                        initPlayingDisplay(global.stepfile.fullParse.tracks);
-                        PageManager.setCurrentScene(PAGES.PLAY);
+                        playFromFileStepfile.finishParsing(selectedMode.id);
+                        initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
+                        PageManager.setCurrentPage(PAGES.PLAY);
                     });
                 }
             } else {
@@ -58,7 +61,7 @@ export abstract class PlayFromFile {
 }
 
 function loadStepfileAndUpdateModeOptions(file: p5.File) {
-    global.stepfile.loadFile.call(global.stepfile, file);
+    playFromFileStepfile.loadFile.call(playFromFileStepfile, file);
     global.stepfileModeOptions = undefined;
     DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
 }
@@ -66,7 +69,7 @@ function loadStepfileAndUpdateModeOptions(file: p5.File) {
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     p.push();
     if (global.stepfileModeOptions === undefined) {
-        global.stepfileModeOptions = getModeOptionsForDisplay(global.stepfile.partialParse.modes);
+        global.stepfileModeOptions = getModeOptionsForDisplay(playFromFileStepfile.partialParse.modes);
     }
 
     let modeRadioClass = "mode-radio"
@@ -105,14 +108,14 @@ function getSelectedMode(modeRadio: p5.Element) {
 }
 
 function getStepfileInputLabel() {
-    switch(global.stepfile.state) {
+    switch(playFromFileStepfile.state) {
         case StepfileState.NO_SIMFILE:
             return "No file chosen";
             break;
         case StepfileState.DONE_READING:
         case StepfileState.PARTIALLY_PARSED:
         case StepfileState.FULLY_PARSED:
-            return truncateFileNameIfTooLong(global.stepfile.file.name, 30);
+            return truncateFileNameIfTooLong(playFromFileStepfile.file.name, 30);
             break;
         default:
             return "Error";
@@ -120,13 +123,13 @@ function getStepfileInputLabel() {
 }
 
 function getAudioFileInputLabel() {
-    switch(global.audioFile.state) {
+    switch(playFromFileAudioFile.state) {
         case AudioFileState.NO_AUDIO_FILE:
             return "No file chosen";
             break;
         case AudioFileState.DONE_READING:
         case AudioFileState.BUFFERED:
-            return truncateFileNameIfTooLong(global.audioFile.file.name, 30);
+            return truncateFileNameIfTooLong(playFromFileAudioFile.file.name, 30);
             break;
         default:
             return "Error";

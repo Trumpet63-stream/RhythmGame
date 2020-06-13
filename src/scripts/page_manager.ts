@@ -15,19 +15,23 @@ export enum PAGES {
 }
 
 export abstract class PageManager {
-    private static currentScene: PAGES = PAGES.PLAY_FROM_FILE;
+    private static currentPage: PAGES = PAGES.PLAY_FROM_FILE;
+    private static returnPage: PAGES;
 
-    public static getCurrentScene() {
-        return this.currentScene;
-    }
-
-    public static setCurrentScene(scene: PAGES) {
-        this.currentScene = scene;
+    public static setCurrentPage(page: PAGES) {
+        if (this.currentPage !== PAGES.PLAY) {
+            this.returnPage = this.currentPage;
+        }
+        this.currentPage = page;
         DOMWrapper.clearRegistry();
     }
 
+    public static return() {
+        this.setCurrentPage(this.returnPage);
+    }
+
     public static draw() {
-        switch (this.currentScene) {
+        switch (this.currentPage) {
             case PAGES.PLAY_FROM_FILE:
                 PlayFromFile.draw();
                 break;
@@ -44,7 +48,7 @@ export abstract class PageManager {
                 PlayFromOnline.draw();
                 break;
             default:
-                throw new Error("Unexpected scene: " + global.currentScene);
+                throw new Error("Unexpected page: " + global.currentPage);
         }
     }
 }
