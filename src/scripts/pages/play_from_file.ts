@@ -58,7 +58,7 @@ export abstract class PlayFromFile {
 }
 
 function loadStepfileAndUpdateModeOptions(file: p5.File) {
-    global.stepfile.load.call(global.stepfile, file);
+    global.stepfile.loadFile.call(global.stepfile, file);
     global.stepfileModeOptions = undefined;
     DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
 }
