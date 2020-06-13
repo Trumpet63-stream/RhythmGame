@@ -1,26 +1,31 @@
 import {global} from "./index";
 import {SWFTags} from "./swf-tags";
-import {uncompress} from "./swf-reader";
+import {SWF, uncompress} from "./swf-reader";
+
+/**
+ * File contents originally from:
+ * @author: Velocity
+ * @github: https://github.com/flashflashrevolution/web-beatbox-editor
+ */
 
 export function parseSwf(input: File | ArrayBuffer) {
     if (input.constructor === ArrayBuffer) {
-        return swfFile_Ready(<ArrayBuffer> input);
+        return swfFile_Ready(<Uint8Array> input);
     }
-    input = <File> input;
 
     let reader = new FileReader();
     reader.onload = function(event) {
-        swfFile_Ready(<ArrayBuffer> event.target.result);
+        swfFile_Ready(<Uint8Array> event.target.result);
     };
     reader.onerror = function(event) {
         alert("I AM ERROR: " + event.target.error.code);
     };
-    reader.readAsArrayBuffer(input);
+    reader.readAsArrayBuffer(<File> input);
 }
 
-let swf_tags: any;
+let swf_tags: SWF;
 
-function swfFile_Ready(buffer: ArrayBuffer) {
+function swfFile_Ready(buffer: Uint8Array) {
     swf_tags = uncompress(buffer);
     
     // Chart Data

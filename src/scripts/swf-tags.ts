@@ -1,72 +1,49 @@
 /**
- * Defines constants on variable objects
+ * Collection of SWF tags and tag types to assist with reading and parsing a .swf file.
  *
- * @param {String} name
- * @param {Mixed} value
+ * File contents originally from:
+ * @author: Velocity
+ * @github: https://github.com/flashflashrevolution/web-beatbox-editor
  */
 
-export var SWFTags = {};
-export var SWFActionTags = {};
-export var SWFTypeTags = {};
-export var SWFOtherTags = {};
-
-function define(name, value) {
-    Object.defineProperty(SWFTags, name, {
-        value       : value,
-        enumerable  : true
-    });
+export abstract class SWFTags {
+    public static END: number = 0;
+    public static SHOWFRAME: number = 1;
+    public static DOACTION: number = 12;
+    public static DEFINESOUND: number = 14;
+    public static STREAMHEAD: number = 18;
+    public static STREAMBLOCK: number = 19;
+    public static STREAMHEAD2: number = 45;
+    public static FILEATTRIBUTES: number = 69;
 }
 
-function defineAction(name, value) {
-    Object.defineProperty(SWFActionTags, name, {
-        value       : value,
-        enumerable  : true
-    });
-}
-function defineType(name, value) {
-    Object.defineProperty(SWFTypeTags, name, {
-        value       : value,
-        enumerable  : true
-    });
-}
-function defineOther(name, value) {
-    Object.defineProperty(SWFOtherTags, name, {
-        value       : value,
-        enumerable  : true
-    });
+export abstract class SWFActionTags {
+    public static END: number = 0;
+    public static CONSTANTPOOL: number = 0x88;
+    public static PUSH: number = 0x96;
+    public static POP: number = 0x17;
+    public static DUPLICATE: number = 0x4C;
+    public static STORE_REGISTER: number = 0x87;
+    public static GET_VARIABLE: number = 0x1C;
+    public static SET_VARIABLE: number = 0x1D;
+    public static INIT_ARRAY: number = 0x42;
+    public static GET_MEMBER: number = 0x4E;
+    public static SET_MEMBER: number = 0x4F;
 }
 
-/* SWF Tags Type */
-define('END', 0);
-define('SHOWFRAME', 1);
-define('DOACTION', 12);
-define('DEFINESOUND', 14);
-define('STREAMHEAD', 18);
-define('STREAMBLOCK', 19);
-define('STREAMHEAD2', 45);
-define('FILEATTRIBUTES', 69);
+export abstract class SWFTypeTags {
+    public static STRING_LITERAL: number = 0;
+    public static FLOAT_LITERAL: number = 1;
+    public static NULL: number = 2;
+    public static UNDEFINED: number = 3;
+    public static REGISTER: number = 4;
+    public static BOOLEAN: number = 5;
+    public static DOUBLE: number = 6;
+    public static INTEGER: number = 7;
+    public static CONSTANT8: number = 8;
+    public static CONSTANT16: number = 9;
+}
 
-defineAction('END', 0x00);
-defineAction('CONSTANTPOOL', 0x88);
-defineAction('PUSH', 0x96);
-defineAction('POP', 0x17);
-defineAction('DUPLICATE', 0x4C);
-defineAction('STORE_REGISTER', 0x87);
-defineAction('GET_VARIABLE', 0x1C);
-defineAction('SET_VARIABLE', 0x1D);
-defineAction('INIT_ARRAY', 0x42);
-defineAction('GET_MEMBER', 0x4E);
-defineAction('SET_MEMBER', 0x4F);
-
-defineType('STRING_LITERAL', 0);
-defineType('FLOAT_LITERAL', 1);
-defineType('NULL', 2);
-defineType('UNDEFINED', 3);
-defineType('REGISTER', 4);
-defineType('BOOLEAN', 5);
-defineType('DOUBLE', 6);
-defineType('INTEGER', 7);
-defineType('CONSTANT8', 8);
-defineType('CONSTANT16', 9);
-
-defineOther('CODEC_MP3', 2);
+export abstract class SWFOtherTags {
+    public static CODEC_MP3: number = 2;
+}
