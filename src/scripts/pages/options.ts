@@ -1,21 +1,18 @@
 import * as p5 from "p5";
 import {ScrollDirection} from "../scroll_direction";
-import {KeyBindingHelper} from "../key_binding_helper";
 import {
     booleanToYesNo,
-    createKeyBindingInput,
     createLabeledInput,
     createLabeledSelect,
     createLabeledTextArea,
-    drawHeading,
+    drawHeading, setOnInputUnlessItAlreadyExists,
     YesNo
 } from "../ui_util";
 import {global} from "../index";
-import {generatePreviewNotes, getKeyBindingContainerId, initializeKeyBindings, isKeyBindingsDefined} from "../util";
 import {Accuracy} from "../accuracy_manager";
-import {PreviewDisplay} from "../preview_display";
 import {DOMWrapper} from "../dom_wrapper";
 import {Config} from "../config";
+import {KeyBindingsUi} from "../key_bindings_ui";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -232,96 +229,9 @@ export abstract class Options {
             scrollDiv.element.child(holdGlowEnabledSelect.element.parent());
         }
 
-        let keyBindingsSectionHeader = createKeyBindingsSectionHeader();
-        if (!keyBindingsSectionHeader.alreadyExists) {
-            scrollDiv.element.child(keyBindingsSectionHeader.element);
-        }
-
-        if (global.previewNumTracks == undefined) {
-            global.previewNumTracks = 4;
-        }
-        let previewNumTracks = createLabeledInput("Number of Tracks", "previewNumTracksInput",
-            global.previewNumTracks.toString(), Options.OPTIONS_CLASS);
-        // @ts-ignore
-        setOnInputUnlessItAlreadyExists(previewNumTracks, () => {
-            let value: string | number = previewNumTracks.element.value();
-            if (typeof value === "string") {
-                value = parseInt(value);
-            }
-            if (Number.isInteger(value) && value > 0 && value <= 26) {
-                removeOldBindingButtons(global.previewNumTracks);
-                global.previewNumTracks = value;
-                global.previewDisplay = new PreviewDisplay(generatePreviewNotes(value), global.config, global.p5Scene);
-            }
-        });
-        if (!previewNumTracks.alreadyExists) {
-            scrollDiv.element.child(previewNumTracks.element.parent());
-        }
-
-        let keyBindingsQuickstartButton = DOMWrapper.create(() => {
-            return p.createButton("KeyBindings Quickstart");
-        }, "keyBindingsQuickstartButton");
-        if (!keyBindingsQuickstartButton.alreadyExists) {
-            keyBindingsQuickstartButton.element.addClass(Options.OPTIONS_CLASS);
-            keyBindingsQuickstartButton.element.addClass("keybindings-quickstart");
-            keyBindingsQuickstartButton.element.addClass(global.globalClass);
-
-
-            keyBindingsQuickstartButton.element.mousePressed(() => {
-                let keybindingHelper = new KeyBindingHelper(global.previewNumTracks);
-
-                // Bind this action to the "-1" key so that it happens on any key press
-                global.keyboardEventManager.bindKeyToAction(-1, () => {
-                    // Ignore this code because it's used to indicate input that's not yet finished processing
-                    if (p.keyCode !== 229) {
-                        keybindingHelper.bindNext(p);
-                    }
-                });
-            });
-
-            scrollDiv.element.child(keyBindingsQuickstartButton.element);
-        }
-
-        if (!isKeyBindingsDefined(global.previewNumTracks)) {
-            initializeKeyBindings(global.previewNumTracks);
-        }
-        for (let trackNumber = 0; trackNumber < global.previewNumTracks; trackNumber++) {
-            let keyBindingInput = createKeyBindingInput(trackNumber, global.previewNumTracks, Options.OPTIONS_CLASS);
-            if (!keyBindingInput.alreadyExists) {
-                scrollDiv.element.child(keyBindingInput.element);
-            }
-        }
+        KeyBindingsUi.draw(p, scrollDiv.element, Options.OPTIONS_CLASS);
 
         global.previewDisplay.draw();
-    }
-}
-
-function createKeyBindingsSectionHeader(): { element: p5.Element, alreadyExists: boolean } {
-    let p: p5 = global.p5Scene.sketchInstance;
-    let container = DOMWrapper.create(() => {
-        let container = p.createDiv();
-        container.html(
-            'Key Bindings <span style="font-size:12px">(track 1 is the leftmost track)</span>'
-        );
-        container.addClass("options-free-text");
-        container.addClass(Options.OPTIONS_CLASS);
-        container.addClass(global.globalClass);
-        return container;
-    }, "keyBindingsSectionHeader");
-
-    return container;
-}
-
-function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
-    if (!inputElement.alreadyExists) {
-        // @ts-ignore
-        inputElement.element.input(onInput);
-    }
-}
-
-function removeOldBindingButtons(numTracks: number) {
-    for (let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
-        DOMWrapper.removeElementById(getKeyBindingContainerId(trackNumber, numTracks));
     }
 }
 

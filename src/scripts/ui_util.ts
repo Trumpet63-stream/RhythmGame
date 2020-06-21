@@ -3,12 +3,7 @@ import {global} from "./index";
 import {PageManager, PAGES} from "./page_manager";
 import {
     enumToStringArray,
-    findBindingInfoForTrack,
     getFirstElementByTagName,
-    getKeyBindingButtonId,
-    getKeyBindingContainerId,
-    getKeyString,
-    setConfigKeyBinding
 } from "./util";
 import {DOMWrapper} from "./dom_wrapper";
 
@@ -94,7 +89,7 @@ export function createLabeledInput(labelString: string, inputId: string, inputIn
     return {element: input, alreadyExists: container.alreadyExists};
 }
 
-function createLabel(p: p5, labelString: string, forId?: string): p5.Element {
+export function createLabel(p: p5, labelString: string, forId?: string): p5.Element {
     let label = p.createElement("label", labelString);
     if (forId !== undefined) {
         label.attribute("for", forId);
@@ -154,54 +149,6 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
     }
 
     return {element: select, alreadyExists: container.alreadyExists};
-}
-
-export function createKeyBindingInput(trackNumber: number, numTracks: number, customClass: string): { element: p5.Element, alreadyExists: boolean } {
-    let p: p5 = global.p5Scene.sketchInstance;
-
-    let setButtonId = getKeyBindingButtonId(trackNumber, numTracks);
-    let keybindingInputClass = "keybinding-input";
-    let container = DOMWrapper.create(() => {
-        let container: p5.Element = p.createDiv();
-        container.addClass(customClass);
-        container.addClass(keybindingInputClass);
-        container.addClass(global.globalClass);
-
-        let label = createLabel(p, "");
-        label.addClass(customClass);
-        label.addClass(keybindingInputClass);
-        label.addClass(global.globalClass);
-        label.parent(container);
-
-        let setButton = p.createButton("Set");
-        setButton.parent(container);
-        setButton.id(setButtonId);
-        setButton.mousePressed(() => {
-            global.keyboardEventManager.bindKeyToAction(-1, () => {
-                // Ignore this code because it's used to indicate input that's not yet finished processing
-                if (p.keyCode !== 229) {
-                    setConfigKeyBinding(trackNumber, numTracks,
-                        {trackNumber: trackNumber, keyCode: p.keyCode, string: getKeyString(p)});
-                    global.keyboardEventManager.unbindKey(-1);
-                }
-            });
-        });
-        setButton.addClass(customClass);
-        setButton.addClass(keybindingInputClass);
-        setButton.addClass(global.globalClass);
-
-        return container;
-    }, getKeyBindingContainerId(trackNumber, numTracks));
-
-    let trackBindingInfo = findBindingInfoForTrack(trackNumber, global.config.keyBindings.get(numTracks));
-    let keyString = trackBindingInfo.string;
-    let labelString = 'Track ' + (trackNumber + 1) + ': <span class="' +
-        keybindingInputClass + " " + customClass + " " + global.globalClass +
-        '">' + keyString + '</span>';
-    let labelElement = getFirstElementByTagName(container.element, "LABEL");
-    labelElement.html(labelString);
-
-    return container;
 }
 
 export function createLabeledTextArea(labelString: string, inputId: string, inputInitialValue: string, customClass: string,
@@ -361,5 +308,21 @@ export function styleRadioOptions(p: p5, radioDivP5Element: p5.Element, styleCla
     let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
     for(let i = 0; i < inputs.length; i++) {
         labels[i].addClass(styleClasses.join(" "));
+    }
+}
+
+function removeAllOccurrencesOfTag(html: string, tagName: string) {
+    let tempDiv = document.createElement("div");
+    let elements = tempDiv.getElementsByTagName(tagName);
+    while (elements[0] !== undefined) {
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+    return tempDiv.innerHTML;
+}
+
+export function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Element, alreadyExists: boolean }, onInput: () => void) {
+    if (!inputElement.alreadyExists) {
+        // @ts-ignore
+        inputElement.element.input(onInput);
     }
 }

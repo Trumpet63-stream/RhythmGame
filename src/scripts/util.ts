@@ -102,18 +102,6 @@ function getIndexOfTrackNumberBinding(trackNumber: number, bindings: { trackNumb
     return -1;
 }
 
-export function getKeyBindingButtonId(trackNumber: number, numTracks: number) {
-    return getKeyBindingUniqueId(trackNumber, numTracks) + "Button";
-}
-
-export function getKeyBindingContainerId(trackNumber: number, numTracks: number) {
-    return getKeyBindingUniqueId(trackNumber, numTracks) + "Button";
-}
-
-function getKeyBindingUniqueId(trackNumber: number, numTracks: number) {
-    return "track" + trackNumber + "Of" + numTracks + "Binding";
-}
-
 export function getKeyString(p: p5) {
     return p.key.length == 1 ? p.key.toUpperCase() : p.key;
 }
