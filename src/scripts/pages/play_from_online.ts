@@ -10,7 +10,7 @@ import {
 } from "../ui_util";
 import {DOMWrapper} from "../dom_wrapper";
 import {PageManager, PAGES} from "../page_manager";
-import {OnlinePlaylistState} from "../online_playlist";
+import {OnlinePlaylist, OnlinePlaylistState} from "../online_playlist";
 import {initPlayingDisplay, isFilesReady} from "../util";
 import {Stepfile} from "../stepfile";
 import {AudioFile} from "../audio_file";
@@ -26,10 +26,11 @@ export abstract class PlayFromOnline {
 
     public static draw() {
         drawHeading();
+        let onlinePlaylist: OnlinePlaylist = <OnlinePlaylist> global.onlinePlaylist;
         let p: p5 = global.p5Scene.sketchInstance;
         p.background(global.playFromFileBackground);
 
-        let urlInput = createLabeledInput("Engine URL", "urlInput", global.onlinePlaylist.indexUrl,
+        let urlInput = createLabeledInput("Engine URL", "urlInput", onlinePlaylist.indexUrl,
             PlayFromOnline.PLAY_FROM_ONLINE_CLASS);
         // @ts-ignore
         let urlInputDiv = new p5.Element(urlInput.element.parent());
@@ -46,18 +47,18 @@ export abstract class PlayFromOnline {
                 let value: string | number = urlInput.element.value();
                 if (typeof value === "string") {
                     loadButton.element.attribute('disabled', '');
-                    global.onlinePlaylist.kickOffLoadPlaylist(value);
+                    onlinePlaylist.kickOffLoadPlaylist(value);
                 }
             });
         }
-        if (global.onlinePlaylist.state !== OnlinePlaylistState.LOADING_PLAYLIST) {
+        if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_PLAYLIST) {
             loadButton.element.removeAttribute('disabled');
         }
 
-        if (global.onlinePlaylist.state === OnlinePlaylistState.PLAYLIST_READY ||
-            global.onlinePlaylist.state === OnlinePlaylistState.LOADING_SONG) {
+        if (onlinePlaylist.state === OnlinePlaylistState.PLAYLIST_READY ||
+            onlinePlaylist.state === OnlinePlaylistState.LOADING_SONG) {
             let playlistMenuId = "playlistMenu"
-            let playlistMenu = drawRadioMenu(p, playlistMenuId, global.onlinePlaylist.playlist);
+            let playlistMenu = drawRadioMenu(p, playlistMenuId, onlinePlaylist.displayedPlaylist);
             setElementCenterPositionRelative(playlistMenu, 0.5, 0.62, 500, 200);
 
             drawPageControls(p, playlistMenuId);
@@ -77,12 +78,12 @@ export abstract class PlayFromOnline {
                         }
                         if (Number.isInteger(value)) {
                             loadAndPlayButton.element.attribute('disabled', '');
-                            global.onlinePlaylist.kickOffLoadSong(value, playFromOnlineStepfile, playFromOnlineAudioFile);
+                            onlinePlaylist.kickOffLoadSong(value, playFromOnlineStepfile, playFromOnlineAudioFile);
                             isSwfLoadStarted = true;
                         }
                     });
                 }
-                if (global.onlinePlaylist.state !== OnlinePlaylistState.LOADING_SONG) {
+                if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_SONG) {
                     loadAndPlayButton.element.removeAttribute('disabled');
                 }
 

@@ -1,39 +1,8 @@
-import {parseSwf} from "./parsing/parse_swf";
 import {Stepfile, StepfileState} from "./stepfile";
 import {AudioFile, AudioFileState} from "./audio_file";
-
-class Song {
-    public genre: number;
-    public songName: string;
-    public songAuthor: string;
-    public songAuthorUrl: string;
-    public songDifficulty: number;
-    public songStyle: string;
-    public songLength: string;
-    public songStepauthor: string;
-    public level: string;
-
-    private constructor() {
-    }
-
-    public static ofXml(xml: Element): Song {
-        let song = new Song();
-        song.genre = parseInt(xml.getAttribute("genre"));
-        song.songName = getContentsByTagName(xml, "songname");
-        song.songAuthor = getContentsByTagName(xml, "songauthor");
-        song.songAuthorUrl = getContentsByTagName(xml, "songauthorurl");
-        song.songDifficulty = parseInt(getContentsByTagName(xml, "songdifficulty"));
-        song.songStyle = getContentsByTagName(xml, "songstyle");
-        song.songLength = getContentsByTagName(xml, "songlength");
-        song.songStepauthor = getContentsByTagName(xml, "songstepauthor");
-        song.level = getContentsByTagName(xml, "level");
-        return song;
-    }
-
-    public toString(): string {
-        return this.songDifficulty + " " + this.songName;
-    }
-}
+import {PlaylistClient} from "./playlist_client/playlist_client";
+import {Song} from "./playlist_client/song";
+import {SwfParseResponse} from "./parsing/parse_swf";
 
 export enum OnlinePlaylistState {
     NO_PLAYLIST,
@@ -44,142 +13,66 @@ export enum OnlinePlaylistState {
     SONG_ERROR,
 }
 
+class DisplayableSong {
+    private song: Song;
+
+    constructor(song: Song) {
+        this.song = song;
+    }
+
+    public toString(): string {
+        return this.song.songDifficulty + " " + this.song.songName;
+    }
+}
+
 export class OnlinePlaylist {
     public indexUrl: string;
-    private songUrl: string;
-    private playlistUrl: string;
-    private fullPlaylist: Song[];
+    private playlistClient: PlaylistClient;
     private static DEFAULT_PAGE_SIZE: number = 50;
     public state: OnlinePlaylistState;
-    public playlist: Song[];
+    public displayedPlaylist: DisplayableSong[];
     private pageNumber: number;
     private pageSize: number;
 
     constructor() {
         this.state = OnlinePlaylistState.NO_PLAYLIST;
         this.indexUrl = "";
+        this.playlistClient = new PlaylistClient();
     }
 
     public kickOffLoadPlaylist(indexUrl: string) {
         this.state = OnlinePlaylistState.LOADING_PLAYLIST;
-        this.indexUrl = indexUrl;
-        this.get(this.indexUrl, this.parseIndexAndLoadPlaylist.bind(this));
+        this.playlistClient.initialize(indexUrl)
+            .then(() => this.initializeDisplayedPlaylist())
+            .catch(() => this.state = OnlinePlaylistState.PLAYLIST_ERROR);
     }
 
-    private parseIndexAndLoadPlaylist(event: ProgressEvent) {
-        try {
-            let playlistMetadata: Document = (<XMLHttpRequest>event.target).responseXML;
-            this.songUrl = getContentsByTagName(playlistMetadata, "songURL");
-            this.playlistUrl = getContentsByTagName(playlistMetadata, "playlistURL");
-            this.get(this.playlistUrl, this.loadPlaylist.bind(this));
-        } catch (e) {
-            this.state = OnlinePlaylistState.PLAYLIST_ERROR;
-            console.error(e);
-        }
+    private initializeDisplayedPlaylist() {
+        this.setPage(0);
+        this.state = OnlinePlaylistState.PLAYLIST_READY
     }
 
-    private loadPlaylist(event: ProgressEvent) {
-        try {
-            let playlistText: string = (<XMLHttpRequest>event.target).response;
-            let parser = new DOMParser();
-
-            // replace ampersands because the DOMParser doesn't like them
-            let text = playlistText.replace(/&/g, '&amp;');
-
-            let playlistXml = parser.parseFromString(text, "text/xml");
-            this.parsePlaylist(playlistXml);
-        } catch (e) {
-            this.state = OnlinePlaylistState.PLAYLIST_ERROR;
-            console.error(e);
-        }
-    }
-
-    private parsePlaylist(playlistXml: Document) {
-        try {
-            let songs: HTMLCollection = playlistXml.getElementsByTagName("song");
-            this.fullPlaylist = [];
-            for (let i = 0; i < songs.length; i++) {
-                let songXml: Element = songs.item(i);
-                if (i === 0) {
-                }
-                let song: Song = Song.ofXml(songXml);
-                if (i === 0) {
-                }
-                this.fullPlaylist.push(song);
-            }
-            if (this.fullPlaylist.length === 0) {
-                this.state = OnlinePlaylistState.PLAYLIST_ERROR;
-            } else {
-                this.state = OnlinePlaylistState.PLAYLIST_READY;
-                this.setPage(0);
-            }
-        } catch (e) {
-            this.state = OnlinePlaylistState.PLAYLIST_ERROR;
-            console.error(e);
-        }
-    }
-
-    public kickOffLoadSong(songIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
+    public kickOffLoadSong(displayedSongIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
         this.state = OnlinePlaylistState.LOADING_SONG;
-        songIndex += this.pageSize * this.pageNumber;
-        stepfile.state = StepfileState.NO_SIMFILE;
         audioFile.state = AudioFileState.NO_AUDIO_FILE;
-        let song: Song = this.fullPlaylist[songIndex];
-        let level: string = song.level;
-        let levelUrl = this.songUrl + "level_" + level + ".swf";
-        this.get(levelUrl, (event: ProgressEvent) => {
-            try {
-                parseSwf((<XMLHttpRequest>event.target).response, stepfile, audioFile);
-            } catch (e) {
-                this.state = OnlinePlaylistState.SONG_ERROR;
-                console.error(e);
-            }
-        }, "arraybuffer");
+        stepfile.state = StepfileState.NO_STEPFILE;
+        this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
+            .then((swfParseResponse) =>
+                this.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
+            .catch(() => this.state = OnlinePlaylistState.SONG_ERROR);
     }
 
-    private get(url: string, onload: (event: ProgressEvent) => void, responseType?: string) {
-        let corsWorkaround: string = 'https://cors-anywhere.herokuapp.com/';
-        let request: XMLHttpRequest = new XMLHttpRequest();
-        request.addEventListener("load", onload);
-        request.open('GET', corsWorkaround + url, true);
-        if (responseType !== undefined) {
-            // @ts-ignore
-            request.responseType = responseType;
-        }
-        request.send();
+    private getSongIndex(displayedSongIndex: number) {
+        return displayedSongIndex + this.pageSize * this.pageNumber;
+    }
+
+    private loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
+        stepfile.loadFfrBeatmap(swfParseResponse.chartData);
+        audioFile.loadBlob(swfParseResponse.blob);
     }
 
     public getPage() {
         return this.pageNumber;
-    }
-
-    private setPage(pageNumber: number, pageSize?: number) {
-        if (pageSize === undefined) {
-            pageSize = OnlinePlaylist.DEFAULT_PAGE_SIZE;
-        } else if (pageSize < 1) {
-            pageSize = 1;
-        } else if (pageSize > 100) {
-            pageSize = 100;
-        }
-
-        if (pageNumber > this.getMaxPageNumber(pageSize) || pageNumber < 0) {
-            return;
-        }
-
-        let minIndex = pageNumber * pageSize;
-        let maxIndex = minIndex + pageSize;
-        this.playlist = [];
-        for (let i = minIndex; i < maxIndex; i++) {
-            if (i < this.fullPlaylist.length) {
-                this.playlist.push(this.fullPlaylist[i]);
-            }
-        }
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-    }
-
-    private getMaxPageNumber(pageSize: number) {
-        return Math.floor(this.fullPlaylist.length / pageSize) - 1;
     }
 
     public nextPage() {
@@ -189,8 +82,44 @@ export class OnlinePlaylist {
     public previousPage() {
         this.setPage(this.pageNumber - 1);
     }
-}
 
-function getContentsByTagName(xml: Element | Document, tag: string) {
-    return xml.getElementsByTagName(tag)[0].innerHTML;
+    private setPage(pageNumber: number, pageSize?: number) {
+        pageSize = this.getValidPageSize(pageSize);
+        if (!this.isValidPageNumber(pageNumber, pageSize)) {
+            return;
+        }
+
+        let minIndex = pageNumber * pageSize;
+        let maxIndex = minIndex + pageSize;
+        this.displayedPlaylist = [];
+        for (let i = minIndex; i < maxIndex; i++) {
+            if (i < this.playlistClient.getPlaylist().length) {
+                this.displayedPlaylist.push(this.getDisplayableSong(i));
+            }
+        }
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
+    }
+
+    private isValidPageNumber(pageNumber: number, pageSize: number) {
+        return 0 <= pageNumber && pageNumber <= this.getMaxPageNumber(pageSize);
+    }
+
+    private getDisplayableSong(songIndex: number): DisplayableSong {
+        return new DisplayableSong(this.playlistClient.getPlaylist()[songIndex]);
+    }
+
+    private getValidPageSize(pageSize: number) {
+        if (pageSize === undefined) {
+            return OnlinePlaylist.DEFAULT_PAGE_SIZE;
+        } else if (pageSize < 1) {
+            return 1;
+        } else if (pageSize > 100) {
+            return 100;
+        }
+    }
+
+    private getMaxPageNumber(pageSize: number) {
+        return Math.floor(this.playlistClient.getPlaylist().length / pageSize) - 1;
+    }
 }

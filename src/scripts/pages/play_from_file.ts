@@ -109,7 +109,7 @@ function getSelectedMode(modeRadio: p5.Element) {
 
 function getStepfileInputLabel() {
     switch(playFromFileStepfile.state) {
-        case StepfileState.NO_SIMFILE:
+        case StepfileState.NO_STEPFILE:
             return "No file chosen";
             break;
         case StepfileState.DONE_READING:

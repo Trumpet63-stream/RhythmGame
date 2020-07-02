@@ -1,8 +1,9 @@
 import * as p5 from "p5";
 import {FullParse, getFullParse, getPartialParse, Note, NoteState, NoteType, PartialParse} from "./parsing/parse_sm";
+import {ParsingHelper} from "./playlist_client/parsing_helper";
 
 export enum StepfileState {
-    NO_SIMFILE,
+    NO_STEPFILE,
     DONE_READING,
     PARTIALLY_PARSED,
     FULLY_PARSED,
@@ -16,7 +17,7 @@ export class Stepfile {
     public fullParse: FullParse;
 
     public constructor() {
-        this.state = StepfileState.NO_SIMFILE;
+        this.state = StepfileState.NO_STEPFILE;
     }
 
     public loadFile(file: p5.File) {
@@ -33,7 +34,7 @@ export class Stepfile {
     }
 
     public loadFfrBeatmap(beatmap: [number, string, string][]) {
-        let tracks: Note[][] = this.beatmapToTrackArray(beatmap);
+        let tracks: Note[][] = ParsingHelper.beatmapToTrackArray(beatmap);
 
         let partialParse = new PartialParse();
         partialParse.modes = [new Map<string, string>()];
@@ -62,45 +63,5 @@ export class Stepfile {
         let fileReader = new FileReader();
         fileReader.readAsText(file);
         fileReader.addEventListener("loadend", listener, options);
-    }
-
-    private beatmapToTrackArray(beatmap: [number, string, string][]) {
-        let tracks: Note[][] = [];
-        for (let i = 0; i < 4; i++) {
-            tracks.push([]);
-        }
-
-        for (let i = 0; i < beatmap.length; i++) {
-            let beatmapRow = beatmap[i];
-            let trackNumber = this.trackNumberFromDirection(beatmapRow[1]);
-            let note = this.noteFromBeatmapRow(beatmapRow);
-            tracks[trackNumber].push(note);
-        }
-
-        return tracks;
-    }
-
-    private noteFromBeatmapRow(row: [number, string, string]): Note {
-        let timeInSeconds = row[0] / 30;
-        return {timeInSeconds: timeInSeconds, type: NoteType.NORMAL, state: NoteState.DEFAULT, typeString: "N/A"};
-    }
-
-    private trackNumberFromDirection(direction: string): number {
-        switch (direction) {
-            case "L":
-                return 0;
-                break;
-            case "D":
-                return 1;
-                break;
-            case "U":
-                return 2;
-                break;
-            case "R":
-                return 3;
-                break;
-            default:
-                throw "Unknown track direction '" + direction + "'";
-        }
     }
 }

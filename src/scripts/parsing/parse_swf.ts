@@ -1,8 +1,5 @@
-import {global} from "../index";
 import {SWFTags} from "./swf-tags";
 import {SWF, uncompress} from "./swf-reader";
-import {AudioFile} from "../audio_file";
-import {Stepfile} from "../stepfile";
 
 /**
  * File contents originally from:
@@ -10,35 +7,29 @@ import {Stepfile} from "../stepfile";
  * @github: https://github.com/flashflashrevolution/web-beatbox-editor
  */
 
-export function parseSwf(input: File | ArrayBuffer, stepfile: Stepfile, audioFile: AudioFile) {
-    if (input.constructor === ArrayBuffer) {
-        return swfFile_Ready(<Uint8Array> input, stepfile, audioFile);
-    }
+export interface SwfParseResponse {
+    chartData: [number, string, string][];
+    blob: Blob;
+}
 
-    let reader = new FileReader();
-    reader.onload = function(event) {
-        swfFile_Ready(<Uint8Array> event.target.result, stepfile, audioFile);
-    };
-    reader.onerror = function(event) {
-        alert("I AM ERROR: " + event.target.error.code);
-    };
-    reader.readAsArrayBuffer(<File> input);
+export function parseSwfFromArrayBuffer(input: ArrayBuffer): SwfParseResponse {
+    return swfFile_Ready(<Uint8Array> input);
 }
 
 let swf_tags: SWF;
 
-function swfFile_Ready(buffer: Uint8Array, stepfile: Stepfile, audioFile: AudioFile) {
+function swfFile_Ready(buffer: Uint8Array): SwfParseResponse {
     swf_tags = uncompress(buffer);
     
     // Chart Data
     let chart_tag = getBeatBox();
     let chart_data = chart_tag["variables"]["_root"]["beatBox"];
-    stepfile.loadFfrBeatmap(chart_data);
 
     // Music Data
     let music_binary = getAudio();
     let blob = new Blob([music_binary], {type : 'audio/mpeg'});
-    audioFile.loadBlob(blob);
+
+    return {blob: blob, chartData: chart_data};
 }
 
 /**
