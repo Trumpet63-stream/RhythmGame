@@ -58,6 +58,15 @@ export function setElementCenterPositionRelative(element: p5.Element, relativeX:
         canvasPosition.y + (relativeY * p.height) - (height / 2));
 }
 
+export function setElementToBottom(element: p5.Element, heightPercent: number, stylingWidth: number, stylingHeight: number) {
+    let p = global.p5Scene.sketchInstance;
+    let canvasPosition: { x: number, y: number } = p._renderer.position();
+    let elementHeight = heightPercent / 100 * p.height;
+    element.position(canvasPosition.x, canvasPosition.y + (p.height - elementHeight - stylingHeight));
+    element.style("width: " + (p.width - stylingWidth) + "px");
+    element.style("height: " + elementHeight + "px");
+}
+
 export function createLabeledInput(labelString: string, inputId: string, inputInitialValue: string, customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
@@ -272,10 +281,8 @@ export function booleanToYesNo(boolean: boolean): YesNo {
 
 // https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
 export function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
-    // @ts-ignore
-    const inputs = p.selectAll('input', radioDivP5Element);
-    // @ts-ignore
-    const labels = p.selectAll('label', radioDivP5Element);
+    const inputs: p5.Element[] = selectAll(p, 'input', radioDivP5Element);
+    const labels: p5.Element[] = selectAll(p, 'label', radioDivP5Element);
     const len = inputs.length;
 
     for (let i = 0; i < len; ++i) {
@@ -292,20 +299,17 @@ export function fixRadioDivElement(radioDivP5Element: p5.Element) {
 }
 
 export function styleRadioOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
-    // @ts-ignore
-    let divs: p5.Element[] = p.selectAll('div', radioDivP5Element);
+    let divs: p5.Element[] = selectAll(p, 'div', radioDivP5Element);
     for(let i = 0; i < divs.length; i++) {
         divs[i].addClass(styleClasses.join(" "));
     }
 
-    // @ts-ignore
-    let inputs: p5.Element[] = p.selectAll('input', radioDivP5Element);
+    let inputs: p5.Element[] = selectAll(p, 'input', radioDivP5Element);
     for(let i = 0; i < inputs.length; i++) {
         inputs[i].addClass(styleClasses.join(" "));
     }
 
-    // @ts-ignore
-    let labels: p5.Element[]  = p.selectAll('label', radioDivP5Element);
+    let labels: p5.Element[]  = selectAll(p, 'label', radioDivP5Element);
     for(let i = 0; i < inputs.length; i++) {
         labels[i].addClass(styleClasses.join(" "));
     }
@@ -325,4 +329,12 @@ export function setOnInputUnlessItAlreadyExists(inputElement: { element: p5.Elem
         // @ts-ignore
         inputElement.element.input(onInput);
     }
+}
+
+function selectAll(p: p5, tagName: string, container: p5.Element): p5.Element[] {
+    if (container.id() === "") {
+        throw "error: container used with selectAll must have an id";
+    }
+    let id = "#" + container.id();
+    return p.selectAll(tagName, id);
 }

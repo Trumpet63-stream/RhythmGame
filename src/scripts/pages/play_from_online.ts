@@ -115,6 +115,7 @@ function drawRadioMenu(p: p5, uniqueId: string, items: MenuItem[]): p5.Element {
     }, uniqueId);
     let radioMenu = radioMenuCreateResult.element;
     if (!radioMenuCreateResult.alreadyExists) {
+        radioMenu.id("radio-div");
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
             let radioLabel = item.toString();

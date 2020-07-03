@@ -12,7 +12,7 @@ export class PreviewDisplay {
     private scrollManager: ScrollManager;
     private displayManager: DisplayManager;
     private topLeftX = 65;
-    private topLeftY = 55;
+    private topLeftY = 46;
     private width = 200;
     private height = 400;
     private displayConfig: DisplayConfig;

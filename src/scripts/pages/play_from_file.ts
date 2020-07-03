@@ -79,6 +79,7 @@ function drawModeSelect(p: p5, uniqueId: string): p5.Element {
     }, uniqueId);
     let modeRadio = modeRadioCreateResult.element;
     if (!modeRadioCreateResult.alreadyExists) {
+        modeRadio.id("radio-div");
         for (let i = 0; i < global.stepfileModeOptions.length; i++) {
             let mode = global.stepfileModeOptions[i];
             let radioLabel = mode.type + ", " + mode.difficulty + ", " + mode.meter;

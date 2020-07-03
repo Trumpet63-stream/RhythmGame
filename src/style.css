@@ -39,17 +39,14 @@ button.game {
 
 button.game:disabled {
     background: rgba(43, 43, 57, 0.9);
-    background-color: rgba(43, 43, 57, 0.9);
 }
 
 button.game:hover:disabled {
     background: rgba(43, 43, 57, 0.9);
-    background-color: rgba(43, 43, 57, 0.9);
 }
 
 button:hover {
-    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
-    background-color: #476e9e;
+    background: #476e9e linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
 }
 
 button:active {
@@ -180,7 +177,7 @@ textarea.labeled-textarea {
 .options-scroll-div {
     padding-left: 2px;
     width: 360px;
-    height: 420px;
+    height: 400px;
     overflow-y: scroll;
     background: rgba(0, 0, 0, 0);
     text-align: left;
@@ -206,8 +203,7 @@ button.navigation-heading {
 }
 
 button.navigation-heading:hover {
-    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
-    background-color: #476e9e;
+    background: #476e9e linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
 }
 
 button.navigation-heading:active {
@@ -252,6 +248,18 @@ div.page-controls {
     width: 140px;
     padding-top: 5px;
     padding-bottom: 3px;
+}
+
+div.ticker-info {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px;
+    padding: 4px 6px 4px 6px;
+}
+
+div.ticker-error {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgb(156, 0, 0);
+    padding: 2px 4px 2px 4px;
 }
 
 label.mode-radio-option {

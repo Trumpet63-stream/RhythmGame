@@ -1,8 +1,6 @@
 import * as p5 from "p5";
 
-/* Lets us code the DOM UI elements as if it were "immediate", i.e. stateless.
- * All registered elements are removed when the page changes
- */
+// Lets us code the DOM UI elements as if it were "immediate", i.e. stateless.
 export abstract class DOMWrapper {
     private static registry: Map<string, p5.Element> = new Map();
 
@@ -23,7 +21,7 @@ export abstract class DOMWrapper {
         }
     }
 
-    public static clearRegistry() {
+    public static clearRegistry(): void {
         this.registry.forEach((value, key, map) => {
             value.remove();
         });
@@ -31,7 +29,7 @@ export abstract class DOMWrapper {
     }
 
     // Returns true if remove was successful, otherwise returns false;
-    public static removeElementById(id: string) {
+    public static removeElementById(id: string): boolean {
         if (this.registry.has(id)) {
             this.registry.get(id).remove();
             this.registry.delete(id);
@@ -42,7 +40,7 @@ export abstract class DOMWrapper {
     }
 
     // Returns the element if found, otherwise returns undefined;
-    public static getElementById(id: string) {
+    public static getElementById(id: string): p5.Element | undefined {
         return this.registry.get(id);
     }
 }

@@ -12,13 +12,15 @@ import {
 import {createLabel, createLabeledInput, setOnInputUnlessItAlreadyExists} from "./ui_util";
 import {PreviewDisplay} from "./preview_display";
 import {Options} from "./pages/options";
+import {Ticker, TickerState} from "./ticker";
 
 export abstract class KeyBindingsUi {
     private static SET_BUTTON_INACTIVE_TEXT: string = "Set";
     private static SET_BUTTON_ACTIVE_TEXT: string = "Press Any Key";
     private static numTracks: number = 4;
 
-    public static draw(p: p5, parentElement: p5.Element, pageStyleClass: string) {
+    public static create(parentElement: p5.Element, pageStyleClass: string) {
+        let p: p5 = global.p5Scene.sketchInstance;
         let keyBindingsSectionHeader = this.createKeyBindingsSectionHeader();
         if (!keyBindingsSectionHeader.alreadyExists) {
             parentElement.child(keyBindingsSectionHeader.element);
@@ -97,6 +99,18 @@ export abstract class KeyBindingsUi {
         }, "keyBindingsSectionHeader");
 
         return container;
+    }
+
+    private static isNumberOfTracksValid(value: string | number): boolean {
+        let numberValue: number = getNumber(value);
+    }
+    private static showNumberOfTracksInfo(): void {
+        Ticker.setMessage("",
+            TickerState.INFORMATION);
+    }
+    private static showNumberOfTracksError(): void {
+        Ticker.setMessage("",
+            TickerState.ERROR);
     }
 
     private static createKeyBindingInput(trackNumber: number, numTracks: number, customClass: string)
