@@ -3,21 +3,26 @@ import {DOMWrapper} from "./dom_wrapper";
 import {global} from "./index";
 import {KeyBindingHelper} from "./key_binding_helper";
 import {
-    findBindingInfoForTrack, generatePreviewNotes, getFirstElementByTagName,
+    findBindingInfoForTrack, generatePreviewNotes, getFirstElementByTagName, getInt,
     getKeyString,
     initializeKeyBindings,
     isKeyBindingsDefined,
     setConfigKeyBinding
 } from "./util";
-import {createLabel, createLabeledInput, setOnInputUnlessItAlreadyExists} from "./ui_util";
+import {createLabel, createLabeledInput, createUserInput, setOnInputUnlessItAlreadyExists} from "./ui_util";
 import {PreviewDisplay} from "./preview_display";
 import {Options} from "./pages/options";
 import {Ticker, TickerState} from "./ticker";
 
 export abstract class KeyBindingsUi {
-    private static SET_BUTTON_INACTIVE_TEXT: string = "Set";
-    private static SET_BUTTON_ACTIVE_TEXT: string = "Press Any Key";
-    private static numTracks: number = 4;
+    private static readonly SET_BUTTON_INACTIVE_TEXT: string = "Set";
+    private static readonly SET_BUTTON_ACTIVE_TEXT: string = "Press Any Key";
+    private static readonly DEFAULT_NUM_TRACKS: number = 4;
+    private static numTracks: number;
+
+    public static resetNumTracks(): void {
+        this.numTracks = KeyBindingsUi.DEFAULT_NUM_TRACKS;
+    }
 
     public static create(parentElement: p5.Element, pageStyleClass: string) {
         let p: p5 = global.p5Scene.sketchInstance;
@@ -27,25 +32,19 @@ export abstract class KeyBindingsUi {
         }
 
         if (this.numTracks == undefined) {
-            this.numTracks = 4;
+            this.numTracks = this.DEFAULT_NUM_TRACKS;
         }
-        let previewNumTracks = createLabeledInput("Number of Tracks", "previewNumTracksInput",
-            this.numTracks.toString(), Options.OPTIONS_CLASS);
-        // @ts-ignore
-        setOnInputUnlessItAlreadyExists(previewNumTracks, () => {
-            let value: string | number = previewNumTracks.element.value();
-            if (typeof value === "string") {
-                value = parseInt(value);
-            }
-            if (Number.isInteger(value) && value > 0 && value <= 26) {
+        createUserInput( () => createLabeledInput("Number of Tracks", "previewNumTracksInput",
+            this.numTracks.toString(), Options.OPTIONS_CLASS),
+            this.isValidNumberOfTracks.bind(this),
+            this.showNumberOfTracksInfo.bind(this),
+            this.showNumberOfTracksError.bind(this),
+            (input: number | string) => {
                 KeyBindingsUi.removeOldBindingButtons(this.numTracks);
-                this.numTracks = value;
-                global.previewDisplay = new PreviewDisplay(generatePreviewNotes(value), global.config, global.p5Scene);
-            }
-        });
-        if (!previewNumTracks.alreadyExists) {
-            parentElement.child(previewNumTracks.element.parent());
-        }
+                this.numTracks = getInt(input);
+                this.regeneratePreview();
+            },
+            parentElement);
 
         let keyBindingsQuickstartButton = DOMWrapper.create(() => {
             return p.createButton("Key-Bindings Quickstart");
@@ -101,15 +100,16 @@ export abstract class KeyBindingsUi {
         return container;
     }
 
-    private static isNumberOfTracksValid(value: string | number): boolean {
-        let numberValue: number = getNumber(value);
+    private static isValidNumberOfTracks(value: string | number): boolean {
+        let numberValue: number = getInt(value);
+        return Number.isInteger(numberValue) && numberValue > 0 && numberValue <= 26;
     }
     private static showNumberOfTracksInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Show options for the number of note tracks you'll be playing with.",
             TickerState.INFORMATION);
     }
     private static showNumberOfTracksError(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Error: must be an integer number between 1 and 26.",
             TickerState.ERROR);
     }
 
@@ -211,5 +211,9 @@ export abstract class KeyBindingsUi {
         for (let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
             DOMWrapper.removeElementById(this.getKeyBindingButtonId(trackNumber, numTracks));
         }
+    }
+
+    public static regeneratePreview() {
+        global.previewDisplay = new PreviewDisplay(generatePreviewNotes(this.numTracks), global.config, global.p5Scene);
     }
 }

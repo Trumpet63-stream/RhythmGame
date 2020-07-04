@@ -2,10 +2,13 @@ import * as p5 from "p5";
 import {global} from "./index";
 import {PageManager, PAGES} from "./page_manager";
 import {
-    enumToStringArray,
-    getFirstElementByTagName,
+    enumToString,
+    enumToStringArray, generatePreviewNotes,
+    getFirstElementByTagName, getInt,
 } from "./util";
 import {DOMWrapper} from "./dom_wrapper";
+import {Options} from "./pages/options";
+import {PreviewDisplay} from "./preview_display";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -113,7 +116,7 @@ function createCheckbox(p: p5, initialState: boolean): p5.Element {
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
-export function createLabeledSelect(labelString: string, selectId: string, optionsEnum: any, initialEnumValue: any,
+export function createLabeledSelect(labelString: string, selectId: string, OptionsEnum: any, initialEnumValue: any,
                                     customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
@@ -142,13 +145,13 @@ export function createLabeledSelect(labelString: string, selectId: string, optio
     }, selectId + "Container");
 
     if (!container.alreadyExists) {
-        let initialOptions = enumToStringArray(optionsEnum);
+        let initialOptions = enumToStringArray(OptionsEnum);
         for (let i = 0; i < initialOptions.length; i++) {
             // @ts-ignore
             select.option(initialOptions[i]);
         }
         // @ts-ignore
-        select.selected(optionsEnum[initialEnumValue as keyof typeof optionsEnum].toString());
+        select.selected(enumToString(OptionsEnum, initialEnumValue));
 
         let options: HTMLCollection = select.elt.children;
         for (let i = 0; i < options.length; i++) {
@@ -279,6 +282,14 @@ export function booleanToYesNo(boolean: boolean): YesNo {
     }
 }
 
+export function yesNoToBoolean(yesNo: YesNo): boolean {
+    if (yesNo === YesNo.Yes) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5
 export function encloseEachInputLabelPairIntoASubDiv(p: p5, radioDivP5Element: p5.Element) {
     const inputs: p5.Element[] = selectAll(p, 'input', radioDivP5Element);
@@ -337,4 +348,37 @@ function selectAll(p: p5, tagName: string, container: p5.Element): p5.Element[] 
     }
     let id = "#" + container.id();
     return p.selectAll(tagName, id);
+}
+
+export function createUserInput(create: () => {element: p5.Element, alreadyExists: boolean},
+                                isValidInput: (input: number | string) => boolean,
+                                showInfo: () => void,
+                                showError: () => void,
+                                onValidInput: (input: number | string) => void,
+                                parent: p5.Element
+): {element: p5.Element, alreadyExists: boolean} {
+    let created: {element: p5.Element, alreadyExists: boolean} = create();
+    if (!created.alreadyExists) {
+        let element = created.element;
+        parent.child(element.parent());
+        element.mouseClicked(() => {
+            let value: string | number = element.value();
+            if (isValidInput(value)) {
+                showInfo();
+            } else {
+                showError();
+            }
+        });
+        // @ts-ignore
+        element.input(() => {
+            let value: string | number = element.value();
+            if (isValidInput(value)) {
+                showInfo();
+                onValidInput(value);
+            } else {
+                showError();
+            }
+        });
+    }
+    return created
 }

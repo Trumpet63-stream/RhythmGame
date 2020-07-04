@@ -243,3 +243,26 @@ export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
 export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile) {
     global.playingDisplay = new PlayingDisplay(tracks, audioFile, global.config, global.p5Scene);
 }
+
+export function enumToString(TheEnum: any, value: any) {
+    return TheEnum[value as keyof typeof TheEnum].toString();
+}
+
+export function getFloat(value: string | number): number {
+    if (typeof value === "string") {
+        return parseFloat(value);
+    }
+    return value;
+}
+
+export function getInt(value: string | number): number {
+    if (typeof value === "string") {
+        return parseInt(value);
+    }
+    return value;
+}
+
+export function getEnum(value: string | number, EnumType: any): any {
+    let string: string = String(value);
+    return EnumType[string as keyof typeof EnumType];
+}

@@ -4,11 +4,10 @@ import {
     booleanToYesNo,
     createLabeledInput,
     createLabeledSelect,
-    createLabeledTextArea,
+    createLabeledTextArea, createUserInput,
     drawHeading,
     setElementToBottom,
-    setOnInputUnlessItAlreadyExists,
-    YesNo
+    YesNo, yesNoToBoolean
 } from "../ui_util";
 import {global} from "../index";
 import {Accuracy} from "../accuracy_manager";
@@ -16,6 +15,7 @@ import {DOMWrapper} from "../dom_wrapper";
 import {Config} from "../config";
 import {KeyBindingsUi} from "../key_bindings_ui";
 import {Ticker, TickerState} from "../ticker";
+import {getEnum, getFloat} from "../util";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -50,228 +50,140 @@ export abstract class Options {
             resetConfigButton.element.mousePressed(() => {
                 global.config = new Config({});
                 global.config.save();
+                KeyBindingsUi.resetNumTracks();
+                KeyBindingsUi.regeneratePreview();
+                DOMWrapper.clearRegistry();
             });
 
             scrollDiv.element.child(resetConfigButton.element);
         }
 
-        let pauseAtStartInSecondsInput = createLabeledInput("Pause at Start (sec)", "pauseAtStartInSecondsInput",
-            global.config.pauseAtStartInSeconds.toString(), Options.OPTIONS_CLASS);
-        if (!pauseAtStartInSecondsInput.alreadyExists) {
-            scrollDiv.element.child(pauseAtStartInSecondsInput.element.parent());
-            pauseAtStartInSecondsInput.element.mouseClicked(() => {
-                let value: string | number = pauseAtStartInSecondsInput.element.value();
-                if (this.isValidPauseAtStart(value)) {
-                    this.showPauseAtStartInfo();
-                } else {
-                    this.showPauseAtStartError();
-                }
-            })
-            // @ts-ignore
-            pauseAtStartInSecondsInput.element.input(() => {
-                let value: string | number = pauseAtStartInSecondsInput.element.value();
-                if (this.isValidPauseAtStart(value)) {
-                    this.showPauseAtStartInfo();
-                    global.config.pauseAtStartInSeconds = getNumber(value);
-                    global.config.save();
-                } else {
-                    this.showPauseAtStartError();
-                }
-            });
-        }
+        createUserInput(() => createLabeledInput("Pause at Start (sec)",
+            "pauseAtStartInSecondsInput", global.config.pauseAtStartInSeconds.toString(), Options.OPTIONS_CLASS),
+            this.isValidPauseAtStart.bind(this),
+            this.showPauseAtStartInfo.bind(this),
+            this.showPauseAtStartError.bind(this),
+            (input: number | string) => {
+                global.config.pauseAtStartInSeconds = getFloat(input);
+                global.config.save();
+            },
+            scrollDiv.element);
 
-        let scrollSpeedInput = createLabeledInput("Scroll Speed (px/sec)", "scrollSpeedInput",
-            global.config.pixelsPerSecond.toString(), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(scrollSpeedInput, () => {
-            let value: string | number = scrollSpeedInput.element.value();
-            if (typeof value === "string") {
-                value = parseFloat(value);
-            }
-            if (!isNaN(value) && value > 0) {
-                global.config.pixelsPerSecond = value;
+        createUserInput(() => createLabeledInput("Scroll Speed (px/sec)",
+            "scrollSpeedInput", global.config.pixelsPerSecond.toString(), Options.OPTIONS_CLASS),
+            this.isValidScrollSpeed.bind(this),
+            this.showScrollSpeedInfo.bind(this),
+            this.showScrollSpeedError.bind(this),
+            (input: number | string) => {
+                global.config.pixelsPerSecond = getFloat(input);
                 global.config.save();
-            }
-        });
-        if (!scrollSpeedInput.alreadyExists) {
-            scrollDiv.element.child(scrollSpeedInput.element.parent());
-            scrollSpeedInput.element.mouseClicked(() => {
-                let value: string | number = scrollSpeedInput.element.value();
-                if (this.isValidScrollSpeed(value)) {
-                    this.showScrollSpeedInfo();
-                } else {
-                    this.showScrollSpeedError();
-                }
-            })
-            // @ts-ignore
-            scrollSpeedInput.element.input(() => {
-                let value: string | number = scrollSpeedInput.element.value();
-                if (this.isValidScrollSpeed(value)) {
-                    this.showScrollSpeedInfo();
-                    global.config.pixelsPerSecond = value;
-                    global.config.save();
-                } else {
-                    this.showScrollSpeedError();
-                }
-            });
-        }
+            },
+            scrollDiv.element);
 
-        let scrollDirectionSelect = createLabeledSelect("Scroll Direction", "scrollDirectionSelect",
-            ScrollDirection, global.config.scrollDirection, Options.OPTIONS_CLASS);
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(scrollDirectionSelect.element.parent());
-            scrollDirectionSelect.element.mouseClicked(() => {
-                let value: string | number = scrollDirectionSelect.element.value();
-                if (this.isValidScrollDirection(value)) {
-                    this.showScrollDirectionInfo();
-                } else {
-                    this.showScrollDirectionError();
-                }
-            })
-            // @ts-ignore
-            scrollDirectionSelect.element.input(() => {
-                let value: string | number = scrollDirectionSelect.element.value();
-                if (this.isValidScrollDirection(value)) {
-                    this.showScrollDirectionInfo();
-                    global.config.scrollDirection = getEnum(value, ScrollDirection);
-                    global.config.save()
-                } else {
-                    this.showScrollDirectionError();
-                }
-            });
-        }
+        createUserInput(() => createLabeledSelect("Scroll Direction",
+            "scrollDirectionSelect", ScrollDirection, global.config.scrollDirection, Options.OPTIONS_CLASS),
+            this.isValidScrollDirection.bind(this),
+            this.showScrollDirectionInfo.bind(this),
+            this.showScrollDirectionError.bind(this),
+            (input: number | string) => {
+                global.config.scrollDirection = getEnum(input, ScrollDirection);
+                global.config.save();
+            },
+            scrollDiv.element);
 
-        let receptorPositionInput = createLabeledInput("Receptor Position (%)", "receptorPositionInput",
-            global.config.receptorYPercent.toString(), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(receptorPositionInput, () => {
-            let value: string | number = receptorPositionInput.element.value();
-            if (typeof value === "string") {
-                value = parseFloat(value);
-            }
-            if (!isNaN(value)) {
-                global.config.receptorYPercent = value;
+        createUserInput(() => createLabeledInput("Receptor Position (%)",
+            "receptorPositionInput", global.config.receptorYPercent.toString(), Options.OPTIONS_CLASS),
+            this.isValidReceptorPosition.bind(this),
+            this.showReceptorPositionInfo.bind(this),
+            this.showReceptorPositionError.bind(this),
+            (input: number | string) => {
+                global.config.receptorYPercent = getFloat(input);
                 global.config.save();
-            }
-        });
-        if (!receptorPositionInput.alreadyExists) {
-            scrollDiv.element.child(receptorPositionInput.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let additionalOffsetInSecondsInput = createLabeledInput("Accuracy Offset (ms)", "additionalOffsetInSecondsInput",
-            (global.config.additionalOffsetInSeconds * 1000).toString(), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(additionalOffsetInSecondsInput, () => {
-            let value: string | number = additionalOffsetInSecondsInput.element.value();
-            if (typeof value === "string") {
-                value = parseFloat(value);
-            }
-            if (!isNaN(value)) {
-                global.config.additionalOffsetInSeconds = value / 1000;
+        createUserInput(() => createLabeledInput("Accuracy Offset (ms)",
+            "additionalOffsetInput", (global.config.additionalOffsetInSeconds * 1000).toString(),
+            Options.OPTIONS_CLASS),
+            this.isValidAdditionalOffset.bind(this),
+            this.showAdditionalOffsetInfo.bind(this),
+            this.showAdditionalOffsetError.bind(this),
+            (input: number | string) => {
+                global.config.additionalOffsetInSeconds = getFloat(input) / 1000;
                 global.config.save();
-            }
-        });
-        if (!additionalOffsetInSecondsInput.alreadyExists) {
-            scrollDiv.element.child(additionalOffsetInSecondsInput.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let accuracySettingsInput = createLabeledTextArea("Accuracy Settings", "accuracySettingsInput",
-            JSON.stringify(global.config.accuracySettings, null, 3), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(accuracySettingsInput, () => {
-            let value: string | number = accuracySettingsInput.element.value();
-            if (typeof value === "string") {
-                let newAccuracySettings: Accuracy[] = parseAccuracySettingsJson(value);
-                if (newAccuracySettings !== null) {
-                    global.config.accuracySettings = newAccuracySettings;
-                    global.config.save();
-                }
-            }
-        })
-        if (!accuracySettingsInput.alreadyExists) {
-            scrollDiv.element.child(accuracySettingsInput.element.parent());
-        }
+        createUserInput(() => createLabeledTextArea("Accuracy Settings",
+            "accuracySettingsInput", JSON.stringify(global.config.accuracySettings, null, 3),
+            Options.OPTIONS_CLASS),
+            this.isValidAccuracySettings.bind(this),
+            this.showAccuracySettingsInfo.bind(this),
+            this.showAccuracySettingsError.bind(this),
+            (input: number | string) => {
+                global.config.accuracySettings = parseAccuracySettingsJson(String(input));
+                global.config.save();
+            },
+            scrollDiv.element);
 
-        let accuracyFlashEnabledSelect = createLabeledSelect("Accuracy Flash", "accuracyFlashEnabledSelect",
-            YesNo, booleanToYesNo(global.config.isAccuracyFlashEnabled), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(accuracyFlashEnabledSelect, () => {
-            let value: string = String(accuracyFlashEnabledSelect.element.value());
-            let enumOfValue = YesNo[value as keyof typeof YesNo];
-            if (enumOfValue === YesNo.Yes) {
-                global.config.isAccuracyFlashEnabled = true;
+        createUserInput(() => createLabeledSelect("Accuracy Flash",
+            "accuracyFlashEnabledSelect", YesNo, booleanToYesNo(global.config.isAccuracyFlashEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidAccuracyFlash.bind(this),
+            this.showAccuracyFlashInfo.bind(this),
+            this.showAccuracyFlashError.bind(this),
+            (input: number | string) => {
+                global.config.isAccuracyFlashEnabled = yesNoToBoolean(getEnum(input, YesNo));
                 global.config.save();
-            } else if (enumOfValue === YesNo.No) {
-                global.config.isAccuracyFlashEnabled = false;
-                global.config.save();
-            }
-        });
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(accuracyFlashEnabledSelect.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let accuracyParticlesEnabledSelect = createLabeledSelect("Accuracy Particles", "accuracyParticlesEnabledSelect",
-            YesNo, booleanToYesNo(global.config.isAccuracyParticlesEnabled), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(accuracyParticlesEnabledSelect, () => {
-            let value: string = String(accuracyParticlesEnabledSelect.element.value());
-            let enumOfValue = YesNo[value as keyof typeof YesNo];
-            if (enumOfValue === YesNo.Yes) {
-                global.config.isAccuracyParticlesEnabled = true;
+        createUserInput(() => createLabeledSelect("Accuracy Particles",
+            "accuracyParticlesEnabledSelect", YesNo, booleanToYesNo(global.config.isAccuracyParticlesEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidAccuracyParticles.bind(this),
+            this.showAccuracyParticlesInfo.bind(this),
+            this.showAccuracyParticlesError.bind(this),
+            (input: number | string) => {
+                global.config.isAccuracyParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
                 global.config.save();
-            } else if (enumOfValue === YesNo.No) {
-                global.config.isAccuracyParticlesEnabled = false;
-                global.config.save();
-            }
-        });
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(accuracyParticlesEnabledSelect.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let accuracyTextEnabledSelect = createLabeledSelect("Accuracy Text", "accuracyTextEnabledSelect",
-            YesNo, booleanToYesNo(global.config.isAccuracyTextEnabled), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(accuracyTextEnabledSelect, () => {
-            let value: string = String(accuracyTextEnabledSelect.element.value());
-            let enumOfValue = YesNo[value as keyof typeof YesNo];
-            if (enumOfValue === YesNo.Yes) {
-                global.config.isAccuracyTextEnabled = true;
+        createUserInput(() => createLabeledSelect("Accuracy Text",
+            "accuracyTextEnabledSelect", YesNo, booleanToYesNo(global.config.isAccuracyTextEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidAccuracyText.bind(this),
+            this.showAccuracyTextInfo.bind(this),
+            this.showAccuracyTextError.bind(this),
+            (input: number | string) => {
+                global.config.isAccuracyTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
                 global.config.save();
-            } else if (enumOfValue === YesNo.No) {
-                global.config.isAccuracyTextEnabled = false;
-                global.config.save();
-            }
-        });
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(accuracyTextEnabledSelect.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let holdParticlesEnabledSelect = createLabeledSelect("Hold Particles", "holdParticlesEnabledSelect",
-            YesNo, booleanToYesNo(global.config.isHoldParticlesEnabled), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(holdParticlesEnabledSelect, () => {
-            let value: string = String(holdParticlesEnabledSelect.element.value());
-            let enumOfValue = YesNo[value as keyof typeof YesNo];
-            if (enumOfValue === YesNo.Yes) {
-                global.config.isHoldParticlesEnabled = true;
+        createUserInput(() => createLabeledSelect("Hold Particles",
+            "holdParticlesEnabledSelect", YesNo, booleanToYesNo(global.config.isHoldParticlesEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidHoldParticles.bind(this),
+            this.showHoldParticlesInfo.bind(this),
+            this.showHoldParticlesError.bind(this),
+            (input: number | string) => {
+                global.config.isHoldParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
                 global.config.save();
-            } else if (enumOfValue === YesNo.No) {
-                global.config.isHoldParticlesEnabled = false;
-                global.config.save();
-            }
-        });
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(holdParticlesEnabledSelect.element.parent());
-        }
+            },
+            scrollDiv.element);
 
-        let holdGlowEnabledSelect = createLabeledSelect("Hold Glow", "holdGlowEnabledSelect",
-            YesNo, booleanToYesNo(global.config.isHoldGlowEnabled), Options.OPTIONS_CLASS);
-        setOnInputUnlessItAlreadyExists(holdGlowEnabledSelect, () => {
-            let value: string = String(holdGlowEnabledSelect.element.value());
-            let enumOfValue = YesNo[value as keyof typeof YesNo];
-            if (enumOfValue === YesNo.Yes) {
-                global.config.isHoldGlowEnabled = true;
+        createUserInput(() => createLabeledSelect("Hold Glow",
+            "holdGlowEnabledSelect", YesNo, booleanToYesNo(global.config.isHoldGlowEnabled), Options.OPTIONS_CLASS),
+            this.isValidHoldGlow.bind(this),
+            this.showHoldGlowInfo.bind(this),
+            this.showHoldGlowError.bind(this),
+            (input: number | string) => {
+                global.config.isHoldGlowEnabled = yesNoToBoolean(getEnum(input, YesNo));
                 global.config.save();
-            } else if (enumOfValue === YesNo.No) {
-                global.config.isHoldGlowEnabled = false;
-                global.config.save();
-            }
-        });
-        if (!scrollDirectionSelect.alreadyExists) {
-            scrollDiv.element.child(holdGlowEnabledSelect.element.parent());
-        }
+            },
+            scrollDiv.element);
 
         KeyBindingsUi.create(scrollDiv.element, Options.OPTIONS_CLASS);
 
@@ -282,7 +194,7 @@ export abstract class Options {
     }
 
     private static isValidPauseAtStart(value: string | number): boolean {
-        return this.isNumberGreaterThanOrEqualZero(value);
+        return this.isFloatGreaterThanOrEqualZero(value);
     }
     private static showPauseAtStartInfo(): void {
         Ticker.setMessage("Delay the start of the song to give yourself more time to get ready.",
@@ -293,7 +205,7 @@ export abstract class Options {
     }
 
     private static isValidScrollSpeed(value: string | number): boolean {
-        return this.isNumberGreaterThanOrEqualZero(value);
+        return this.isFloatGreaterThanOrEqualZero(value);
     }
     private static showScrollSpeedInfo(): void {
         Ticker.setMessage("The movement speed of the notes. Higher values will make the notes look farther apart.",
@@ -312,118 +224,133 @@ export abstract class Options {
             TickerState.INFORMATION);
     }
     private static showScrollDirectionError(): void {
-        Ticker.setMessage("Error: huh... not sure how you did that.",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isReceptorPositionValid(value: string | number): boolean {
-        let numberValue: number = getNumber(value);
-        return !isNaN(numberValue);
+    private static isValidReceptorPosition(value: string | number): boolean {
+        return this.isFloat(value);
     }
     private static showReceptorPositionInfo(): void {
-        Ticker.setMessage("",
+        let oppositeDirection: string;
+        if (global.config.scrollDirection === ScrollDirection.Down) {
+            oppositeDirection = "up";
+        } else {
+            oppositeDirection = "down";
+        }
+        Ticker.setMessage("Increase this value to move the receptors " + oppositeDirection + ".",
             TickerState.INFORMATION);
     }
     private static showReceptorPositionError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showValueNotNumberError();
     }
 
-    private static isAdditionalOffsetValid(value: string | number): boolean {
-        let numberValue: number = getNumber(value);
+    private static isValidAdditionalOffset(value: string | number): boolean {
+        return this.isFloat(value);
     }
     private static showAdditionalOffsetInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Shifts the time position of all the notes. Use this to help synchronize the music.",
             TickerState.INFORMATION);
     }
     private static showAdditionalOffsetError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showValueNotNumberError();
     }
 
-    private static isAccuracySettingsValid(value: string | number): boolean {
+    private static isValidAccuracySettings(value: string | number): boolean {
         let stringValue: string = String(value);
+        return parseAccuracySettingsJson(stringValue) !== null;
     }
     private static showAccuracySettingsInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Controls what happens when you hit a note too early, too late, or exactly right.",
             TickerState.INFORMATION);
     }
     private static showAccuracySettingsError(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Error: unable to parse the JSON text.",
             TickerState.ERROR);
     }
 
-    private static isAccuracyFlashValid(value: string | number): boolean {
-        let enumValue: YesNo = getEnum(value, YesNo);
+    private static isValidAccuracyFlash(value: string | number): boolean {
+        return this.isValidYesNo(value);
     }
     private static showAccuracyFlashInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("A flash effect that shows on the receptors when you hit a note.",
             TickerState.INFORMATION);
     }
     private static showAccuracyFlashError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isAccuracyParticlesValid(value: string | number): boolean {
-        let enumValue: YesNo = getEnum(value, YesNo);
+    private static isValidAccuracyParticles(value: string | number): boolean {
+        return this.isValidYesNo(value);
     }
     private static showAccuracyParticlesInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Particles that shoot out of the receptors when you hit a note.",
             TickerState.INFORMATION);
     }
     private static showAccuracyParticlesError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isAccuracyTextValid(value: string | number): boolean {
-        let enumValue: YesNo = getEnum(value, YesNo);
+    private static isValidAccuracyText(value: string | number): boolean {
+        return this.isValidYesNo(value);
     }
     private static showAccuracyTextInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Text that pops up telling you what accuracy you hit a note with.",
             TickerState.INFORMATION);
     }
     private static showAccuracyTextError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isHoldParticlesValid(value: string | number): boolean {
-        let enumValue: YesNo = getEnum(value, YesNo);
+    private static isValidHoldParticles(value: string | number): boolean {
+        return this.isValidYesNo(value);
     }
     private static showHoldParticlesInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("Particles that shoot out while you're holding a note.",
             TickerState.INFORMATION);
     }
     private static showHoldParticlesError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isHoldGlowValid(value: string | number): boolean {
-        let enumValue: YesNo = getEnum(value, YesNo);
+    private static isValidHoldGlow(value: string | number): boolean {
+        return this.isValidYesNo(value);
     }
     private static showHoldGlowInfo(): void {
-        Ticker.setMessage("",
+        Ticker.setMessage("A glow effect on the receptors that shows when you're holding a note.",
             TickerState.INFORMATION);
     }
     private static showHoldGlowError(): void {
-        Ticker.setMessage("",
-            TickerState.ERROR);
+        this.showSelectError();
     }
 
-    private static isNumberGreaterThanOrEqualZero(value: string | number) {
-        let numberValue: number = getNumber(value);
-        if (!isNaN(numberValue) && numberValue >= 0) {
-            return true;
-        }
-        return false;
+    private static isFloatGreaterThanOrEqualZero(value: string | number) {
+        let numberValue: number = getFloat(value);
+        return !isNaN(numberValue) && numberValue >= 0;
     }
 
     private static showNumberNotGreaterThanOrEqualZeroError() {
         Ticker.setMessage("Error: must be a number greater than or equal to zero.",
             TickerState.ERROR);
+    }
+
+    private static isValidYesNo(value: string | number) {
+        let enumValue: YesNo = getEnum(value, YesNo);
+        return enumValue !== undefined;
+    }
+
+    private static showSelectError() {
+        Ticker.setMessage("Error: huh... not sure how you did that.",
+            TickerState.ERROR);
+    }
+
+    private static showValueNotNumberError() {
+        Ticker.setMessage("Error: must be a number.",
+            TickerState.ERROR);
+    }
+
+    private static isFloat(value: string | number) {
+        let numberValue: number = getFloat(value);
+        return !isNaN(numberValue);
     }
 }
 
@@ -440,16 +367,4 @@ function parseAccuracySettingsJson(accuracySettingsJson: string): Accuracy[] {
     } catch (e) {
     }
     return null;
-}
-
-function getNumber(value: string | number): number {
-    if (typeof value === "string") {
-        return parseFloat(value);
-    }
-    return value;
-}
-
-function getEnum(value: string | number, EnumType: any): any {
-    let string: string = String(value);
-    return EnumType[string as keyof typeof EnumType];
 }
