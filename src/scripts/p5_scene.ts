@@ -24,7 +24,7 @@ export class P5Scene {
                 global.noteSkin = new NoteSkin(
                     p.loadImage("../assets/arrow_blue_v3.png"),
                     p.loadImage("../assets/connector_tile_resize.png"),
-                    p.loadImage("../assets/tail_resize.png"),
+                    p.loadImage("../assets/tail_square.png"),
                     p.loadImage("../assets/arrow_receptor.png")
                 );
                 global.playFromFileBackground = p.loadImage("../assets/play_from_file_background.jpg");

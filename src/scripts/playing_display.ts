@@ -51,6 +51,7 @@ export class PlayingDisplay {
     private holdParticles: HoldParticles;
     private holdGlow: HoldGlow;
     private audioFile: AudioFile;
+    private timeDiffInterval: number;
 
     constructor(tracks: Note[][], audioFile: AudioFile, config: Config, scene: P5Scene) {
         this.showResultsScreen = false;
@@ -62,6 +63,16 @@ export class PlayingDisplay {
         if (!this.isDebugMode) {
             this.timeManager = new TimeManager(performance.now(), this.config);
             this.audioFile.play(config.pauseAtStartInSeconds);
+
+            // This is just for debugging
+            this.timeDiffInterval = setInterval(() => {
+                let audioTime = this.audioFile.getCurrentTimeInSeconds();
+                console.log("Audio time: " + audioTime);
+                let gameTime = this.timeManager.getGameTime(performance.now());
+                console.log("Game time: " + gameTime);
+                let timeDiff = audioTime - gameTime;
+                console.log("Time diff: " + timeDiff);
+            }, 5000);
         }
 
         this.noteManager = new NoteManager(tracks);
@@ -163,6 +174,7 @@ export class PlayingDisplay {
             this.scene.sketchInstance, this.accuracyRecording);
         PageManager.setCurrentPage(PAGES.RESULTS);
         this.unbindKeys();
+        clearInterval(this.timeDiffInterval);
     }
 
     private bindKeyBindingsToActions() {
@@ -226,6 +238,7 @@ export class PlayingDisplay {
     }
 
     private unbindKeys() {
+        global.keyboardEventManager.unbindKey(global.config.quitKey);
         let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];

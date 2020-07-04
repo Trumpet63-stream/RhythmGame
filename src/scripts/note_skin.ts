@@ -101,10 +101,12 @@ export class NoteSkin {
             p.angleMode(p.DEGREES);
             p.translate(centerX, centerY);
             p.rotate(180);
-            p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2);
+            p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
+            // p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2);
             p.pop();
         } else {
-            p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize / 2);
+            p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize);
+            // p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize / 2);
         }
     }
 

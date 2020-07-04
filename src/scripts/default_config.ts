@@ -7,8 +7,6 @@ export let DEFAULT_CONFIG = {
     receptorYPercent: 15,
     additionalOffsetInSeconds: 0,
     // This is a symmetrical version of FFR's accuracy
-    // TODO: Add a list of presets that live in their own file
-    // TODO: validation on accuracy settings that explains why miss shouldn't have lower bound
     accuracySettings: [
         new Accuracy("Miss", null,-117),
         new Accuracy("Average", -117, -83),

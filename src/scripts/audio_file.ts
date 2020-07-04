@@ -14,6 +14,7 @@ export class AudioFile {
     public audioSource: AudioBufferSourceNode;
     public audioContext: AudioContext;
     public audioBuffer: AudioBuffer;
+    private playStartTime: number;
 
     public constructor() {
         this.state = AudioFileState.NO_AUDIO_FILE;
@@ -60,13 +61,19 @@ export class AudioFile {
     }
 
     public play(delayInSeconds: number = 0) {
-        this.audioSource.start(this.audioContext.currentTime + delayInSeconds);
+        let currentTime = this.audioContext.currentTime;
+        this.playStartTime = currentTime;
+        this.audioSource.start(currentTime + delayInSeconds);
     }
 
     public stop() {
         this.audioSource.stop(0);
         this.state = AudioFileState.DONE_READING;
         this.recreateSourceNode();
+    }
+
+    public getCurrentTimeInSeconds(): number {
+        return this.audioContext.currentTime - this.playStartTime;
     }
 
     private recreateSourceNode() {
