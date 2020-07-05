@@ -382,3 +382,7 @@ export function createUserInput(create: () => {element: p5.Element, alreadyExist
     }
     return created
 }
+
+export function setElementClasses(element: p5.Element, ...classes: string[]) {
+    element.class(classes.join(" "));
+}

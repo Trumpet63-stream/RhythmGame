@@ -12,6 +12,7 @@ import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../uti
 import {Mode} from "../parsing/parse_sm";
 import {PageManager, PAGES} from "../page_manager";
 import {DOMWrapper} from "../dom_wrapper";
+import {FileDropZone} from "../file_drop_zone";
 
 const playFromFileStepfile = new Stepfile();
 const playFromFileAudioFile = new AudioFile();
@@ -25,13 +26,15 @@ export abstract class PlayFromFile {
         let p: p5 = global.p5Scene.sketchInstance;
         p.background(global.playFromFileBackground);
 
+        FileDropZone.create(playFromFileStepfile, playFromFileAudioFile);
+
         let stepfileInput = createFileInput(getStepfileInputLabel(), "Choose Stepfile (.sm)", "stepfileInput",
             loadStepfileAndUpdateModeOptions, PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(stepfileInput, 0.43, 0.3, 268, 34);
+        setElementCenterPositionRelative(stepfileInput, 0.43, 0.35, 268, 34);
 
         let audioFileInput = createFileInput(getAudioFileInputLabel(), "Choose Audio File (.mp3, .ogg)", "audioFileInput",
-            playFromFileAudioFile.loadFile.bind(playFromFileAudioFile), PlayFromFile.PLAY_FROM_FILE_CLASS).element;
-        setElementCenterPositionRelative(audioFileInput, 0.43, 0.45, 325, 34);
+            loadAudioFile, PlayFromFile.PLAY_FROM_FILE_CLASS).element;
+        setElementCenterPositionRelative(audioFileInput, 0.43, 0.5, 325, 34);
 
         let playButtonId = "playButton";
         if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
@@ -58,12 +61,20 @@ export abstract class PlayFromFile {
             DOMWrapper.removeElementById(playButtonId);
         }
     }
+
+    public static resetModeOptions() {
+        global.stepfileModeOptions = undefined;
+        DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
+    }
 }
 
 function loadStepfileAndUpdateModeOptions(file: p5.File) {
-    playFromFileStepfile.loadFile.call(playFromFileStepfile, file);
-    global.stepfileModeOptions = undefined;
-    DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
+    playFromFileStepfile.loadFile.call(playFromFileStepfile, file.file);
+    PlayFromFile.resetModeOptions();
+}
+
+function loadAudioFile(file: p5.File) {
+    playFromFileAudioFile.loadFile.call(playFromFileAudioFile, file.file);
 }
 
 function drawModeSelect(p: p5, uniqueId: string): p5.Element {

@@ -1,4 +1,3 @@
-import * as p5 from "p5";
 
 export enum AudioFileState {
     NO_AUDIO_FILE,
@@ -20,8 +19,8 @@ export class AudioFile {
         this.state = AudioFileState.NO_AUDIO_FILE;
     }
 
-    public loadFile(file: p5.File) {
-        this.file = file.file; // this unwraps the p5.File wrapper to get the original DOM file
+    public loadFile(file: File) {
+        this.file = file;
         this.loadAudioData(this.file);
     }
 

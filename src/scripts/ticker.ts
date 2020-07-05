@@ -1,6 +1,7 @@
 import * as p5 from "p5";
 import {DOMWrapper} from "./dom_wrapper";
 import {global} from "./index";
+import {setElementClasses} from "./ui_util";
 
 export enum TickerState {
     INFORMATION,
@@ -52,8 +53,4 @@ export abstract class Ticker {
             setElementClasses(this.div, global.globalClass, customClass, this.errorClass);
         }
     }
-}
-
-function setElementClasses(element: p5.Element, ...classes: string[]) {
-    element.class(classes.join(" "));
 }

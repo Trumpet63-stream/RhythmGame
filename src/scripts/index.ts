@@ -1,6 +1,4 @@
 import {Config} from "./config";
-import {Stepfile} from "./stepfile";
-import {AudioFile} from "./audio_file";
 import {P5Scene} from "./p5_scene";
 import {OnlinePlaylist} from "./online_playlist";
 

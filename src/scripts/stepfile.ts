@@ -1,5 +1,4 @@
-import * as p5 from "p5";
-import {FullParse, getFullParse, getPartialParse, Note, NoteState, NoteType, PartialParse} from "./parsing/parse_sm";
+import {FullParse, getFullParse, getPartialParse, Note, PartialParse} from "./parsing/parse_sm";
 import {ParsingHelper} from "./playlist_client/parsing_helper";
 
 export enum StepfileState {
@@ -20,8 +19,8 @@ export class Stepfile {
         this.state = StepfileState.NO_STEPFILE;
     }
 
-    public loadFile(file: p5.File) {
-        this.file = file.file; // this unwraps the p5.File wrapper to get the original DOM file
+    public loadFile(file: File) {
+        this.file = file;
         this.loadTextFile(this.file, ((event: ProgressEvent<FileReader>) => {
             this.state = StepfileState.DONE_READING;
             this.partialParse = getPartialParse(<string>event.target.result);

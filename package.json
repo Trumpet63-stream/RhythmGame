@@ -25,8 +25,10 @@
   "homepage": "https://github.com/Trumpet63-stream/SimParser#readme",
   "version": "1.0.0",
   "dependencies": {
+    "@types/dropzone": "^5.7.0",
     "@types/p5": "^0.9.0",
     "@types/pako": "^1.0.1",
+    "dropzone": "^5.7.1",
     "p5": "^1.0.0",
     "pako": "^1.0.11"
   },
