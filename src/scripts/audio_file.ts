@@ -92,4 +92,3 @@ export class AudioFile {
         fileReader.addEventListener("loadend", listener, options);
     }
 }
-
