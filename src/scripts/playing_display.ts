@@ -117,10 +117,6 @@ export class PlayingDisplay {
     }
 
     private handleAccuracyEvent(accuracyEvent: AccuracyEvent) {
-        // console.log("Track #" + (accuracyEvent.trackNumber + 1) + " " + accuracyEvent.accuracyName +
-        //     (Math.abs(accuracyEvent.accuracyMillis) == Infinity ?
-        //         "" :
-        //         " (" + Math.round(accuracyEvent.accuracyMillis) + " ms)"));
         this.accuracyRecording.recordAccuracyEvent(accuracyEvent);
         this.accuracyFeedbackParticles.addParticlesForAccuracyEvent(accuracyEvent);
     }

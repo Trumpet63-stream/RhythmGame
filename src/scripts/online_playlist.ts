@@ -41,6 +41,7 @@ export class OnlinePlaylist {
     }
 
     public kickOffLoadPlaylist(indexUrl: string) {
+        this.indexUrl = indexUrl;
         this.state = OnlinePlaylistState.LOADING_PLAYLIST;
         this.playlistClient.initialize(indexUrl)
             .then(() => this.initializeDisplayedPlaylist())
@@ -53,8 +54,7 @@ export class OnlinePlaylist {
     }
 
     public kickOffLoadSong(displayedSongIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
-        this.state = OnlinePlaylistState.LOADING_SONG;
-        audioFile.state = AudioFileState.NO_AUDIO_FILE;
+        audioFile.reset();
         stepfile.state = StepfileState.NO_STEPFILE;
         this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
             .then((swfParseResponse) =>

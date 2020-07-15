@@ -236,7 +236,7 @@ export function getAccuracyEventName(timeDifferenceInMilliseconds: number, confi
 export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
     let stepfileReady = stepfile.state === StepfileState.PARTIALLY_PARSED ||
         stepfile.state === StepfileState.FULLY_PARSED;
-    let audioFileReady = audioFile.state === AudioFileState.BUFFERED;
+    let audioFileReady = audioFile.getState() === AudioFileState.BUFFERED;
     return stepfileReady && audioFileReady;
 }
 

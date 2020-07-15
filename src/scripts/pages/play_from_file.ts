@@ -135,7 +135,7 @@ function getStepfileInputLabel() {
 }
 
 function getAudioFileInputLabel() {
-    switch(playFromFileAudioFile.state) {
+    switch(playFromFileAudioFile.getState()) {
         case AudioFileState.NO_AUDIO_FILE:
             return "No file chosen";
             break;
