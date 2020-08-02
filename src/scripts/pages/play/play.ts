@@ -1,4 +1,4 @@
-import {global} from "../index";
+import {global} from "../../index";
 
 export abstract class Play {
     public static draw() {

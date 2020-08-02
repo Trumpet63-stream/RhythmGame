@@ -1,5 +1,5 @@
 import * as p5 from "p5";
-import {ScrollDirection} from "../scroll_direction";
+import {ScrollDirection} from "../../scroll_direction";
 import {
     booleanToYesNo,
     createLabeledInput,
@@ -8,14 +8,14 @@ import {
     drawHeading,
     setElementToBottom,
     YesNo, yesNoToBoolean
-} from "../ui_util";
-import {global} from "../index";
-import {Accuracy} from "../accuracy_manager";
-import {DOMWrapper} from "../dom_wrapper";
-import {Config} from "../config";
-import {KeyBindingsUi} from "../key_bindings_ui";
-import {Ticker, TickerState} from "../ticker";
-import {getEnum, getFloat} from "../util";
+} from "../../ui_util";
+import {global} from "../../index";
+import {Accuracy} from "../../accuracy_manager";
+import {DOMWrapper} from "../../dom_wrapper";
+import {Config} from "../../config";
+import {KeyBindingsUi} from "./key_bindings_ui";
+import {Ticker, TickerState} from "./ticker";
+import {getEnum, getFloat} from "../../util";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";

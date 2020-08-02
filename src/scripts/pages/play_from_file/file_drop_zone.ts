@@ -1,11 +1,11 @@
 import * as Dropzone from "dropzone";
-import {DOMWrapper} from "./dom_wrapper";
-import {setElementCenterPositionRelative, setElementClasses} from "./ui_util";
+import {DOMWrapper} from "../../dom_wrapper";
+import {setElementCenterPositionRelative, setElementClasses} from "../../ui_util";
 import * as p5 from "p5";
-import {global} from "./index";
-import {PlayFromFile} from "./pages/play_from_file";
-import {Stepfile} from "./stepfile";
-import {AudioFile} from "./audio_file";
+import {global} from "../../index";
+import {PlayFromFile} from "./play_from_file";
+import {Stepfile} from "../../stepfile";
+import {AudioFile} from "../../audio/audio_file";
 
 export abstract class FileDropZone {
     private static readonly PREVIEW_TEMPLATE: string = '<div></div>';

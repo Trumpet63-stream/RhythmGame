@@ -1,7 +1,7 @@
 import * as p5 from "p5";
 import {getKeyString, setConfigKeyBinding} from "./util";
 import {global} from "./index";
-import {KeyBindingsUi} from "./key_bindings_ui";
+import {KeyBindingsUi} from "./pages/options/key_bindings_ui";
 
 export interface KeyBinding {
     trackNumber: number,

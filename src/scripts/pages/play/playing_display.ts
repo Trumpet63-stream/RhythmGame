@@ -1,34 +1,34 @@
-import {P5Scene} from "./p5_scene";
-import {DisplayConfig, DisplayManager} from "./display_manager";
-import {NoteManager} from "./note_manager";
-import {TimeManager} from "./time_manager";
-import {MissManager} from "./miss_manager";
-import {AccuracyManager} from "./accuracy_manager";
-import {ScrollManager} from "./scroll_manager";
-import {ResultsDisplay} from "./results_display";
-import {Note} from "./parsing/parse_sm";
-import {HoldManager} from "./hold_manager";
-import {GameTimeProvider} from "./game_time_provider";
-import {Config} from "./config";
+import {P5Scene} from "../../p5_scene";
+import {DisplayConfig, DisplayManager} from "../../display_manager";
+import {NoteManager} from "../../note_manager";
+import {TimeManager} from "../../time_manager";
+import {MissManager} from "../../miss_manager";
+import {AccuracyManager} from "../../accuracy_manager";
+import {ScrollManager} from "../../scroll_manager";
+import {ResultsDisplay} from "../results/results_display";
+import {Note} from "../../parsing/parse_sm";
+import {HoldManager} from "../../hold_manager";
+import {GameTimeProvider} from "../../game_time_provider";
+import {Config} from "../../config";
 import {
     initializeKeyBindings,
     isKeyBindingsDefined,
     replaceNotYetImplementedNoteTypes,
     setAllNotesToDefaultState
-} from "./util";
-import {global} from "./index";
-import {KeyState, PlayerKeyAction} from "./player_key_action";
-import {KeyBinding} from "./key_binding_helper";
-import {PageManager, PAGES} from "./page_manager";
-import {AccuracyEvent, AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
-import {AccuracyFeedbackText} from "./accuracy_feedback_text";
-import {ReceptorShrinkReaction} from "./receptor_shrink_reaction";
-import {AccuracyFeedbackFlash} from "./accuracy_feedback_flash";
-import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
-import {HoldParticles} from "./hold_particles";
-import {HoldGlow} from "./hold_glow";
-import {ScrollDirection} from "./scroll_direction";
-import {AudioFile} from "./audio_file";
+} from "../../util";
+import {global} from "../../index";
+import {KeyState, PlayerKeyAction} from "../../player_key_action";
+import {KeyBinding} from "../../key_binding_helper";
+import {PageManager, PAGES} from "../../page_manager";
+import {AccuracyEvent, AccuracyRecording, AccuracyRecordingState} from "../../accuracy_recording";
+import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
+import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
+import {AccuracyFeedbackFlash} from "../../accuracy_feedback_flash";
+import {AccuracyFeedbackParticles} from "../../accuracy_feedback_particles";
+import {HoldParticles} from "../../hold_particles";
+import {HoldGlow} from "../../hold_glow";
+import {ScrollDirection} from "../../scroll_direction";
+import {AudioFile} from "../../audio/audio_file";
 
 export class PlayingDisplay {
     private scene: P5Scene;

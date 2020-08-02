@@ -1,7 +1,7 @@
 import * as p5 from "p5";
-import {DOMWrapper} from "./dom_wrapper";
-import {global} from "./index";
-import {setElementClasses} from "./ui_util";
+import {DOMWrapper} from "../../dom_wrapper";
+import {global} from "../../index";
+import {setElementClasses} from "../../ui_util";
 
 export enum TickerState {
     INFORMATION,

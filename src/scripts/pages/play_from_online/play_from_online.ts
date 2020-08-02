@@ -1,4 +1,4 @@
-import {global} from "../index";
+import {global} from "../../index";
 import * as p5 from "p5";
 import {
     createLabeledInput,
@@ -7,16 +7,16 @@ import {
     fixRadioDivElement,
     setElementCenterPositionRelative,
     styleRadioOptions
-} from "../ui_util";
-import {DOMWrapper} from "../dom_wrapper";
-import {PageManager, PAGES} from "../page_manager";
-import {OnlinePlaylist, OnlinePlaylistState} from "../online_playlist";
-import {initPlayingDisplay, isFilesReady} from "../util";
-import {Stepfile} from "../stepfile";
-import {AudioFile} from "../audio_file";
+} from "../../ui_util";
+import {DOMWrapper} from "../../dom_wrapper";
+import {PageManager, PAGES} from "../../page_manager";
+import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
+import {initPlayingDisplay, isFilesReady} from "../../util";
+import {Stepfile} from "../../stepfile";
+import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 
 const playFromOnlineStepfile = new Stepfile();
-const playFromOnlineAudioFile = new AudioFile();
+const playFromOnlineAudioFile = new HtmlAudioElementHelper();
 
 // This prevents loading previous song upon returning to a loaded playlist
 let isSwfLoadStarted: boolean = false;

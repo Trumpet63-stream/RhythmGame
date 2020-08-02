@@ -4,18 +4,19 @@ import {
     setElementCenterPositionRelative,
     createFileInput,
     encloseEachInputLabelPairIntoASubDiv, fixRadioDivElement, styleRadioOptions
-} from "../ui_util";
-import {global} from "../index";
-import {Stepfile, StepfileState} from "../stepfile";
-import {AudioFile, AudioFileState} from "../audio_file";
-import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../util";
-import {Mode} from "../parsing/parse_sm";
-import {PageManager, PAGES} from "../page_manager";
-import {DOMWrapper} from "../dom_wrapper";
-import {FileDropZone} from "../file_drop_zone";
+} from "../../ui_util";
+import {global} from "../../index";
+import {Stepfile, StepfileState} from "../../stepfile";
+import {AudioFile, AudioFileState} from "../../audio/audio_file";
+import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../../util";
+import {Mode} from "../../parsing/parse_sm";
+import {PageManager, PAGES} from "../../page_manager";
+import {DOMWrapper} from "../../dom_wrapper";
+import {FileDropZone} from "./file_drop_zone";
+import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 
-const playFromFileStepfile = new Stepfile();
-const playFromFileAudioFile = new AudioFile();
+const playFromFileStepfile: Stepfile = new Stepfile();
+const playFromFileAudioFile: AudioFile = new HtmlAudioElementHelper();
 
 export abstract class PlayFromFile {
     public static PLAY_FROM_FILE_CLASS: string = "play-from-file";
@@ -123,12 +124,10 @@ function getStepfileInputLabel() {
     switch(playFromFileStepfile.state) {
         case StepfileState.NO_STEPFILE:
             return "No file chosen";
-            break;
         case StepfileState.DONE_READING:
         case StepfileState.PARTIALLY_PARSED:
         case StepfileState.FULLY_PARSED:
             return truncateFileNameIfTooLong(playFromFileStepfile.file.name, 30);
-            break;
         default:
             return "Error";
     }
@@ -138,11 +137,9 @@ function getAudioFileInputLabel() {
     switch(playFromFileAudioFile.getState()) {
         case AudioFileState.NO_AUDIO_FILE:
             return "No file chosen";
-            break;
         case AudioFileState.DONE_READING:
         case AudioFileState.BUFFERED:
-            return truncateFileNameIfTooLong(playFromFileAudioFile.file.name, 30);
-            break;
+            return truncateFileNameIfTooLong(playFromFileAudioFile.getName(), 30);
         default:
             return "Error";
     }

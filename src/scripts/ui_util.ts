@@ -7,8 +7,8 @@ import {
     getFirstElementByTagName, getInt,
 } from "./util";
 import {DOMWrapper} from "./dom_wrapper";
-import {Options} from "./pages/options";
-import {PreviewDisplay} from "./preview_display";
+import {Options} from "./pages/options/options";
+import {PreviewDisplay} from "./pages/options/preview_display";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;

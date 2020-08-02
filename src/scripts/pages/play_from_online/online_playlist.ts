@@ -1,8 +1,8 @@
-import {Stepfile, StepfileState} from "./stepfile";
-import {AudioFile, AudioFileState} from "./audio_file";
-import {PlaylistClient} from "./playlist_client/playlist_client";
-import {Song} from "./playlist_client/song";
-import {SwfParseResponse} from "./parsing/parse_swf";
+import {Stepfile, StepfileState} from "../../stepfile";
+import {AudioFile} from "../../audio/audio_file";
+import {PlaylistClient} from "../../playlist_client/playlist_client";
+import {Song} from "../../playlist_client/song";
+import {SwfParseResponse} from "../../parsing/parse_swf";
 
 export enum OnlinePlaylistState {
     NO_PLAYLIST,

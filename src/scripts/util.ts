@@ -5,8 +5,8 @@ import {KeyBinding} from "./key_binding_helper";
 import * as p5 from "p5";
 import {Accuracy} from "./accuracy_manager";
 import {Stepfile, StepfileState} from "./stepfile";
-import {AudioFile, AudioFileState} from "./audio_file";
-import {PlayingDisplay} from "./playing_display";
+import {AudioFile, AudioFileState} from "./audio/audio_file";
+import {PlayingDisplay} from "./pages/play/playing_display";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;

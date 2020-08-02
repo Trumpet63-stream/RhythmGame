@@ -1,17 +1,17 @@
 import * as p5 from "p5";
-import {DOMWrapper} from "./dom_wrapper";
-import {global} from "./index";
-import {KeyBindingHelper} from "./key_binding_helper";
+import {DOMWrapper} from "../../dom_wrapper";
+import {global} from "../../index";
+import {KeyBindingHelper} from "../../key_binding_helper";
 import {
     findBindingInfoForTrack, generatePreviewNotes, getFirstElementByTagName, getInt,
     getKeyString,
     initializeKeyBindings,
     isKeyBindingsDefined,
     setConfigKeyBinding
-} from "./util";
-import {createLabel, createLabeledInput, createUserInput, setOnInputUnlessItAlreadyExists} from "./ui_util";
+} from "../../util";
+import {createLabel, createLabeledInput, createUserInput, setOnInputUnlessItAlreadyExists} from "../../ui_util";
 import {PreviewDisplay} from "./preview_display";
-import {Options} from "./pages/options";
+import {Options} from "./options";
 import {Ticker, TickerState} from "./ticker";
 
 export abstract class KeyBindingsUi {

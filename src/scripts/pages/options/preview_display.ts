@@ -1,9 +1,9 @@
-import {DisplayConfig, DisplayManager} from "./display_manager";
-import {NoteManager} from "./note_manager";
-import {P5Scene} from "./p5_scene";
-import {ScrollManager} from "./scroll_manager";
-import {Note} from "./parsing/parse_sm";
-import {Config} from "./config";
+import {DisplayConfig, DisplayManager} from "../../display_manager";
+import {NoteManager} from "../../note_manager";
+import {P5Scene} from "../../p5_scene";
+import {ScrollManager} from "../../scroll_manager";
+import {Note} from "../../parsing/parse_sm";
+import {Config} from "../../config";
 
 export class PreviewDisplay {
     private scene: P5Scene;

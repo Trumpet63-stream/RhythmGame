@@ -1,10 +1,10 @@
 import {global} from "./index";
-import {PlayFromFile} from "./pages/play_from_file";
-import {Options} from "./pages/options";
-import {Play} from "./pages/play";
-import {Results} from "./pages/results";
+import {PlayFromFile} from "./pages/play_from_file/play_from_file";
+import {Options} from "./pages/options/options";
+import {Play} from "./pages/play/play";
+import {Results} from "./pages/results/results";
 import {DOMWrapper} from "./dom_wrapper";
-import {PlayFromOnline} from "./pages/play_from_online";
+import {PlayFromOnline} from "./pages/play_from_online/play_from_online";
 
 export enum PAGES {
     PLAY_FROM_FILE,

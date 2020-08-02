@@ -1,36 +1,33 @@
+import {AudioFile, AudioFileState} from "./audio_file";
 
-export enum WebAudioState {
-    NO_AUDIO_FILE,
-    DONE_READING,
-    BUFFERED,
-    ERROR,
-}
-
-export class WebAudioHelper {
-    public state: WebAudioState;
-    public file: File;
-    public blob: Blob;
+export class WebAudioHelper implements AudioFile {
+    public state: AudioFileState;
+    public source: File | Blob;
     public audioSource: AudioBufferSourceNode;
     public audioContext: AudioContext;
     public audioBuffer: AudioBuffer;
     private playStartTime: number;
 
     public constructor() {
-        this.state = WebAudioState.NO_AUDIO_FILE;
+        this.state = AudioFileState.NO_AUDIO_FILE;
+    }
+
+    public getState() {
+        return this.state;
     }
 
     public loadFile(file: File) {
-        this.file = file;
-        this.loadAudioData(this.file);
+        this.source = file;
+        this.loadAudioData();
     }
 
     public loadBlob(blob: Blob) {
-        this.blob = blob;
-        this.loadAudioData(this.blob);
+        this.source = blob;
+        this.loadAudioData();
     }
 
     public getDuration(): number | undefined {
-        if (this.state === WebAudioState.BUFFERED) {
+        if (this.state === AudioFileState.BUFFERED) {
             return this.audioSource.buffer.duration;
         }
         return undefined;
@@ -44,7 +41,7 @@ export class WebAudioHelper {
 
     public stop() {
         this.audioSource.stop(0);
-        this.state = WebAudioState.DONE_READING;
+        this.state = AudioFileState.DONE_READING;
         this.recreateSourceNode();
     }
 
@@ -52,38 +49,38 @@ export class WebAudioHelper {
         return this.audioContext.currentTime - this.playStartTime;
     }
 
-    private loadAudioData(audioData: File | Blob) {
-        this.loadSoundFile(audioData, ((onFileRead: ProgressEvent<FileReader>) => {
-            this.state = WebAudioState.DONE_READING;
+    private loadAudioData() {
+        WebAudioHelper.loadSoundFile(this.source, (onFileRead: ProgressEvent<FileReader>) => {
+            this.state = AudioFileState.DONE_READING;
             // @ts-ignore
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.audioSource = this.audioContext.createBufferSource();
             this.decodeAudioData(<ArrayBuffer>onFileRead.target.result);
-        }));
+        });
     }
 
     private decodeAudioData(audioData: ArrayBuffer) {
         this.audioContext.decodeAudioData(audioData)
             .then(((buffer: AudioBuffer) => {
-                this.audioBuffer = buffer;
-                this.audioSource.buffer = buffer;
-                this.audioSource.connect(this.audioContext.destination);
-                this.state = WebAudioState.BUFFERED;
-            }),
-            (e: any) => {
-                console.log("Error with decoding audio data" + e.err);
-                this.state = WebAudioState.ERROR;
-            });
+                    this.audioBuffer = buffer;
+                    this.audioSource.buffer = buffer;
+                    this.audioSource.connect(this.audioContext.destination);
+                    this.state = AudioFileState.BUFFERED;
+                }),
+                (e: any) => {
+                    console.log("Error with decoding audio data" + e.err);
+                    this.state = AudioFileState.ERROR;
+                });
     }
 
     private recreateSourceNode() {
         this.audioSource = this.audioContext.createBufferSource();
         this.audioSource.buffer = this.audioBuffer;
         this.audioSource.connect(this.audioContext.destination);
-        this.state = WebAudioState.BUFFERED;
+        this.state = AudioFileState.BUFFERED;
     }
 
-    private loadSoundFile(
+    private static loadSoundFile(
         file: Blob | File,
         listener: (event: ProgressEvent<FileReader>) => any,
         options?: boolean | AddEventListenerOptions
@@ -94,8 +91,14 @@ export class WebAudioHelper {
     }
 
     public reset() {
-        this.state = WebAudioState.NO_AUDIO_FILE;
-        this.file = undefined;
-        this.blob = undefined;
+        this.state = AudioFileState.NO_AUDIO_FILE;
+        this.source = undefined;
+    }
+
+    public getName(): string {
+        if (this.source instanceof File) {
+            return this.source.name;
+        }
+        throw "Error: called getName() but name does not exist on Blob";
     }
 }
