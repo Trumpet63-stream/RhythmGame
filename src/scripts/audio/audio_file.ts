@@ -5,15 +5,36 @@ export enum AudioFileState {
     ERROR,
 }
 
-export interface AudioFile {
-    source: File | Blob;
-    getState(): AudioFileState;
-    loadFile(file: File): void;
-    loadBlob(blob: Blob): void;
-    getDuration(): number | undefined;
-    play(delayInSeconds: number): void;
-    stop(): void;
-    getCurrentTimeInSeconds(): number;
-    reset(): void;
-    getName(): string;
+export abstract class AudioFile {
+    public source: File | Blob;
+    protected state: AudioFileState;
+
+    public constructor() {
+        this.state = AudioFileState.NO_AUDIO_FILE;
+    }
+
+    public getState(): AudioFileState {
+        return this.state;
+    }
+
+    abstract loadFile(file: File): void;
+
+    abstract loadBlob(blob: Blob): void;
+
+    abstract getDuration(): number | undefined;
+
+    abstract play(delayInSeconds: number): void;
+
+    abstract stop(): void;
+
+    abstract getCurrentTimeInSeconds(): number;
+
+    abstract reset(): void;
+
+    public getName(): string {
+        if (this.source instanceof File) {
+            return this.source.name;
+        }
+        throw new Error("called getName() but name does not exist on Blob");
+    }
 }

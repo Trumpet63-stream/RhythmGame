@@ -1,24 +1,24 @@
-import {GameTimeProvider} from "./game_time_provider";
-import {Config} from "./config";
+export abstract class TimeManager {
+    private systemTimeMillis: number;
 
-export class TimeManager implements GameTimeProvider {
-    private systemTimeWhenGameStarted: number;
-    private config: Config;
-
-    constructor(systemTimeWhenGameStarted: number, config: Config) {
-        this.systemTimeWhenGameStarted = systemTimeWhenGameStarted;
-        this.config = config;
-    }
-
-    private getElapsedTime(systemTimeMillis: number): number {
-        if (systemTimeMillis === undefined) {
-            throw Error("Error: can't get elapsed time. Expected 1 argument: systemTime.");
+    protected constructor(systemTime?: number) {
+        if (systemTime === undefined) {
+            this.systemTimeMillis = performance.now();
+        } else {
+            this.systemTimeMillis = systemTime;
         }
-        return (systemTimeMillis - this.systemTimeWhenGameStarted) / 1000; // in seconds
     }
 
-    // We want to keep this calculation in only one place
-    getGameTime(systemTimeMillis: number) {
-        return this.getElapsedTime(systemTimeMillis) + this.config.additionalOffsetInSeconds - this.config.pauseAtStartInSeconds;
+    protected getSystemTimeDifferenceInSeconds(systemTimeMillis: number): number {
+        if (systemTimeMillis === undefined) {
+            throw Error("Error: can't get elapsed time. Given systemTimeMillis is undefined");
+        }
+        return (systemTimeMillis - this.systemTimeMillis) / 1000;
+    }
+
+    public abstract getCurrentTimeInSeconds(systemTimeMillis: number): number;
+
+    public setCurrentTimeInSeconds(currentTimeInSeconds: number): void {
+        this.systemTimeMillis -= 1000 * (currentTimeInSeconds - this.getCurrentTimeInSeconds(performance.now()));
     }
 }

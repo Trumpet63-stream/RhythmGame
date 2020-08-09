@@ -7,6 +7,9 @@ import {Accuracy} from "./accuracy_manager";
 import {Stepfile, StepfileState} from "./stepfile";
 import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
+import {SyncGameDisplay} from "./pages/audio_sync/sync_game_display";
+import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
+import {PAGES} from "./page_manager";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -14,37 +17,6 @@ export function defaultIfUndefined(value: any, defaultValue: any): any {
 
 export function isUndefined(value: any): boolean {
     return typeof value === "undefined";
-}
-
-export function setAllNotesToDefaultState(tracks: Note[][]) {
-    for (let i = 0; i < tracks.length; i++) {
-        for (let j = 0; j < tracks[i].length; j++) {
-            tracks[i][j].state = NoteState.DEFAULT;
-        }
-    }
-}
-
-export function replaceNotYetImplementedNoteTypes(tracks: Note[][]) {
-    for (let i = 0; i < tracks.length; i++) {
-        for (let j = 0; j < tracks[i].length; j++) {
-            switch (tracks[i][j].type) {
-                case NoteType.TAIL:
-                    break;
-                case NoteType.MINE:
-                    tracks[i][j].type = NoteType.NONE; //TODO: implement mines
-                    break;
-                case NoteType.HOLD_HEAD:
-                    break;
-                case NoteType.NONE:
-                    break;
-                case NoteType.ROLL_HEAD:
-                    tracks[i][j].type = NoteType.HOLD_HEAD; //TODO: implement rolls
-                    break;
-                case NoteType.NORMAL:
-                    break;
-            }
-        }
-    }
 }
 
 export function getMissBoundary(currentTime: number, config: Config) {
@@ -191,19 +163,26 @@ export function generatePreviewNotes(numTracks: number): Note[][] {
         let track: Note[] = [];
         if (isHold) {
             track.push({
-                type: NoteType.HOLD_HEAD, typeString: "Don't Care", timeInSeconds: currentTime,
-                state: NoteState.DEFAULT
+                type: NoteType.HOLD_HEAD,
+                typeString: "Don't Care",
+                timeInSeconds: currentTime,
+                state: NoteState.DEFAULT,
+                trackNumber: i
             });
             track.push({
-                type: NoteType.TAIL, typeString: "Don't Care", timeInSeconds: currentTime + 0.25,
-                state: NoteState.DEFAULT
+                type: NoteType.TAIL,
+                typeString: "Don't Care",
+                timeInSeconds: currentTime + 0.25,
+                state: NoteState.DEFAULT,
+                trackNumber: i
             });
         } else {
             track.push({
                 type: NoteType.NORMAL,
                 typeString: "Don't Care",
                 timeInSeconds: currentTime,
-                state: NoteState.DEFAULT
+                state: NoteState.DEFAULT,
+                trackNumber: i
             });
         }
         notes.push(track);
@@ -213,6 +192,7 @@ export function generatePreviewNotes(numTracks: number): Note[][] {
     return notes;
 }
 
+// TODO: maybe wrap the config's accuracy definitions in a class that has this
 export function getAccuracyEventName(timeDifferenceInMilliseconds: number, config: Config): string {
     if (config.accuracySettings[0].lowerBound == null &&
         timeDifferenceInMilliseconds < config.accuracySettings[0].upperBound) {
@@ -244,6 +224,10 @@ export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile) {
     global.playingDisplay = new PlayingDisplay(tracks, audioFile, global.config, global.p5Scene);
 }
 
+export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile) {
+    global.syncGameDisplay = new SyncGameDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, PAGES.PLAY_FROM_FILE);
+}
+
 export function enumToString(TheEnum: any, value: any) {
     return TheEnum[value as keyof typeof TheEnum].toString();
 }
@@ -265,4 +249,11 @@ export function getInt(value: string | number): number {
 export function getEnum(value: string | number, EnumType: any): any {
     let string: string = String(value);
     return EnumType[string as keyof typeof EnumType];
+}
+
+export function logArray(array: any[]) {
+    for (let i = 0; i < array.length; i++) {
+        let logEntry = i + ": " + JSON.stringify(array[i]);
+        console.log(logEntry);
+    }
 }

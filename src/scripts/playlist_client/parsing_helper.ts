@@ -6,16 +6,22 @@ export abstract class ParsingHelper {
         for (let i = 0; i < beatmap.length; i++) {
             let beatmapRow = beatmap[i];
             let trackNumber = this.trackNumberFromDirection(beatmapRow[1]);
-            let note = this.noteFromBeatmapRow(beatmapRow);
+            let note = this.noteFromBeatmapRow(beatmapRow, trackNumber);
             tracks[trackNumber].push(note);
         }
 
         return tracks;
     }
 
-    private static noteFromBeatmapRow(row: [number, string, string]): Note {
+    private static noteFromBeatmapRow(row: [number, string, string], trackNumber: number): Note {
         let timeInSeconds = row[0] / 30;
-        return {timeInSeconds: timeInSeconds, type: NoteType.NORMAL, state: NoteState.DEFAULT, typeString: "N/A"};
+        return {
+            timeInSeconds: timeInSeconds,
+            type: NoteType.NORMAL,
+            state: NoteState.DEFAULT,
+            typeString: "N/A",
+            trackNumber: trackNumber
+        };
     }
 
     private static trackNumberFromDirection(direction: string): number {

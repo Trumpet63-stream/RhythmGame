@@ -1,18 +1,8 @@
 import {AudioFile, AudioFileState} from "./audio_file";
 
-export class HtmlAudioElementHelper implements AudioFile{
-    public state: AudioFileState;
-    public source: File | Blob;
+export class HtmlAudioElementHelper extends AudioFile {
     private audioElement: HTMLAudioElement;
     private sourceUrl: string;
-
-    public constructor() {
-        this.state = AudioFileState.NO_AUDIO_FILE;
-    }
-
-    public getState() {
-        return this.state;
-    }
 
     public loadFile(file: File) {
         this.source = file;
@@ -28,7 +18,7 @@ export class HtmlAudioElementHelper implements AudioFile{
         this.sourceUrl = this.getSourceUrl();
         this.audioElement = new Audio(this.sourceUrl);
         this.state = AudioFileState.DONE_READING;
-        this.audioElement.addEventListener('canplaythrough', function() {
+        this.audioElement.addEventListener('canplaythrough', function () {
             this.state = AudioFileState.BUFFERED;
         }.bind(this));
     }
@@ -63,15 +53,17 @@ export class HtmlAudioElementHelper implements AudioFile{
         return this.audioElement.currentTime;
     }
 
+    public playFromTimeInSeconds(startTimeInSeconds: number): void {
+        if (startTimeInSeconds < 0) {
+            setTimeout(this.audioElement.play.bind(this.audioElement), -startTimeInSeconds * 1000);
+        } else {
+            this.audioElement.currentTime = startTimeInSeconds;
+            this.audioElement.play();
+        }
+    }
+
     public reset() {
         this.releaseSourceUrl();
         this.source = undefined;
-    }
-
-    public getName(): string {
-        if (this.source instanceof File) {
-            return this.source.name;
-        }
-        throw "Error: called getName() but name does not exist on Blob";
     }
 }

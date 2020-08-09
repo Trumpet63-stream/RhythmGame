@@ -28,7 +28,8 @@ export class PreviewDisplay {
     }
 
     draw() {
-        this.displayManager.draw(this.scrollManager.getGameTime());
+        let currentTimeInSeconds = this.scrollManager.getCurrentTimeInSeconds();
+        this.displayManager.draw(currentTimeInSeconds);
     }
 
     private getBounds() {
@@ -57,7 +58,8 @@ export class PreviewDisplay {
             getReceptorSizes: () => {
                 return receptorSizes;
             },
-            setReceptorSize: (trackNumber: number, receptorSize: number) => {}
+            setReceptorSize: (trackNumber: number, receptorSize: number) => {
+            }
         };
     }
 }

@@ -13,7 +13,7 @@ export enum NoteType {
     UNKNOWN = "???",
 }
 
-export function stringToNoteType(string: string): NoteType {
+function stringToNoteType(string: string): NoteType {
     switch (string) {
         case "0":
             return NoteType.NONE;
@@ -43,6 +43,7 @@ export interface Note {
     type: NoteType;
     typeString: string; // the string representation of the type BEFORE it's interpreted as a NoteType
     timeInSeconds: number;
+    trackNumber: number;
     state?: NoteState;
 }
 
@@ -111,8 +112,6 @@ function cleanMetaDataString(string: string): string {
 }
 
 /* Step Two Of Parsing */
-
-// TODO: actually return FullParse
 export function getFullParse(modeIndex: number, partialParse: PartialParse): FullParse {
     let fullParse = new FullParse(partialParse);
     let unparsedNotes: string = partialParse.modes[modeIndex].get("notes");
@@ -267,7 +266,7 @@ function getTracksFromLines(timesBeatsAndLines: { time: number; beat: number; li
             let typeString = line.lineInfo.charAt(j);
             let noteType: NoteType = stringToNoteType(typeString);
             if (noteType !== NoteType.NONE) {
-                tracks[j].push({type: noteType, typeString: typeString, timeInSeconds: line.time});
+                tracks[j].push({type: noteType, typeString: typeString, timeInSeconds: line.time, trackNumber: j});
             }
         }
     }

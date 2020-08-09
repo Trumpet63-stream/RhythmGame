@@ -4,6 +4,7 @@ import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
 import {getAccuracyEventName} from "./util";
 
+//TODO: don't depend on accuracy recording here
 export class AccuracyFeedbackText {
     private accuracyRecording: AccuracyRecording;
     private centerX: number;
@@ -54,9 +55,9 @@ export class AccuracyFeedbackText {
         let maxFontSize = 30;
         if (time < 0.1) {
             return time / 0.1 * maxFontSize;
-        } else if(time >= 0.1 && time < 0.4) {
+        } else if (time >= 0.1 && time < 0.4) {
             return maxFontSize;
-        } else if(time >= 0.4 && time < 0.7) {
+        } else if (time >= 0.4 && time < 0.7) {
             return (1 - (time - 0.4) / (0.7 - 0.4)) * maxFontSize;
         }
         return 0;

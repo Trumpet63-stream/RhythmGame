@@ -1,4 +1,4 @@
-import {Note, NoteType} from "./parsing/parse_sm";
+import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 
 export class NoteManager {
     tracks: Note[][];
@@ -6,6 +6,7 @@ export class NoteManager {
     constructor(tracks: Note[][]) {
         this.tracks = tracks;
         this.removeUnsupportedNoteTypes();
+        this.setAllNotesToDefaultState();
     }
 
     private removeUnsupportedNoteTypes() {
@@ -19,6 +20,14 @@ export class NoteManager {
                     track.splice(noteNumber, 1);
                     noteNumber--; // decrement note number so next iteration it starts at the right note
                 }
+            }
+        }
+    }
+
+    private setAllNotesToDefaultState() {
+        for (let i = 0; i < this.tracks.length; i++) {
+            for (let j = 0; j < this.tracks[i].length; j++) {
+                this.tracks[i][j].state = NoteState.DEFAULT;
             }
         }
     }
@@ -73,7 +82,7 @@ export class NoteManager {
         for (let i = 0; i < this.tracks.length; i++) {
             if (this.tracks[i].length > 0) {
                 let trackLatestNote: Note = this.tracks[i][this.tracks[i].length - 1];
-                if (latestNote == undefined) {
+                if (latestNote === undefined) {
                     latestNote = trackLatestNote;
                 } else if (latestNote.timeInSeconds < trackLatestNote.timeInSeconds) {
                     latestNote = trackLatestNote;
@@ -85,5 +94,109 @@ export class NoteManager {
 
     getTotalNotes() {
         return this.tracks.reduce((sum, track) => sum + track.length, 0);
+    }
+
+    public getNoteByIndex(noteIndex: number): Note {
+        let currentNoteIndices: number[] = [];
+        for (let i = 0; i < this.tracks.length; i++) {
+            currentNoteIndices.push(0);
+        }
+
+        let currentNote: Note;
+        for (let i = 0; i <= noteIndex; i++) {
+            let nextNotes: Note[] = this.getNextNoteFromEachTrack(currentNoteIndices);
+            let earliestNote: Note = NoteManager.getEarliestNoteInArray(nextNotes);
+            currentNoteIndices[earliestNote.trackNumber]++;
+            currentNote = earliestNote;
+        }
+
+        return currentNote;
+    }
+
+    private getNextNoteFromEachTrack(currentNoteIndices: number[]): Note[] {
+        let nextNotes: Note[] = [];
+        for (let trackNumber = 0; trackNumber < this.tracks.length; trackNumber++) {
+            let track = this.tracks[trackNumber];
+            if (currentNoteIndices[trackNumber] < track.length) {
+                nextNotes.push(track[currentNoteIndices[trackNumber]]);
+            }
+        }
+        return nextNotes;
+    }
+
+    private static getEarliestNoteInArray(notes: Note[]) {
+        let earliestNote: Note = notes[0];
+        for (let i = 1; i < notes.length; i++) {
+            if (notes[i].timeInSeconds < earliestNote.timeInSeconds) {
+                earliestNote = notes[i];
+            }
+        }
+        return earliestNote;
+    }
+
+    public hideAllNotesAfterIndex(noteIndex: number): void {
+        let currentNoteIndices: number[] = [];
+        for (let i = 0; i < this.tracks.length; i++) {
+            currentNoteIndices.push(0);
+        }
+
+        for (let i = 0; i <= noteIndex; i++) {
+            let nextNotes: Note[] = this.getNextNoteFromEachTrack(currentNoteIndices);
+            let earliestNote: Note = NoteManager.getEarliestNoteInArray(nextNotes);
+            currentNoteIndices[earliestNote.trackNumber]++;
+        }
+
+        this.allowHoldTails(currentNoteIndices);
+
+        for (let trackNumber = 0; trackNumber < currentNoteIndices.length; trackNumber++) {
+            let track = this.tracks[trackNumber];
+            for (let i = currentNoteIndices[trackNumber]; i < track.length; i++) {
+                track[i].state = NoteState.HIT;
+            }
+        }
+    }
+
+    private allowHoldTails(currentNoteIndices: number[]) {
+        for (let trackNumber = 0; trackNumber < currentNoteIndices.length; trackNumber++) {
+            let track = this.tracks[trackNumber];
+            if (currentNoteIndices[trackNumber] < track.length) {
+                let note: Note = track[currentNoteIndices[trackNumber]];
+                if (note.type === NoteType.TAIL) {
+                    currentNoteIndices[trackNumber]++;
+                }
+            }
+        }
+    }
+
+    public getLatestUnhitNote(): Note {
+        let latestNotes: Note[] = [];
+        for (let trackNumber = 0; trackNumber < this.tracks.length; trackNumber++) {
+            let latestUnhitNote = this.getLatestUnhitNoteInTrack(trackNumber);
+            latestNotes.push(latestUnhitNote);
+        }
+        return NoteManager.getLatestNoteInArray(latestNotes);
+    }
+
+    private getLatestUnhitNoteInTrack(trackNumber: number) {
+        let track = this.tracks[trackNumber];
+        let latestUnhitNote;
+        for (let i = 0; i < track.length; i++) {
+            if (track[i].state === NoteState.DEFAULT) {
+                latestUnhitNote = track[i];
+            } else {
+                return latestUnhitNote;
+            }
+        }
+        return latestUnhitNote;
+    }
+
+    private static getLatestNoteInArray(notes: Note[]) {
+        let latestNote: Note = notes[0];
+        for (let i = 1; i < notes.length; i++) {
+            if (notes[i].timeInSeconds > latestNote.timeInSeconds) {
+                latestNote = notes[i];
+            }
+        }
+        return latestNote;
     }
 }

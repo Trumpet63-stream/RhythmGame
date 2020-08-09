@@ -3,7 +3,6 @@ import * as p5 from "p5";
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
-import {Config} from "./config";
 import {global} from "./index";
 import {DefaultNoteSkin} from "./default_note_skin";
 
@@ -89,25 +88,6 @@ class Receptor {
         }
     }
 }
-
-// export class DisplayConfig {
-//     public noteSize: number;
-//     public pixelsPerSecond: number;
-//     public receptorYPercent: number;
-//     public scrollDirection: ScrollDirection;
-//     public receptorSizes: number[];
-//
-//     constructor(config: Config, numTracks: number) {
-//         this.noteSize = config.noteSize;
-//         this.pixelsPerSecond = config.pixelsPerSecond;
-//         this.receptorYPercent = config.receptorYPercent;
-//         this.scrollDirection = config.scrollDirection;
-//         this.receptorSizes = [];
-//         for (let i = 0; i < numTracks; i++) {
-//             this.receptorSizes.push(config.noteSize);
-//         }
-//     }
-// }
 
 /* A set of options that intersect with the user Config, but are expected to be changed during play */
 export interface DisplayConfig {

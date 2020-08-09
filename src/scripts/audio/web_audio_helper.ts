@@ -1,20 +1,10 @@
 import {AudioFile, AudioFileState} from "./audio_file";
 
-export class WebAudioHelper implements AudioFile {
-    public state: AudioFileState;
-    public source: File | Blob;
+export class WebAudioHelper extends AudioFile {
     public audioSource: AudioBufferSourceNode;
     public audioContext: AudioContext;
     public audioBuffer: AudioBuffer;
     private playStartTime: number;
-
-    public constructor() {
-        this.state = AudioFileState.NO_AUDIO_FILE;
-    }
-
-    public getState() {
-        return this.state;
-    }
 
     public loadFile(file: File) {
         this.source = file;
@@ -93,12 +83,5 @@ export class WebAudioHelper implements AudioFile {
     public reset() {
         this.state = AudioFileState.NO_AUDIO_FILE;
         this.source = undefined;
-    }
-
-    public getName(): string {
-        if (this.source instanceof File) {
-            return this.source.name;
-        }
-        throw "Error: called getName() but name does not exist on Blob";
     }
 }

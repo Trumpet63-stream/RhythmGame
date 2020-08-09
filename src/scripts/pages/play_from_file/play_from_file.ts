@@ -1,14 +1,16 @@
 import * as p5 from "p5";
 import {
-    drawHeading,
-    setElementCenterPositionRelative,
     createFileInput,
-    encloseEachInputLabelPairIntoASubDiv, fixRadioDivElement, styleRadioOptions
+    drawHeading,
+    encloseEachInputLabelPairIntoASubDiv,
+    fixRadioDivElement,
+    setElementCenterPositionRelative,
+    styleRadioOptions
 } from "../../ui_util";
 import {global} from "../../index";
 import {Stepfile, StepfileState} from "../../stepfile";
 import {AudioFile, AudioFileState} from "../../audio/audio_file";
-import {getModeOptionsForDisplay, initPlayingDisplay, isFilesReady} from "../../util";
+import {getModeOptionsForDisplay, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Mode} from "../../parsing/parse_sm";
 import {PageManager, PAGES} from "../../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
@@ -38,6 +40,7 @@ export abstract class PlayFromFile {
         setElementCenterPositionRelative(audioFileInput, 0.43, 0.5, 325, 34);
 
         let playButtonId = "playButton";
+        let syncButtonId = "syncButton";
         if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
             let modeRadio = drawModeSelect(p, PlayFromFile.MODE_RADIO_ID);
             if (modeRadio.value() !== "") { // if user has selected a mode
@@ -47,20 +50,44 @@ export abstract class PlayFromFile {
                 setElementCenterPositionRelative(playButton.element, 0.5, 0.88, 60, 34);
                 if (!playButton.alreadyExists) {
                     playButton.element.addClass(global.globalClass);
-                    playButton.element.mouseClicked(() => {
-                        let selectedMode: Mode = getSelectedMode(modeRadio);
-                        playFromFileStepfile.finishParsing(selectedMode.id);
-                        initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
-                        PageManager.setCurrentPage(PAGES.PLAY);
-                    });
+                    this.setPlayButtonBehavior(playButton, modeRadio);
+                }
+
+                let syncButton = DOMWrapper.create(() => {
+                    return p.createButton("Start Audio Sync Wizard");
+                }, syncButtonId);
+                setElementCenterPositionRelative(syncButton.element, 0.8, 0.88, 177, 34);
+                if (!syncButton.alreadyExists) {
+                    syncButton.element.addClass(global.globalClass);
+                    this.setSyncButtonBehavior(syncButton, modeRadio);
                 }
             } else {
                 DOMWrapper.removeElementById(playButtonId);
+                DOMWrapper.removeElementById(syncButtonId);
             }
         } else {
             DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
             DOMWrapper.removeElementById(playButtonId);
+            DOMWrapper.removeElementById(syncButtonId);
         }
+    }
+
+    private static setSyncButtonBehavior(syncButton: { element: p5.Element; alreadyExists: boolean }, modeRadio: p5.Element) {
+        syncButton.element.mouseClicked(() => {
+            let selectedMode: Mode = getSelectedMode(modeRadio);
+            playFromFileStepfile.finishParsing(selectedMode.id);
+            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
+            PageManager.setCurrentPage(PAGES.SYNC);
+        });
+    }
+
+    private static setPlayButtonBehavior(playButton: { element: p5.Element; alreadyExists: boolean }, modeRadio: p5.Element) {
+        playButton.element.mouseClicked(() => {
+            let selectedMode: Mode = getSelectedMode(modeRadio);
+            playFromFileStepfile.finishParsing(selectedMode.id);
+            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
+            PageManager.setCurrentPage(PAGES.PLAY);
+        });
     }
 
     public static resetModeOptions() {
@@ -121,7 +148,7 @@ function getSelectedMode(modeRadio: p5.Element) {
 }
 
 function getStepfileInputLabel() {
-    switch(playFromFileStepfile.state) {
+    switch (playFromFileStepfile.state) {
         case StepfileState.NO_STEPFILE:
             return "No file chosen";
         case StepfileState.DONE_READING:
@@ -134,7 +161,7 @@ function getStepfileInputLabel() {
 }
 
 function getAudioFileInputLabel() {
-    switch(playFromFileAudioFile.getState()) {
+    switch (playFromFileAudioFile.getState()) {
         case AudioFileState.NO_AUDIO_FILE:
             return "No file chosen";
         case AudioFileState.DONE_READING:

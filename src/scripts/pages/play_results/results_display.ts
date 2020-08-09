@@ -22,19 +22,19 @@ export class ResultsDisplay {
     }
 
     draw() {
-        this.drawAccuracyResults(this.p, this.config.accuracySettings, this.accuracyRecording, this.noteManager, this.accuracyManager);
+        this.drawAccuracyResults(this.config.accuracySettings, this.accuracyRecording, this.noteManager, this.accuracyManager);
     }
 
-    private drawAccuracyResults(p: p5, accuracySettings: Accuracy[],
+    private drawAccuracyResults(accuracySettings: Accuracy[],
                                 accuracyRecording: AccuracyRecording,
                                 noteManager: NoteManager, accuracyManager: AccuracyManager) {
-        let centerX = p.width / 2;
-        let centerY = p.height / 2;
-        let barWidth = p.width * 0.6;
+        let centerX = this.p.width / 2;
+        let centerY = this.p.height / 2;
+        let barWidth = this.p.width * 0.6;
         let barHeight = barWidth / 10;
         let leftLabelHeight = 0.8 * barHeight;
         let accuracyListForResults = this.getResultsAccuracyList(accuracySettings);
-        drawAccuracyBars(p, accuracyListForResults, accuracyRecording, centerX, centerY, leftLabelHeight, barWidth,
+        drawAccuracyBars(this.p, accuracyListForResults, accuracyRecording, centerX, centerY, leftLabelHeight, barWidth,
             barHeight, noteManager, accuracyManager, accuracyManager.isConfiguredForBoos());
     }
 

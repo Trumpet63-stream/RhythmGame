@@ -3,8 +3,7 @@ import {DisplayConfig, DisplayManager} from "../../display_manager";
 import {NoteManager} from "../../note_manager";
 import {MissManager} from "../../miss_manager";
 import {AccuracyManager} from "../../accuracy_manager";
-import {ScrollManager} from "../../scroll_manager";
-import {ResultsDisplay} from "../play_results/results_display";
+import {ScrollManager, ScrollManagerConfig} from "../../scroll_manager";
 import {Note} from "../../parsing/parse_sm";
 import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
@@ -20,12 +19,13 @@ import {AccuracyFeedbackFlash} from "../../accuracy_feedback_flash";
 import {AccuracyFeedbackParticles} from "../../accuracy_feedback_particles";
 import {HoldParticles} from "../../hold_particles";
 import {HoldGlow} from "../../hold_glow";
-import {AudioFile} from "../../audio/audio_file";
 import {PlayingConfig} from "../../playing_config";
-import {TimeManager} from "../../time_manager";
+import {SyncResultsDisplay} from "../sync_results/sync_results_display";
 import {GameTimeManager} from "../../game_time_manager";
+import {TimeManager} from "../../time_manager";
+import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 
-export class PlayingDisplay {
+export class SyncGameDisplay {
     private scene: P5Scene;
     private config: Config;
     private noteManager: NoteManager;
@@ -45,19 +45,36 @@ export class PlayingDisplay {
     private accuracyFeedbackParticles: AccuracyFeedbackParticles;
     private holdParticles: HoldParticles;
     private holdGlow: HoldGlow;
-    private audioFile: AudioFile;
+    private audioFile: HtmlAudioElementHelper;
     private timeDiffInterval: number;
+    private returnPage: PAGES;
 
-    constructor(tracks: Note[][], audioFile: AudioFile, config: Config, scene: P5Scene) {
+    constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene, returnPage: PAGES) {
+        this.initialize(tracks, audioFile, config, scene, returnPage);
+    }
+
+    private initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene, returnPage: PAGES) {
         this.showResultsScreen = false;
         this.audioFile = audioFile;
         this.config = config;
         this.scene = scene;
+        this.returnPage = returnPage;
+        this.noteManager = new NoteManager(tracks);
+
+        let skipTimePosition = this.noteManager.getEarliestNote().timeInSeconds -
+            this.config.additionalOffsetInSeconds - 2;
+        let partialConfig: ScrollManagerConfig = {
+            additionalOffsetInSeconds: this.config.additionalOffsetInSeconds,
+            pauseAtStartInSeconds: -skipTimePosition,
+            scrollDirection: this.config.scrollDirection
+        }
+
+        this.noteManager.hideAllNotesAfterIndex(19);
 
         // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
         if (!this.isDebugMode) {
-            this.timeManager = new GameTimeManager(this.config);
-            this.audioFile.play(config.pauseAtStartInSeconds);
+            this.timeManager = new GameTimeManager(partialConfig);
+            this.audioFile.playFromTimeInSeconds(skipTimePosition);
 
             // This is just for debugging
             this.timeDiffInterval = setInterval(() => {
@@ -70,7 +87,6 @@ export class PlayingDisplay {
             }, 5000);
         }
 
-        this.noteManager = new NoteManager(tracks);
         let numTracks: number = this.noteManager.tracks.length;
         this.accuracyRecording = new AccuracyRecording(numTracks);
 
@@ -87,7 +103,7 @@ export class PlayingDisplay {
         this.holdManager = new HoldManager(numTracks, this.onTrackHold.bind(this), this.onTrackUnhold.bind(this));
 
         if (this.isDebugMode) {
-            this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
+            this.timeManager = new ScrollManager(partialConfig, this.scene.sketchInstance);
         }
 
         this.gameEndTime = this.calculateGameEnd();
@@ -147,23 +163,19 @@ export class PlayingDisplay {
         } else {
             earliestAccuracy = this.config.accuracySettings[this.config.accuracySettings.length - 2].upperBound;
         }
-        return this.noteManager.getLatestNote().timeInSeconds + earliestAccuracy / 1000;
+        let latestNote: Note = this.noteManager.getLatestUnhitNote();
+        return latestNote.timeInSeconds + earliestAccuracy / 1000;
     }
 
     private calculateGameEnd() {
-        let audioDuration = this.audioFile.getDuration();
         let notesEndTime = this.getNotesEndTime();
-        if (audioDuration < notesEndTime) {
-            return notesEndTime + 1;
-        }
-        return Math.min(notesEndTime + 5, audioDuration);
+        return notesEndTime + 0.5;
     }
 
     private endSong() {
         this.audioFile.stop();
-        global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.accuracyManager,
-            this.scene.sketchInstance, this.accuracyRecording);
-        PageManager.setCurrentPage(PAGES.PLAY_RESULTS);
+        global.syncResultsDisplay = new SyncResultsDisplay(this.accuracyRecording, this.accuracyManager, this.config);
+        PageManager.setCurrentPage(PAGES.SYNC_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
     }
@@ -236,5 +248,9 @@ export class PlayingDisplay {
             let keyBinding: KeyBinding = keyBindings[i];
             global.keyboardEventManager.unbindKey(keyBinding.keyCode);
         }
+    }
+
+    public replay() {
+        this.initialize(this.noteManager.tracks, this.audioFile, this.config, this.scene, this.returnPage);
     }
 }
