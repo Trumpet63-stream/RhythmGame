@@ -1,16 +1,16 @@
 import * as p5 from "p5";
 import {ScrollDirection} from "./scroll_direction";
 import {GameTimeConfig, GameTimeManager} from "./game_time_manager";
+import {Rectangle} from "./rectangle";
 
 export interface ScrollManagerConfig extends GameTimeConfig {
     scrollDirection: ScrollDirection;
 }
 
 export class ScrollManager extends GameTimeManager {
-    // TODO: make an interface or class for this data type
-    private scrollBounds: { topLeftX: number, topLeftY: number, width: number, height: number };
+    private scrollBounds: Rectangle;
 
-    constructor(config: ScrollManagerConfig, p: p5, scrollBounds?: { topLeftX: number, topLeftY: number, width: number, height: number }) {
+    constructor(config: ScrollManagerConfig, p: p5, scrollBounds?: Rectangle) {
         super(config, 0);
         this.scrollBounds = scrollBounds;
         p.mouseWheel = function (e: WheelEvent) {
@@ -33,7 +33,7 @@ export class ScrollManager extends GameTimeManager {
         return super.getCurrentTimeInSeconds(0);
     }
 
-    private isScrollingAllowed(scrollBounds: { topLeftX: number; topLeftY: number; width: number; height: number }, p: p5) {
+    private isScrollingAllowed(scrollBounds: Rectangle, p: p5) {
         let allowScroll = false;
         if (scrollBounds !== undefined) {
             if (ScrollManager.mouseIsInBounds(p, this.scrollBounds)) {
@@ -45,7 +45,7 @@ export class ScrollManager extends GameTimeManager {
         return allowScroll;
     }
 
-    private static mouseIsInBounds(p: p5, bounds: { topLeftX: number, topLeftY: number, width: number, height: number }) {
+    private static mouseIsInBounds(p: p5, bounds: Rectangle) {
         return p.mouseX >= bounds.topLeftX &&
             p.mouseX <= bounds.topLeftX + bounds.width &&
             p.mouseY >= bounds.topLeftY &&

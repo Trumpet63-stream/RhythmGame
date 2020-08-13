@@ -1,6 +1,6 @@
 import {NoteManager} from "./note_manager";
 import {Config} from "./config";
-import {getMissBoundary} from "./util";
+import {getMissBoundaryInSeconds} from "./util";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {HoldManager} from "./hold_manager";
 import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
@@ -27,7 +27,7 @@ export class MissManager {
     }
 
     update(currentTime: number) {
-        if (this.config.accuracySettings[0].lowerBound != null) {
+        if (this.config.accuracySettings[0].lowerBound !== null) {
             return; // A lowerBound for misses is incompatible with this way of doing misses
         }
         let numTracks = this.noteManager.tracks.length;
@@ -64,7 +64,7 @@ export class MissManager {
     }
 
     private isNoteMissedAndNotHandled(note: Note, currentTime: number): boolean {
-        let missBoundary = getMissBoundary(currentTime, this.config);
+        let missBoundary = getMissBoundaryInSeconds(currentTime, this.config);
         return note.timeInSeconds < missBoundary && note.state === NoteState.DEFAULT;
     }
 

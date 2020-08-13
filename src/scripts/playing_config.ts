@@ -3,11 +3,11 @@ import {ScrollDirection} from "./scroll_direction";
 import {Config} from "./config";
 
 export class PlayingConfig implements DisplayConfig {
-    public noteSize: number;
-    public pixelsPerSecond: number;
-    public receptorYPercent: number;
-    public scrollDirection: ScrollDirection;
-    public receptorSizes: number[];
+    private noteSize: number;
+    private pixelsPerSecond: number;
+    private receptorYPercent: number;
+    private scrollDirection: ScrollDirection;
+    private receptorSizes: number[];
 
     constructor(config: Config, numTracks: number) {
         this.noteSize = config.noteSize;

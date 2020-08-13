@@ -3,13 +3,16 @@ import {DOMWrapper} from "../../dom_wrapper";
 import {global} from "../../index";
 import {KeyBindingHelper} from "../../key_binding_helper";
 import {
-    findBindingInfoForTrack, generatePreviewNotes, getFirstElementByTagName, getInt,
+    findBindingInfoForTrack,
+    generatePreviewNotes,
+    getFirstElementByTagName,
+    getInt,
     getKeyString,
     initializeKeyBindings,
     isKeyBindingsDefined,
     setConfigKeyBinding
 } from "../../util";
-import {createLabel, createLabeledInput, createUserInput, setOnInputUnlessItAlreadyExists} from "../../ui_util";
+import {createLabel, createLabeledInput, createUserInput} from "../../ui_util";
 import {PreviewDisplay} from "./preview_display";
 import {Options} from "./options";
 import {Ticker, TickerState} from "./ticker";
@@ -31,10 +34,10 @@ export abstract class KeyBindingsUi {
             parentElement.child(keyBindingsSectionHeader.element);
         }
 
-        if (this.numTracks == undefined) {
+        if (this.numTracks === undefined) {
             this.numTracks = this.DEFAULT_NUM_TRACKS;
         }
-        createUserInput( () => createLabeledInput("Number of Tracks", "previewNumTracksInput",
+        createUserInput(() => createLabeledInput("Number of Tracks", "previewNumTracksInput",
             this.numTracks.toString(), Options.OPTIONS_CLASS),
             this.isValidNumberOfTracks.bind(this),
             this.showNumberOfTracksInfo.bind(this),
@@ -104,10 +107,12 @@ export abstract class KeyBindingsUi {
         let numberValue: number = getInt(value);
         return Number.isInteger(numberValue) && numberValue > 0 && numberValue <= 26;
     }
+
     private static showNumberOfTracksInfo(): void {
         Ticker.setMessage("Show options for the number of note tracks you'll be playing with.",
             TickerState.INFORMATION);
     }
+
     private static showNumberOfTracksError(): void {
         Ticker.setMessage("Error: must be an integer number between 1 and 26.",
             TickerState.ERROR);

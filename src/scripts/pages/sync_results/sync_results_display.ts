@@ -5,6 +5,7 @@ import {global} from "../../index";
 import {setElementCenterPositionRelative} from "../../ui_util";
 import {Accuracy, AccuracyManager} from "../../accuracy_manager";
 import {Config} from "../../config";
+import {AccuracyUtil} from "../../accuracy_util";
 
 export class SyncResultsDisplay {
     private accuracyRecording: AccuracyRecording;
@@ -42,7 +43,7 @@ export class SyncResultsDisplay {
     }
 
     private ignoreBoos(events: AccuracyRecordingEntry[]) {
-        if (!this.accuracyManager.isConfiguredForBoos()) {
+        if (!AccuracyUtil.isConfiguredForBoos(this.config)) {
             return;
         }
         let boo: Accuracy = this.getLastAccuracy();
@@ -112,12 +113,12 @@ export class SyncResultsDisplay {
     private getAccuracyResultsText() {
         let accuracyDirection: string = this.averageAccuracy < 0 ? "(late)" : "(early)";
         return "Average = " +
-            this.formatNumber(this.averageAccuracy) + " " + accuracyDirection +
-            ", StdDev = " + this.formatNumber(this.accuracyStdDev) +
+            SyncResultsDisplay.formatNumber(this.averageAccuracy) + " " + accuracyDirection +
+            ", StdDev = " + SyncResultsDisplay.formatNumber(this.accuracyStdDev) +
             "<br> Recommended change: " + this.getRecommendedChangeText();
     }
 
-    private formatNumber(x: number) {
+    private static formatNumber(x: number) {
         return x.toFixed(0) + "ms";
     }
 
@@ -127,14 +128,13 @@ export class SyncResultsDisplay {
         } else {
             let currentOffset = this.config.additionalOffsetInSeconds * 1000;
             let newOffset = currentOffset + this.recommendedOffsetChangeMillis;
-            return this.formatNumber(currentOffset) + " => " + this.formatNumber(newOffset);
+            return SyncResultsDisplay.formatNumber(currentOffset) + " => " + SyncResultsDisplay.formatNumber(newOffset);
         }
     }
 
     public applyRecommendedChange(): void {
-        console.log(this.config.additionalOffsetInSeconds);
-        let newOffsetMillis = Math.round(this.config.additionalOffsetInSeconds * 1000 + this.recommendedOffsetChangeMillis);
+        let newOffsetMillis = Math.round(
+            this.config.additionalOffsetInSeconds * 1000 + this.recommendedOffsetChangeMillis);
         this.config.additionalOffsetInSeconds = newOffsetMillis / 1000;
-        console.log(this.config.additionalOffsetInSeconds);
     }
 }

@@ -2,9 +2,8 @@ import * as p5 from "p5";
 import {global} from "./index";
 import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
-import {getAccuracyEventName} from "./util";
+import {AccuracyUtil} from "./accuracy_util";
 
-//TODO: don't depend on accuracy recording here
 export class AccuracyFeedbackText {
     private accuracyRecording: AccuracyRecording;
     private centerX: number;
@@ -24,11 +23,11 @@ export class AccuracyFeedbackText {
             return;
         }
         let timeSinceLastEvent = currentTimeInSeconds - lastEvent.timeInSeconds;
-        let textSize = this.getFontSize(timeSinceLastEvent);
+        let textSize = AccuracyFeedbackText.getFontSize(timeSinceLastEvent);
         if (textSize <= 0) {
             return;
         }
-        let eventName = getAccuracyEventName(lastEvent.accuracyMillis, this.config);
+        let eventName = AccuracyUtil.getAccuracyEventName(lastEvent.accuracyMillis, this.config);
         this.drawEventText(eventName, textSize);
     }
 
@@ -51,7 +50,7 @@ export class AccuracyFeedbackText {
         return mostRecentTrack[mostRecentTrack.length - 1];
     }
 
-    private getFontSize(time: number): number {
+    private static getFontSize(time: number): number {
         let maxFontSize = 30;
         if (time < 0.1) {
             return time / 0.1 * maxFontSize;

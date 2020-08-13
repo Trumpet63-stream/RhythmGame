@@ -1,41 +1,33 @@
 import * as p5 from "p5";
-import {drawAccuracyBars} from "../../drawing_util";
-import {Accuracy, AccuracyManager} from "../../accuracy_manager";
+import {Accuracy} from "../../accuracy_manager";
 import {Config} from "../../config";
 import {NoteManager} from "../../note_manager";
 import {AccuracyRecording} from "../../accuracy_recording";
+import {AccuracyUtil} from "../../accuracy_util";
 
 export class ResultsDisplay {
     private config: Config;
     private noteManager: NoteManager;
-    private accuracyManager: AccuracyManager;
     private accuracyRecording: AccuracyRecording;
     private p: p5;
 
-    constructor(config: Config, noteManager: NoteManager, accuracyManager: AccuracyManager, p: p5,
-                accuracyRecording: AccuracyRecording) {
+    constructor(config: Config, noteManager: NoteManager, p: p5, accuracyRecording: AccuracyRecording) {
         this.config = config;
         this.noteManager = noteManager;
-        this.accuracyManager = accuracyManager;
         this.p = p;
         this.accuracyRecording = accuracyRecording;
     }
 
     draw() {
-        this.drawAccuracyResults(this.config.accuracySettings, this.accuracyRecording, this.noteManager, this.accuracyManager);
-    }
-
-    private drawAccuracyResults(accuracySettings: Accuracy[],
-                                accuracyRecording: AccuracyRecording,
-                                noteManager: NoteManager, accuracyManager: AccuracyManager) {
-        let centerX = this.p.width / 2;
-        let centerY = this.p.height / 2;
-        let barWidth = this.p.width * 0.6;
+        let p = this.p;
+        let centerX = p.width / 2;
+        let centerY = p.height / 2;
+        let barWidth = p.width * 0.6;
         let barHeight = barWidth / 10;
         let leftLabelHeight = 0.8 * barHeight;
-        let accuracyListForResults = this.getResultsAccuracyList(accuracySettings);
-        drawAccuracyBars(this.p, accuracyListForResults, accuracyRecording, centerX, centerY, leftLabelHeight, barWidth,
-            barHeight, noteManager, accuracyManager, accuracyManager.isConfiguredForBoos());
+        let accuracyListForResults = this.getResultsAccuracyList(this.config.accuracySettings);
+        this.drawAccuracyBars(accuracyListForResults, centerX, centerY, leftLabelHeight, barWidth, barHeight,
+            AccuracyUtil.isConfiguredForBoos(this.config));
     }
 
     // return a list of unique accuracies sorted by the offset, with the best accuracy being first
@@ -43,20 +35,20 @@ export class ResultsDisplay {
         let accuracyTable: { accuracyName: string, sortValue: number }[] = accuracySettings.map(accuracy => {
             return {
                 accuracyName: accuracy.name,
-                sortValue: this.getAccuracySortingValue(accuracy.lowerBound, accuracy.upperBound)
+                sortValue: ResultsDisplay.getAccuracySortingValue(accuracy.lowerBound, accuracy.upperBound)
             };
         });
         let mergedAccuracyTable: { accuracyName: string, sortValue: number }[] =
             this.mergeAccuraciesWithSameName(accuracyTable);
-        mergedAccuracyTable.sort(this.accuracyTableSortFunction);
+        mergedAccuracyTable.sort(ResultsDisplay.accuracyTableSortFunction);
         return mergedAccuracyTable.map(row => row.accuracyName);
     }
 
-    private getAccuracySortingValue(lowerBound: number, upperBound: number) {
-        if (lowerBound == null) {
+    private static getAccuracySortingValue(lowerBound: number, upperBound: number) {
+        if (lowerBound === null) {
             return Math.abs(upperBound);
         }
-        if (upperBound == null) {
+        if (upperBound === null) {
             return Math.abs(lowerBound);
         }
         return Math.abs((upperBound + lowerBound) / 2);
@@ -76,8 +68,123 @@ export class ResultsDisplay {
         return mergedAccuracyTable;
     }
 
-    private accuracyTableSortFunction(a: { accuracyName: string, sortValue: number },
-                                      b: { accuracyName: string, sortValue: number }) {
+    private static accuracyTableSortFunction(a: { accuracyName: string, sortValue: number },
+                                             b: { accuracyName: string, sortValue: number }) {
         return a.sortValue - b.sortValue;
+    }
+
+    private drawAccuracyBars(accuracyLabels: string[],
+                             centerX: number, centerY: number, textSize: number, barWidth: number,
+                             barHeight: number,
+                             isBooForLastAccuracy: boolean) {
+        let p: p5 = this.p;
+        let maxTextWidth = this.getMaxTextWidth(accuracyLabels, textSize);
+        let totalNotes = this.noteManager.getTotalNotes();
+        let barSpacing = 10;
+        let totalHeight = accuracyLabels.length * barHeight + (accuracyLabels.length - 1) * barSpacing;
+        let startY = (p.height - totalHeight) / 2 + barHeight / 2;
+        startY *= 0.8; // shift the results up to make room for exit button
+
+        for (let i = 0; i < accuracyLabels.length; i++) {
+            let accuracyLabel = accuracyLabels[i];
+            let numAccuracyEvents = this.getNumAccuracyEvents(accuracyLabel, this.config);
+            let percentFilled = numAccuracyEvents / totalNotes;
+
+            if (isBooForLastAccuracy && i === accuracyLabels.length - 1) {
+                this.drawAccuracyWithNoBar(centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
+                    numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth);
+            } else {
+                this.drawAccuracyBar(centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
+                    numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+            }
+        }
+    }
+
+    private getNumAccuracyEvents(accuracyLabel: string, config: Config) {
+        return this.accuracyRecording.recording.reduce((sum, trackRecording) =>
+            sum + trackRecording.filter(accuracyEvent =>
+            AccuracyUtil.getAccuracyEventName(accuracyEvent.accuracyMillis, config) === accuracyLabel).length, 0);
+    }
+
+    private getMaxTextWidth(textArray: string[], textSize: number) {
+        let p: p5 = this.p;
+        p.push();
+        p.textSize(textSize);
+        let maxTextWidth = textArray.map((string) => p.textWidth(string))
+            .reduce((maxWidth, width) => Math.max(maxWidth, width, -1));
+        p.pop();
+        return maxTextWidth;
+    }
+
+    private drawAccuracyBar(centerX: number, centerY: number, label1: string, label2: string, label3: string,
+                            textSize: number, largestTextWidth: number, barWidth: number, barHeight: number,
+                            percentFilled: number) {
+        let p: p5 = this.p;
+        let spacingBetweenBarAndLabel = 8;
+        let totalWidth = largestTextWidth + spacingBetweenBarAndLabel + barWidth;
+        let labelRightmostX = centerX - totalWidth / 2 + largestTextWidth;
+        this.drawRightAlignedLabel(labelRightmostX, centerY, label1, textSize);
+
+        let barRightX = centerX + totalWidth / 2;
+        let barLeftX = barRightX - barWidth;
+        let barCenterX = (barLeftX + barRightX) / 2;
+        this.drawPartiallyFilledBar(barCenterX, centerY, barWidth, barHeight, percentFilled, textSize, label2, label3);
+    }
+
+    private drawRightAlignedLabel(rightmostX: number, centerY: number, text: string, textSize: number) {
+        let p: p5 = this.p;
+        p.push();
+        p.fill("white");
+        p.textSize(textSize);
+        p.textAlign(p.RIGHT, p.CENTER);
+        p.text(text, rightmostX, centerY);
+        p.pop();
+    }
+
+    private drawPartiallyFilledBar(centerX: number, centerY: number, width: number, height: number,
+                                   percentFilled: number, textSize: number, startLabel: string, endLabel: string) {
+        let p: p5 = this.p;
+        p.push();
+        p.rectMode(p.CENTER);
+        p.stroke("white");
+
+        // draw the filled part of the bar
+        p.fill("gray");
+        p.rect(centerX - (width * (1 - percentFilled) / 2), centerY, width * percentFilled, height);
+
+        // draw the outline of the bar
+        p.noFill();
+        p.rect(centerX, centerY, width, height);
+
+        // draw the labels on the ends of the bar
+        let labelSize = 1.5 * textSize;
+        p.fill("white");
+        p.textSize(labelSize);
+        p.textAlign(p.LEFT, p.CENTER);
+        p.text(startLabel, centerX - width / 2, centerY + 2);
+        p.textAlign(p.RIGHT, p.CENTER);
+        p.text(endLabel, centerX + width / 2, centerY + 2);
+        p.pop();
+    }
+
+    private drawAccuracyWithNoBar(centerX: number, centerY: number, label1: string, label2: string, label3: string,
+                                  textSize: number, largestTextWidth: number, barWidth: number) {
+        let p: p5 = this.p;
+        let spacingBetweenBarAndLabel = 8;
+        let totalWidth = largestTextWidth + spacingBetweenBarAndLabel + barWidth;
+        let labelRightmostX = centerX - totalWidth / 2 + largestTextWidth;
+        this.drawRightAlignedLabel(labelRightmostX, centerY, label1, textSize);
+
+        // draw the accuracy count label on the left end of the bar
+        let labelSize = 1.5 * textSize;
+        let barRightX = centerX + totalWidth / 2;
+        let barLeftX = barRightX - barWidth;
+        let barCenterX = (barLeftX + barRightX) / 2;
+        p.push();
+        p.fill("white");
+        p.textSize(labelSize);
+        p.textAlign(p.LEFT, p.CENTER);
+        p.text(label2, barCenterX - barWidth / 2, centerY + 2);
+        p.pop();
     }
 }

@@ -1,5 +1,5 @@
 import {DisplayManager} from "./display_manager";
-import {AccuracyRecordingEntry, AccuracyRecording} from "./accuracy_recording";
+import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
 import * as p5 from "p5";
 import {global} from "./index";
@@ -60,11 +60,11 @@ export class AccuracyFeedbackFlash {
         }
 
         let accuracies = this.config.accuracySettings;
-        if (accuracies[0].lowerBound == null &&
+        if (accuracies[0].lowerBound === null &&
             accuracyEvent.accuracyMillis < accuracies[0].upperBound) {
             return false; // Handle miss if it exists
         }
-        if (accuracies[accuracies.length - 1].upperBound == null &&
+        if (accuracies[accuracies.length - 1].upperBound === null &&
             accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound) {
             return false; // Handle boo if it exists
         }
