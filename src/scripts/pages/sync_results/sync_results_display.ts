@@ -132,9 +132,8 @@ export class SyncResultsDisplay {
     }
 
     public applyRecommendedChange(): void {
-        console.log(this.config.additionalOffsetInSeconds);
-        let newOffsetMillis = Math.round(this.config.additionalOffsetInSeconds * 1000 + this.recommendedOffsetChangeMillis);
+        let newOffsetMillis = Math.round(
+            this.config.additionalOffsetInSeconds * 1000 + this.recommendedOffsetChangeMillis);
         this.config.additionalOffsetInSeconds = newOffsetMillis / 1000;
-        console.log(this.config.additionalOffsetInSeconds);
     }
 }

@@ -3,7 +3,7 @@ import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {Config} from "./config";
 import {HoldManager} from "./hold_manager";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
-import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
+import {AccuracyEvent} from "./accuracy_recording";
 import {getAccuracyEventName} from "./util";
 
 export class Accuracy {
@@ -33,7 +33,7 @@ export class AccuracyManager {
     }
 
     public handlePlayerAction(action: PlayerKeyAction): void {
-        if (action.keyState == KeyState.DOWN) {
+        if (action.keyState === KeyState.DOWN) {
             this.tryToHitNote(action.gameTime, action.track);
         } else if (action.keyState === KeyState.UP) {
             if (this.holdManager.isTrackHeld(action.track)) {
@@ -45,7 +45,7 @@ export class AccuracyManager {
 
     private tryToHitNote(currentTimeInSeconds: number, trackNumber: number) {
         let noteIndex = this.getEarliestHittableUnhitNoteIndex(currentTimeInSeconds, trackNumber);
-        if (noteIndex != null) {
+        if (noteIndex !== null) {
             let note: Note = this.noteManager.tracks[trackNumber][noteIndex];
             if (note.type === NoteType.NORMAL) {
                 note.state = NoteState.HIT;
@@ -92,10 +92,10 @@ export class AccuracyManager {
     getAccuracyRangeInSeconds() {
         let accuracySettings = this.config.accuracySettings;
         let numSettings = accuracySettings.length;
-        let leastTime = accuracySettings[0].lowerBound == null ?
+        let leastTime = accuracySettings[0].lowerBound === null ?
             accuracySettings[1].lowerBound : accuracySettings[0].lowerBound;
         let greatestTime;
-        if (accuracySettings[numSettings - 1].upperBound == null) {
+        if (accuracySettings[numSettings - 1].upperBound === null) {
             greatestTime = accuracySettings[numSettings - 2].upperBound;
         } else {
             greatestTime = accuracySettings[numSettings - 1].upperBound;
@@ -112,7 +112,7 @@ export class AccuracyManager {
 
     private getEarliestUnhitNoteIndexInRange(trackNumber: number, noteIndexRange: { startIndex: number, endIndexNotInclusive: number }) {
         for (let i = noteIndexRange.startIndex; i < noteIndexRange.endIndexNotInclusive; i++) {
-            if (this.noteManager.tracks[trackNumber][i].state == NoteState.DEFAULT) {
+            if (this.noteManager.tracks[trackNumber][i].state === NoteState.DEFAULT) {
                 return i;
             }
         }
@@ -120,14 +120,14 @@ export class AccuracyManager {
     }
 
     isConfiguredForBoos(): boolean {
-        return this.config.accuracySettings[this.config.accuracySettings.length - 1].upperBound == null;
+        return this.config.accuracySettings[this.config.accuracySettings.length - 1].upperBound === null;
     }
 
     tryToReleaseNote(currentTimeInSeconds: number, trackNumber: number) {
         let noteIndex = this.getEarliestHittableUnhitNoteIndex(currentTimeInSeconds, trackNumber);
-        if (noteIndex != null) {
+        if (noteIndex !== null) {
             let note = this.noteManager.tracks[trackNumber][noteIndex];
-            if (note.type == NoteType.TAIL) {
+            if (note.type === NoteType.TAIL) {
                 let hold = this.noteManager.tracks[trackNumber][noteIndex - 1]; // get the hold belonging to this tail
                 hold.state = NoteState.HIT; // change the hold state from HELD to HIT
                 note.state = NoteState.HIT; // hit the tail of the hold
@@ -145,7 +145,7 @@ export class AccuracyManager {
             let holdStartIndex = this.noteManager.findIndexOfFirstNoteAfterTime(currentTimeInSeconds, this.noteManager.tracks[trackNumber]);
             let hold = this.noteManager.tracks[trackNumber][holdStartIndex - 1];
             let tail = this.noteManager.tracks[trackNumber][holdStartIndex];
-            if (hold.type == NoteType.HOLD_HEAD && tail.type == NoteType.TAIL) {
+            if (hold.type === NoteType.HOLD_HEAD && tail.type === NoteType.TAIL) {
                 this.noteManager.tracks[trackNumber][holdStartIndex - 1].state = NoteState.HIT; // hit the start of the hold
                 this.noteManager.tracks[trackNumber][holdStartIndex].state = NoteState.HIT; // hit the tail of the hold
                 this.handleAccuracyEvent({

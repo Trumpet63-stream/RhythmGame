@@ -107,7 +107,7 @@ export function readSWFTags(buff: ByteReader) {
         switch (tagHeader.code) {
             // Sound Tags - MP3 Extraction
             case SWFTags.STREAMBLOCK:
-                if (!mp3Stream || ((tagHeader.length - 4) == 0))
+                if (!mp3Stream || ((tagHeader.length - 4) === 0))
                     break;
 
                 mp3Samples += buff.readUIntLE(16); // frame samples
@@ -124,7 +124,7 @@ export function readSWFTags(buff: ByteReader) {
                 mp3Format = buff.readUIntLE(8);
                 buff.readUIntLE(16); // average frame samples
                 mp3Seek = buff.readUIntLE(16);
-                if (((mp3Format >>> 4) & 0xf) == SWFOtherTags.CODEC_MP3)
+                if (((mp3Format >>> 4) & 0xf) === SWFOtherTags.CODEC_MP3)
                     mp3Stream = true;
                 break;
 
@@ -132,7 +132,7 @@ export function readSWFTags(buff: ByteReader) {
                 if (!mp3Stream) {
                     let id = buff.readUIntLE(16);
                     let format = buff.readUIntLE(8);
-                    if (((format >>> 4) & 0xf) == SWFOtherTags.CODEC_MP3) {
+                    if (((format >>> 4) & 0xf) === SWFOtherTags.CODEC_MP3) {
                         mp3Id = id;
                         mp3Format = format;
                         mp3Samples = buff.readUIntLE(32);
@@ -278,7 +278,7 @@ export function readSWFTags(buff: ByteReader) {
                             break;
                     }
                 }
-                if (actionVariables["_root"] != undefined && actionVariables["_root"]["beatBox"])
+                if (actionVariables["_root"] !== undefined && actionVariables["_root"]["beatBox"])
                     tag.doInclude = true;
 
                 tag.pool = constantPool;

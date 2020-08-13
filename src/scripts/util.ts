@@ -19,9 +19,8 @@ export function isUndefined(value: any): boolean {
     return typeof value === "undefined";
 }
 
-export function getMissBoundary(currentTime: number, config: Config) {
-    let missBoundary = currentTime + (config.accuracySettings[0].upperBound / 1000); //result is in seconds
-    return missBoundary;
+export function getMissBoundaryInSeconds(currentTime: number, config: Config) {
+    return currentTime + (config.accuracySettings[0].upperBound / 1000);
 }
 
 export function isKeyBindingsDefined(numTracks: number) {
@@ -75,7 +74,7 @@ function getIndexOfTrackNumberBinding(trackNumber: number, bindings: { trackNumb
 }
 
 export function getKeyString(p: p5) {
-    return p.key.length == 1 ? p.key.toUpperCase() : p.key;
+    return p.key.length === 1 ? p.key.toUpperCase() : p.key;
 }
 
 export function getModeOptionsForDisplay(modesAsStrings: Map<string, string>[]): Mode[] {
@@ -91,7 +90,7 @@ export function getModeOptionsForDisplay(modesAsStrings: Map<string, string>[]):
 export function compareModeOptions(a: Mode, b: Mode) {
     let typeA = a.type.toUpperCase();
     let typeB = b.type.toUpperCase();
-    if (typeA != typeB) {
+    if (typeA !== typeB) {
         if (typeA < typeB) {
             return -1;
         } else {
@@ -100,12 +99,12 @@ export function compareModeOptions(a: Mode, b: Mode) {
     } else {
         let difficultyA = a.difficulty.toUpperCase();
         let difficultyB = b.difficulty.toUpperCase();
-        if (difficultyA != difficultyB) {
+        if (difficultyA !== difficultyB) {
             return difficultyRank(difficultyA) - difficultyRank(difficultyB);
         } else {
             let meterA = parseFloat(a.meter);
             let meterB = parseFloat(b.meter);
-            if (meterA != meterB) {
+            if (meterA !== meterB) {
                 return meterA - meterB;
             }
         }
@@ -194,17 +193,17 @@ export function generatePreviewNotes(numTracks: number): Note[][] {
 
 // TODO: maybe wrap the config's accuracy definitions in a class that has this
 export function getAccuracyEventName(timeDifferenceInMilliseconds: number, config: Config): string {
-    if (config.accuracySettings[0].lowerBound == null &&
+    if (config.accuracySettings[0].lowerBound === null &&
         timeDifferenceInMilliseconds < config.accuracySettings[0].upperBound) {
         return config.accuracySettings[0].name; // Handle miss if it exists
     }
-    if (config.accuracySettings[config.accuracySettings.length - 1].upperBound == null &&
+    if (config.accuracySettings[config.accuracySettings.length - 1].upperBound === null &&
         timeDifferenceInMilliseconds >= config.accuracySettings[config.accuracySettings.length - 1].lowerBound) {
         return config.accuracySettings[config.accuracySettings.length - 1].name; // Handle boo if it exists
     }
     for (let i = 0; i < config.accuracySettings.length; i++) {
         let accuracy: Accuracy = config.accuracySettings[i];
-        if (accuracy.lowerBound != null && accuracy.upperBound != null) {
+        if (accuracy.lowerBound !== null && accuracy.upperBound !== null) {
             if (accuracy.lowerBound < timeDifferenceInMilliseconds && timeDifferenceInMilliseconds <= accuracy.upperBound) {
                 return accuracy.name;
             }
@@ -221,7 +220,7 @@ export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
 }
 
 export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile) {
-    global.playingDisplay = new PlayingDisplay(tracks, audioFile, global.config, global.p5Scene);
+    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, PAGES.PLAY_FROM_FILE);
 }
 
 export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile) {

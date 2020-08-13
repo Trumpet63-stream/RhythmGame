@@ -53,10 +53,10 @@ export class ResultsDisplay {
     }
 
     private getAccuracySortingValue(lowerBound: number, upperBound: number) {
-        if (lowerBound == null) {
+        if (lowerBound === null) {
             return Math.abs(upperBound);
         }
-        if (upperBound == null) {
+        if (upperBound === null) {
             return Math.abs(lowerBound);
         }
         return Math.abs((upperBound + lowerBound) / 2);

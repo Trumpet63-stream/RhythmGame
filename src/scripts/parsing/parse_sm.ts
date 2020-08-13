@@ -114,17 +114,22 @@ function cleanMetaDataString(string: string): string {
 /* Step Two Of Parsing */
 export function getFullParse(modeIndex: number, partialParse: PartialParse): FullParse {
     let fullParse = new FullParse(partialParse);
+    let cleanedBeatsAndLines = getCleanedBeatsAndLines(partialParse, modeIndex);
+    let offset: number = parseFloat(partialParse.metaData.get("OFFSET"));
+    let bpms: { beat: number; bpm: number }[] = parseBPMS(partialParse.metaData.get("BPMS"));
+    let stops: { stopDuration: number; beat: number }[] = parseStops(partialParse.metaData.get("STOPS"));
+    let timesBeatsAndLines: { time: number; beat: number; lineInfo: string }[] =
+        getTimeInfoByLine(cleanedBeatsAndLines, offset, bpms, stops);
+    fullParse.tracks = getTracksFromLines(timesBeatsAndLines);
+    return fullParse;
+}
+
+function getCleanedBeatsAndLines(partialParse: PartialParse, modeIndex: number) {
     let unparsedNotes: string = partialParse.modes[modeIndex].get("notes");
     let unparsedArray: string[] = unparsedNotes.split("\n");
     let measures: string[][] = getMeasures(unparsedArray);
     let beatsAndLines: { beat: number, lineInfo: string }[] = getBeatInfoByLine(measures);
-    let cleanedBeatsAndLines: { beat: number, lineInfo: string }[] = removeBlankLines(beatsAndLines);
-    let offset: number = parseFloat(partialParse.metaData.get("OFFSET"));
-    let bpms: { beat: number; bpm: number }[] = parseBPMS(partialParse.metaData.get("BPMS"));
-    let stops: { stopDuration: number; beat: number }[] = parseStops(partialParse.metaData.get("STOPS"));
-    let timesBeatsAndLines: { time: number; beat: number; lineInfo: string }[] = getTimeInfoByLine(cleanedBeatsAndLines, offset, bpms, stops);
-    fullParse.tracks = getTracksFromLines(timesBeatsAndLines);
-    return fullParse;
+    return removeBlankLines(beatsAndLines);
 }
 
 function getMeasures(unparsedArray: string[]) {
@@ -214,7 +219,7 @@ function getElapsedTime(startBeat: number, endBeat: number, bpms: { beat: number
                         stops: { beat: number, stopDuration: number }[]) {
     let currentBPMIndex: number = getStartBPMIndex(startBeat, bpms);
     let earliestBeat: number = startBeat;
-    let elapsedTime: number = stops == null ? 0 : stoppedTime(startBeat, endBeat, stops);
+    let elapsedTime: number = stops === null ? 0 : stoppedTime(startBeat, endBeat, stops);
     do {
         let nextBPMChange: number = getNextBPMChange(currentBPMIndex, bpms);
         let nextBeat: number = Math.min(endBeat, nextBPMChange);
@@ -274,11 +279,11 @@ function getTracksFromLines(timesBeatsAndLines: { time: number; beat: number; li
 }
 
 function parseBPMS(bpmString: string) {
-    if (bpmString == null) {
+    if (bpmString === undefined) {
         return [];
     }
     let bpmArray: [number, number][] = parseFloatEqualsFloatPattern(bpmString);
-    let bpms: { beat: number; bpm: number }[] = [];
+    let bpms: { beat: number, bpm: number }[] = [];
     for (let i = 0; i < bpmArray.length; i++) {
         bpms.push({beat: bpmArray[i][0], bpm: bpmArray[i][1]});
     }
@@ -286,11 +291,11 @@ function parseBPMS(bpmString: string) {
 }
 
 function parseStops(stopsString: string) {
-    if (stopsString == null) {
+    if (stopsString === undefined) {
         return [];
     }
     let stopsArray: [number, number][] = parseFloatEqualsFloatPattern(stopsString);
-    let stops: { stopDuration: number; beat: number }[] = [];
+    let stops: { beat: number, stopDuration: number }[] = [];
     for (let i = 0; i < stopsArray.length; i++) {
         stops.push({beat: stopsArray[i][0], stopDuration: stopsArray[i][1]});
     }

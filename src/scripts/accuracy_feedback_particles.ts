@@ -61,7 +61,7 @@ export class AccuracyFeedbackParticles {
             let initialPosition = this.getInitialPosition(p, accuracyEvent.trackNumber, this.numTracks,
                 receptorTimePosition);
             let initialVelocity = p.createVector(0, -500 * this.gravityDirection);
-            let particleSettings: {color: p5.Color, numParticles: number } = this.getParticleSettings(accuracyEvent);
+            let particleSettings: { color: p5.Color, numParticles: number } = this.getParticleSettings(accuracyEvent);
             this.particleSystems[accuracyEvent.trackNumber].addRandomizedParticles(initialPosition, initialVelocity,
                 accuracyEvent.timeInSeconds, particleSettings.numParticles, particleSettings.color);
         }
@@ -75,11 +75,11 @@ export class AccuracyFeedbackParticles {
 
     private isEventForParticles(accuracyEvent: AccuracyEvent) {
         let accuracies = this.config.accuracySettings;
-        if (accuracies[0].lowerBound == null &&
+        if (accuracies[0].lowerBound === null &&
             accuracyEvent.accuracyMillis < accuracies[0].upperBound) {
             return false; // Handle miss if it exists
         }
-        if (accuracies[accuracies.length - 1].upperBound == null &&
+        if (accuracies[accuracies.length - 1].upperBound === null &&
             accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound) {
             return false; // Handle boo if it exists
         }
@@ -93,8 +93,10 @@ export class AccuracyFeedbackParticles {
         let accuracyRank = this.getAccuracyRank(accuracyEvent, accuracies);
         let particleSettings = this.particleSettings[accuracyRank - 1];
         let p: p5 = global.p5Scene.sketchInstance;
-        return {color: p.color(particleSettings[0], particleSettings[1], particleSettings[2]),
-            numParticles: particleSettings[3]};
+        return {
+            color: p.color(particleSettings[0], particleSettings[1], particleSettings[2]),
+            numParticles: particleSettings[3]
+        };
     }
 
     // Assumes symmetrical accuracy settings

@@ -5,6 +5,7 @@ import {ScrollDirection} from "./scroll_direction";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {global} from "./index";
 import {DefaultNoteSkin} from "./default_note_skin";
+import {Rectangle} from "./rectangle";
 
 class NoteDisplay {
     centerX: number;
@@ -104,21 +105,14 @@ export class DisplayManager {
     private noteManager: NoteManager;
     private currentTimeInSeconds: number;
     private sketchInstance: p5;
-    private topLeftX: number;
-    private topLeftY: number;
-    private width: number;
-    private height: number;
+    private bounds: Rectangle;
 
-    constructor(noteManager: NoteManager, displayConfig: DisplayConfig, sketchInstance: p5, topLeftX: number = 0,
-                topLeftY: number = 0, width: number = 180, height: number = 400) {
+    constructor(noteManager: NoteManager, displayConfig: DisplayConfig, sketchInstance: p5, bounds: Rectangle) {
         this.displayConfig = displayConfig;
         this.noteManager = noteManager;
         this.currentTimeInSeconds = 0;
         this.sketchInstance = sketchInstance;
-        this.topLeftX = topLeftX;
-        this.topLeftY = topLeftY;
-        this.width = width;
-        this.height = height;
+        this.bounds = bounds;
     }
 
     draw(currentTimeInSeconds: number) {
@@ -126,7 +120,7 @@ export class DisplayManager {
         p.push();
         p.fill("black");
         this.currentTimeInSeconds = currentTimeInSeconds;
-        this.sketchInstance.rect(this.topLeftX, this.topLeftY, this.width, this.height);
+        this.sketchInstance.rect(this.bounds.topLeftX, this.bounds.topLeftY, this.bounds.width, this.bounds.height);
         this.drawNotesAndConnectors();
         this.drawReceptors();
         p.pop();
@@ -156,7 +150,7 @@ export class DisplayManager {
     }
 
     private drawNote(note: Note, trackNumber: number, numTracks: number, currentTime: number) {
-        if (note.state == NoteState.DEFAULT) {
+        if (note.state === NoteState.DEFAULT) {
             let x = this.getNoteCenterX(trackNumber, numTracks);
             let y = this.getNoteCenterY(note.timeInSeconds, currentTime);
             new NoteDisplay(x, y, note.type, this.sketchInstance, this.displayConfig.getNoteSize(), trackNumber, numTracks).draw();
@@ -164,37 +158,29 @@ export class DisplayManager {
     }
 
     private getLeastTime(currentTime: number) {
-        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.getPixelsPerSecond();
+        let totalDisplaySeconds = this.bounds.height / this.displayConfig.getPixelsPerSecond();
         return currentTime - this.displayConfig.getReceptorYPercent() / 100 * totalDisplaySeconds;
     }
 
     private getGreatestTime(currentTime: number) {
-        let totalDisplaySeconds = this.getDisplayHeight() / this.displayConfig.getPixelsPerSecond();
+        let totalDisplaySeconds = this.bounds.height / this.displayConfig.getPixelsPerSecond();
         return currentTime + (1 - this.displayConfig.getReceptorYPercent() / 100) * totalDisplaySeconds;
     }
 
     public getNoteCenterX(trackNumber: number, numTracks: number) {
-        let receptorSpacing = this.getDisplayWidth() / numTracks - this.displayConfig.getNoteSize();
-        return (2 * trackNumber + 1) / 2 * (this.displayConfig.getNoteSize() + receptorSpacing) + this.topLeftX;
+        let receptorSpacing = this.bounds.width / numTracks - this.displayConfig.getNoteSize();
+        return (2 * trackNumber + 1) / 2 * (this.displayConfig.getNoteSize() + receptorSpacing) + this.bounds.topLeftX;
     }
 
     // This essentially defines a conversion from seconds to pixels
     public getNoteCenterY(noteTimeInSeconds: number, currentTimeInSeconds: number) {
         let noteYOffset = this.displayConfig.getPixelsPerSecond() * (noteTimeInSeconds - currentTimeInSeconds);
-        let receptorYOffset = this.displayConfig.getReceptorYPercent() / 100 * this.getDisplayHeight();
-        if (this.displayConfig.getScrollDirection() == ScrollDirection.Up) {
-            return receptorYOffset + noteYOffset + this.topLeftY;
+        let receptorYOffset = this.displayConfig.getReceptorYPercent() / 100 * this.bounds.height;
+        if (this.displayConfig.getScrollDirection() === ScrollDirection.Up) {
+            return receptorYOffset + noteYOffset + this.bounds.topLeftY;
         } else {
-            return this.getDisplayHeight() - (receptorYOffset + noteYOffset) + this.topLeftY;
+            return this.bounds.height - (receptorYOffset + noteYOffset) + this.bounds.topLeftY;
         }
-    }
-
-    private getDisplayWidth(): number {
-        return this.width;
-    }
-
-    private getDisplayHeight(): number {
-        return this.height;
     }
 
     private drawAllConnectors(leastTime: number, greatestTime: number) {
@@ -222,15 +208,15 @@ export class DisplayManager {
                 } else if (currentNote.type === NoteType.TAIL) {
                     let startNote = noteStack.pop();
                     let endNote = currentNote;
-                    if (startNote != undefined && endNote != undefined) {
-                        if ((startNote.state == NoteState.DEFAULT || startNote.state == NoteState.HELD) &&
-                            endNote.state == NoteState.DEFAULT) {
+                    if (startNote !== undefined && endNote !== undefined) {
+                        if ((startNote.state === NoteState.DEFAULT || startNote.state === NoteState.HELD) &&
+                            endNote.state === NoteState.DEFAULT) {
                             this.drawConnector(startNote, endNote, trackNumber, numTracks, currentTime);
                         }
                     }
                 }
             } else {
-                if (noteStack.length == 0) {
+                if (noteStack.length === 0) {
                     break;
                 }
                 if (currentNote.type === NoteType.HOLD_HEAD || currentNote.type === NoteType.ROLL_HEAD) {
@@ -238,9 +224,9 @@ export class DisplayManager {
                 } else if (currentNote.type === NoteType.TAIL) {
                     let startNote = noteStack.pop();
                     let endNote = currentNote;
-                    if (startNote != undefined && endNote != undefined) {
-                        if ((startNote.state == NoteState.DEFAULT || startNote.state == NoteState.HELD) &&
-                            endNote.state == NoteState.DEFAULT) {
+                    if (startNote !== undefined && endNote !== undefined) {
+                        if ((startNote.state === NoteState.DEFAULT || startNote.state === NoteState.HELD) &&
+                            endNote.state === NoteState.DEFAULT) {
                             this.drawConnector(startNote, endNote, trackNumber, numTracks, currentTime);
                         }
                     }
@@ -255,15 +241,15 @@ export class DisplayManager {
         let noteEndY = this.getNoteCenterY(endNote.timeInSeconds, currentTime);
 
         let drawStartY;
-        if (startNote.state == NoteState.HELD) {
+        if (startNote.state === NoteState.HELD) {
             drawStartY = this.getNoteCenterY(Math.min(currentTime, endNote.timeInSeconds), currentTime);
         } else {
             drawStartY = noteStartY;
         }
-        drawStartY = this.clampValueToRange(drawStartY, this.topLeftY, this.topLeftY + this.height);
+        drawStartY = this.clampValueToRange(drawStartY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
 
         let drawEndY = noteEndY
-        drawEndY = this.clampValueToRange(drawEndY, this.topLeftY, this.topLeftY + this.height);
+        drawEndY = this.clampValueToRange(drawEndY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
 
         new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.sketchInstance).draw();
     }
