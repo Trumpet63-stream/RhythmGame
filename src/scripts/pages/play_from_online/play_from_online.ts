@@ -11,7 +11,7 @@ import {
 import {DOMWrapper} from "../../dom_wrapper";
 import {PageManager, PAGES} from "../../page_manager";
 import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
-import {initPlayingDisplay, isFilesReady} from "../../util";
+import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Stepfile} from "../../stepfile";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 
@@ -23,10 +23,11 @@ let isSwfLoadStarted: boolean = false;
 
 export abstract class PlayFromOnline {
     public static PLAY_FROM_ONLINE_CLASS: string = "play-from-online";
+    private static onSongLoaded: () => void;
 
     public static draw() {
         drawHeading();
-        let onlinePlaylist: OnlinePlaylist = <OnlinePlaylist> global.onlinePlaylist;
+        let onlinePlaylist: OnlinePlaylist = <OnlinePlaylist>global.onlinePlaylist;
         let p: p5 = global.p5Scene.sketchInstance;
         p.background(global.playFromFileBackground);
 
@@ -36,69 +37,107 @@ export abstract class PlayFromOnline {
         let urlInputDiv = new p5.Element(urlInput.element.parent());
         setElementCenterPositionRelative(urlInputDiv, 0.50, 0.21, 600, 38);
 
-        let loadButton = DOMWrapper.create(() => {
+        let loadPlaylistButton = DOMWrapper.create(() => {
             return p.createButton("Load");
-        }, "loadButton");
-        setElementCenterPositionRelative(loadButton.element, 0.85, 0.215, 62, 33);
-        if (!loadButton.alreadyExists) {
-            loadButton.element.addClass(global.globalClass);
-            loadButton.element.addClass(PlayFromOnline.PLAY_FROM_ONLINE_CLASS);
-            loadButton.element.mouseClicked(() => {
+        }, "loadPlaylistButton");
+        setElementCenterPositionRelative(loadPlaylistButton.element, 0.85, 0.215, 62, 33);
+        if (!loadPlaylistButton.alreadyExists) {
+            loadPlaylistButton.element.addClass(global.globalClass);
+            loadPlaylistButton.element.addClass(PlayFromOnline.PLAY_FROM_ONLINE_CLASS);
+            loadPlaylistButton.element.mouseClicked(() => {
                 let value: string | number = urlInput.element.value();
                 if (typeof value === "string") {
-                    loadButton.element.attribute('disabled', '');
+                    loadPlaylistButton.element.attribute('disabled', '');
                     onlinePlaylist.kickOffLoadPlaylist(value);
                 }
             });
         }
         if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_PLAYLIST) {
-            loadButton.element.removeAttribute('disabled');
+            loadPlaylistButton.element.removeAttribute('disabled');
         }
 
+        let playlistMenuId = "playlistMenu"
         if (onlinePlaylist.state === OnlinePlaylistState.PLAYLIST_READY ||
             onlinePlaylist.state === OnlinePlaylistState.LOADING_SONG) {
-            let playlistMenuId = "playlistMenu"
             let playlistMenu = drawRadioMenu(p, playlistMenuId, onlinePlaylist.displayedPlaylist);
             setElementCenterPositionRelative(playlistMenu, 0.5, 0.62, 500, 200);
 
             drawPageControls(p, playlistMenuId);
 
+            let loadAndPlayButtonId = "loadAndPlayButton";
+            let loadAndSyncButtonId = "loadAndSyncButton";
             if (playlistMenu.value() !== "") {
                 let loadAndPlayButton = DOMWrapper.create(() => {
                     return p.createButton("Load And Play");
-                }, "loadAndPlayButton");
+                }, loadAndPlayButtonId);
                 setElementCenterPositionRelative(loadAndPlayButton.element, 0.5, 0.88, 118, 34);
 
                 if (!loadAndPlayButton.alreadyExists) {
                     loadAndPlayButton.element.addClass(global.globalClass);
-                    loadAndPlayButton.element.mouseClicked(() => {
-                        let value: string | number = playlistMenu.value();
-                        if (typeof value === "string") {
-                            value = parseInt(value);
-                        }
-                        if (Number.isInteger(value)) {
-                            loadAndPlayButton.element.attribute('disabled', '');
-                            onlinePlaylist.kickOffLoadSong(value, playFromOnlineStepfile, playFromOnlineAudioFile);
-                            isSwfLoadStarted = true;
-                        }
-                    });
+                    this.setLoadAndPlayButtonBehavior(loadAndPlayButton.element, playlistMenu, onlinePlaylist);
                 }
+
+                let loadAndSyncButton = DOMWrapper.create(() => {
+                    return p.createButton("Load Audio Sync Wizard");
+                }, loadAndSyncButtonId);
+                setElementCenterPositionRelative(loadAndSyncButton.element, 0.8, 0.88, 177, 34);
+                if (!loadAndSyncButton.alreadyExists) {
+                    loadAndSyncButton.element.addClass(global.globalClass);
+                    this.setSyncButtonBehavior(loadAndSyncButton.element, playlistMenu, onlinePlaylist);
+                }
+
                 if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_SONG) {
                     loadAndPlayButton.element.removeAttribute('disabled');
                 }
 
                 if (isFilesReady(playFromOnlineStepfile, playFromOnlineAudioFile) && isSwfLoadStarted) {
-                    initPlayingDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile);
-                    PageManager.setCurrentPage(PAGES.PLAY);
+                    this.onSongLoaded();
                 }
 
             } else {
-                DOMWrapper.removeElementById("loadAndPlayButton");
+                DOMWrapper.removeElementById(loadAndPlayButtonId);
+                DOMWrapper.removeElementById(loadAndSyncButtonId);
                 isSwfLoadStarted = false;
             }
 
         } else {
-            DOMWrapper.removeElementById("playlistMenu");
+            DOMWrapper.removeElementById(playlistMenuId);
+        }
+    }
+
+    private static setLoadAndPlayButtonBehavior(loadAndPlayButton: p5.Element, playlistMenu: p5.Element,
+                                                onlinePlaylist: OnlinePlaylist) {
+        loadAndPlayButton.mouseClicked(
+            PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndPlayButton, playlistMenu, onlinePlaylist,
+                () => {
+                    initPlayingDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
+                        PAGES.PLAY_FROM_ONLINE);
+                    PageManager.setCurrentPage(PAGES.PLAY);
+                }));
+    }
+
+    private static setSyncButtonBehavior(loadAndSyncButton: p5.Element, playlistMenu: p5.Element,
+                                         onlinePlaylist: OnlinePlaylist) {
+        loadAndSyncButton.mouseClicked(
+            PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndSyncButton, playlistMenu, onlinePlaylist,
+                () => {
+                    initSyncGameDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
+                        PAGES.PLAY_FROM_ONLINE);
+                    PageManager.setCurrentPage(PAGES.SYNC);
+                }));
+    }
+
+    private static loadSelectedSongAndDisableButton(button: p5.Element, playlistMenu: p5.Element,
+                                                    onlinePlaylist: OnlinePlaylist, onSongLoaded: () => void) {
+        this.onSongLoaded = onSongLoaded;
+        let value: string | number = playlistMenu.value();
+        if (typeof value === "string") {
+            value = parseInt(value);
+        }
+        if (Number.isInteger(value)) {
+            button.attribute('disabled', '');
+            onlinePlaylist.kickOffLoadSong(value, playFromOnlineStepfile, playFromOnlineAudioFile);
+            isSwfLoadStarted = true;
         }
     }
 }
@@ -168,7 +207,7 @@ function drawPageControls(p: p5, playlistMenuId: string) {
         pageControlsDiv.element.child(previousPageButton.element);
     }
 
-    if(!pageNumberText.alreadyExists) {
+    if (!pageNumberText.alreadyExists) {
         pageControlsDiv.element.child(pageNumberText.element);
         pageNumberText.element.html("Page " + (global.onlinePlaylist.getPage() + 1));
     }

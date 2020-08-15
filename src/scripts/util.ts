@@ -197,12 +197,12 @@ export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
     return stepfileReady && audioFileReady;
 }
 
-export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile) {
-    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, PAGES.PLAY_FROM_FILE);
+export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PAGES) {
+    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, returnPage);
 }
 
-export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile) {
-    global.syncGameDisplay = new SyncGameDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, PAGES.PLAY_FROM_FILE);
+export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PAGES) {
+    global.syncGameDisplay = new SyncGameDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, returnPage);
 }
 
 export function enumToString(TheEnum: any, value: any) {

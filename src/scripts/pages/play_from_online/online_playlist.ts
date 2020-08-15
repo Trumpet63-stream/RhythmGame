@@ -58,7 +58,7 @@ export class OnlinePlaylist {
         stepfile.state = StepfileState.NO_STEPFILE;
         this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
             .then((swfParseResponse) =>
-                this.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
+                OnlinePlaylist.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
             .catch(() => this.state = OnlinePlaylistState.SONG_ERROR);
     }
 
@@ -66,7 +66,7 @@ export class OnlinePlaylist {
         return displayedSongIndex + this.pageSize * this.pageNumber;
     }
 
-    private loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
+    private static loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
         stepfile.loadFfrBeatmap(swfParseResponse.chartData);
         audioFile.loadBlob(swfParseResponse.blob);
     }
@@ -84,7 +84,7 @@ export class OnlinePlaylist {
     }
 
     private setPage(pageNumber: number, pageSize?: number) {
-        pageSize = this.getValidPageSize(pageSize);
+        pageSize = OnlinePlaylist.getValidPageSize(pageSize);
         if (!this.isValidPageNumber(pageNumber, pageSize)) {
             return;
         }
@@ -109,7 +109,7 @@ export class OnlinePlaylist {
         return new DisplayableSong(this.playlistClient.getPlaylist()[songIndex]);
     }
 
-    private getValidPageSize(pageSize: number) {
+    private static getValidPageSize(pageSize: number) {
         if (pageSize === undefined) {
             return OnlinePlaylist.DEFAULT_PAGE_SIZE;
         } else if (pageSize < 1) {

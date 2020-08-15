@@ -50,7 +50,7 @@ export abstract class PlayFromFile {
                 setElementCenterPositionRelative(playButton.element, 0.5, 0.88, 60, 34);
                 if (!playButton.alreadyExists) {
                     playButton.element.addClass(global.globalClass);
-                    this.setPlayButtonBehavior(playButton, modeRadio);
+                    this.setPlayButtonBehavior(playButton.element, modeRadio);
                 }
 
                 let syncButton = DOMWrapper.create(() => {
@@ -59,7 +59,7 @@ export abstract class PlayFromFile {
                 setElementCenterPositionRelative(syncButton.element, 0.8, 0.88, 177, 34);
                 if (!syncButton.alreadyExists) {
                     syncButton.element.addClass(global.globalClass);
-                    this.setSyncButtonBehavior(syncButton, modeRadio);
+                    this.setSyncButtonBehavior(syncButton.element, modeRadio);
                 }
             } else {
                 DOMWrapper.removeElementById(playButtonId);
@@ -72,20 +72,20 @@ export abstract class PlayFromFile {
         }
     }
 
-    private static setSyncButtonBehavior(syncButton: { element: p5.Element; alreadyExists: boolean }, modeRadio: p5.Element) {
-        syncButton.element.mouseClicked(() => {
+    private static setSyncButtonBehavior(syncButton: p5.Element, modeRadio: p5.Element) {
+        syncButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
+            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, PAGES.PLAY_FROM_FILE);
             PageManager.setCurrentPage(PAGES.SYNC);
         });
     }
 
-    private static setPlayButtonBehavior(playButton: { element: p5.Element; alreadyExists: boolean }, modeRadio: p5.Element) {
-        playButton.element.mouseClicked(() => {
+    private static setPlayButtonBehavior(playButton: p5.Element, modeRadio: p5.Element) {
+        playButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile);
+            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, PAGES.PLAY_FROM_FILE);
             PageManager.setCurrentPage(PAGES.PLAY);
         });
     }
