@@ -5,7 +5,7 @@ import {Play} from "./pages/play/play";
 import {PlayResults} from "./pages/play_results/play_results";
 import {DOMWrapper} from "./dom_wrapper";
 import {PlayFromOnline} from "./pages/play_from_online/play_from_online";
-import {Sync} from "./pages/audio_sync/sync";
+import {Sync} from "./pages/sync/sync";
 import {SyncResults} from "./pages/sync_results/sync_results";
 
 export enum PAGES {

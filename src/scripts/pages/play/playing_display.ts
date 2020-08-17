@@ -20,7 +20,7 @@ import {HoldParticles} from "../../hold_particles";
 import {HoldGlow} from "../../hold_glow";
 import {PlayingConfig} from "../../playing_config";
 import {GameTimeManager} from "../../game_time_manager";
-import {AbstractPlayingDisplay} from "../../common_playing_display";
+import {AbstractPlayingDisplay} from "../../abstract_playing_display";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
@@ -70,10 +70,8 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
             this.handleAccuracyEvent.bind(this));
 
-        this.accuracyFeedbackText = new AccuracyFeedbackText(this.accuracyRecording, this.bounds.centerX,
-            this.bounds.centerY, this.config);
-        this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.accuracyRecording, this.config, this.displayManager,
-            numTracks);
+        this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
+        this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
         this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
 

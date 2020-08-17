@@ -5,7 +5,7 @@ import {DisplayConfig, DisplayManager} from "./display_manager";
 import {TimeManager} from "./time_manager";
 import {MissManager} from "./miss_manager";
 import {AccuracyManager} from "./accuracy_manager";
-import {AccuracyEvent, AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
+import {AccuracyRecording, AccuracyRecordingState} from "./accuracy_recording";
 import {AccuracyFeedbackText} from "./accuracy_feedback_text";
 import {HoldManager} from "./hold_manager";
 import {ReceptorShrinkReaction} from "./receptor_shrink_reaction";
@@ -20,6 +20,7 @@ import {Note} from "./parsing/parse_sm";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
+import {AccuracyEvent} from "./accuracy_event";
 
 export abstract class AbstractPlayingDisplay {
     protected scene: P5Scene;
@@ -61,8 +62,10 @@ export abstract class AbstractPlayingDisplay {
                                   returnPage: PAGES): void;
 
     protected handleAccuracyEvent(accuracyEvent: AccuracyEvent) {
-        this.accuracyRecording.recordAccuracyEvent(accuracyEvent);
-        this.accuracyFeedbackParticles.addParticlesForAccuracyEvent(accuracyEvent);
+        this.accuracyRecording.update(accuracyEvent);
+        this.accuracyFeedbackParticles.update(accuracyEvent);
+        this.accuracyFeedbackText.update(accuracyEvent);
+        this.accuracyFeedbackFlash.update(accuracyEvent);
     }
 
     public draw() {

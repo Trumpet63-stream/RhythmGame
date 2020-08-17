@@ -3,7 +3,8 @@ import {Config} from "./config";
 import {getMissBoundaryInSeconds} from "./util";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {HoldManager} from "./hold_manager";
-import {AccuracyEvent, AccuracyRecording} from "./accuracy_recording";
+import {AccuracyRecording} from "./accuracy_recording";
+import {AccuracyEvent} from "./accuracy_event";
 
 export class MissManager {
     private config: Config;

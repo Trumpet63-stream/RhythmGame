@@ -1,16 +1,9 @@
 import {NoteType} from "./parsing/parse_sm";
+import {AccuracyEvent} from "./accuracy_event";
 
 export enum AccuracyRecordingState {
     INCOMPLETE,
     READY,
-}
-
-export interface AccuracyEvent {
-    accuracyName: string,
-    trackNumber: number,
-    timeInSeconds: number,
-    accuracyMillis: number,
-    noteType: NoteType
 }
 
 export interface AccuracyRecordingEntry {
@@ -31,7 +24,7 @@ export class AccuracyRecording {
         }
     }
 
-    public recordAccuracyEvent(accuracyEvent: AccuracyEvent) {
+    public update(accuracyEvent: AccuracyEvent) {
         this.recording[accuracyEvent.trackNumber].push(
             {
                 timeInSeconds: accuracyEvent.timeInSeconds,

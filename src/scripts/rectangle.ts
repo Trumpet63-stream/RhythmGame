@@ -1,3 +1,5 @@
+import {Point2D} from "./point_2d";
+
 export class Rectangle {
     public width: number;
     public height: number;
@@ -5,6 +7,8 @@ export class Rectangle {
     public topLeftY: number;
     public centerX: number;
     public centerY: number;
+    public center: Point2D;
+    public topLeft: Point2D;
 
     private constructor() {
     }
@@ -15,8 +19,10 @@ export class Rectangle {
         rect.height = height;
         rect.topLeftX = x;
         rect.topLeftY = y;
+        rect.topLeft = new Point2D(rect.topLeftX, rect.topLeftY);
         rect.centerX = x + width / 2;
         rect.centerY = y + height / 2;
+        rect.center = new Point2D(rect.centerX, rect.centerY);
         return rect;
     }
 
@@ -26,8 +32,10 @@ export class Rectangle {
         rect.height = height;
         rect.topLeftX = x - width / 2;
         rect.topLeftY = y - height / 2;
+        rect.topLeft = new Point2D(rect.topLeftX, rect.topLeftY);
         rect.centerX = x;
         rect.centerY = y;
+        rect.center = new Point2D(rect.centerX, rect.centerY);
         return rect;
     }
 }

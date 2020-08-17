@@ -1,25 +1,24 @@
 import {DisplayManager} from "./display_manager";
-import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
 import * as p5 from "p5";
 import {global} from "./index";
-import {Accuracy} from "./accuracy_manager";
+import {AccuracyEvent} from "./accuracy_event";
+import {AccuracyUtil} from "./accuracy_util";
 
 export class AccuracyFeedbackFlash {
-    private accuracyRecording: AccuracyRecording;
     private config: Config;
     private displayManager: DisplayManager;
     private numTracks: number;
     private numColoredAccuracyRanks: number;
     private static flashDurationInSeconds: number = 0.1;
     private accuracyColors: [number, number, number, number][];
+    private lastEvents: AccuracyEvent[];
 
-    constructor(accuracyRecording: AccuracyRecording, config: Config, displayManager: DisplayManager, numTracks: number) {
-        this.accuracyRecording = accuracyRecording;
+    constructor(config: Config, displayManager: DisplayManager, numTracks: number) {
         this.config = config;
         this.displayManager = displayManager;
         this.numTracks = numTracks;
-        this.numColoredAccuracyRanks = this.getNumColoredAccuracyRanks(this.config.accuracySettings);
+        this.numColoredAccuracyRanks = AccuracyUtil.countDifferentHitAccuracies(this.config);
         this.accuracyColors = [
             [178, 94, 247, 180],
             [30, 217, 124, 160],
@@ -31,10 +30,15 @@ export class AccuracyFeedbackFlash {
                 [this.getRandomInt(255), this.getRandomInt(255), this.getRandomInt(255), 100]
             );
         }
+        this.lastEvents = [];
     }
 
     private getRandomInt(max: number) {
         return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    public update(accuracyEvent: AccuracyEvent) {
+        this.lastEvents[accuracyEvent.trackNumber] = accuracyEvent;
     }
 
     public draw(currentTimeInSeconds: number) {
@@ -44,107 +48,41 @@ export class AccuracyFeedbackFlash {
     }
 
     private drawFlashForTrack(trackNumber: number, currentTimeInSeconds: number) {
-        let mostRecentAccuracyRecordingEntry = this.getTrackMostRecentAccuracyRecordingEntry(trackNumber);
-        if (this.isFlashHappening(currentTimeInSeconds, mostRecentAccuracyRecordingEntry)) {
+        let lastEvent: AccuracyEvent = this.lastEvents[trackNumber];
+        if (this.isFlashHappening(currentTimeInSeconds, lastEvent)) {
             let centerX = this.displayManager.getNoteCenterX(trackNumber, this.numTracks);
             let centerY = this.displayManager.getNoteCenterY(currentTimeInSeconds, currentTimeInSeconds);
-            let flashColor: p5.Color = this.getFlashColor(mostRecentAccuracyRecordingEntry);
-            let elapsedTimeInSeconds = this.getElapsedTimeInSeconds(currentTimeInSeconds, mostRecentAccuracyRecordingEntry);
+            let flashColor: p5.Color = this.getFlashColor(lastEvent);
+            let elapsedTimeInSeconds = this.getElapsedTimeInSeconds(currentTimeInSeconds, lastEvent);
             this.drawFlash(elapsedTimeInSeconds, centerX, centerY, flashColor);
         }
     }
 
-    private isFlashHappening(currentTimeInSeconds: number, accuracyEvent: AccuracyRecordingEntry) {
-        if (accuracyEvent === null) {
+    private isFlashHappening(currentTimeInSeconds: number, accuracyEvent: AccuracyEvent) {
+        if (accuracyEvent === undefined) {
             return false;
         }
 
-        let accuracies = this.config.accuracySettings;
-        if (accuracies[0].lowerBound === null &&
-            accuracyEvent.accuracyMillis < accuracies[0].upperBound) {
-            return false; // Handle miss if it exists
-        }
-        if (accuracies[accuracies.length - 1].upperBound === null &&
-            accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound) {
-            return false; // Handle boo if it exists
+        if (!AccuracyUtil.eventIsAHit(accuracyEvent, this.config)) {
+            return false;
         }
 
         let elapsedTimeInSeconds = this.getElapsedTimeInSeconds(currentTimeInSeconds, accuracyEvent);
-        if (elapsedTimeInSeconds > AccuracyFeedbackFlash.flashDurationInSeconds) {
-            return false;
-        }
-
-        return true;
+        return elapsedTimeInSeconds <= AccuracyFeedbackFlash.flashDurationInSeconds;
     }
 
-    private getElapsedTimeInSeconds(currentTimeInSeconds: number, accuracyEvent: AccuracyRecordingEntry) {
+    private getElapsedTimeInSeconds(currentTimeInSeconds: number, accuracyEvent: AccuracyEvent) {
         return currentTimeInSeconds - accuracyEvent.timeInSeconds;
     }
 
-    private getTrackMostRecentAccuracyRecordingEntry(trackNumber: number): AccuracyRecordingEntry {
-        let track = this.accuracyRecording.recording[trackNumber];
-        if (track.length > 0) {
-            return this.accuracyRecording.recording[trackNumber][track.length - 1];
-        } else {
-            return null;
-        }
-    }
-
     // Assumes symmetrical accuracy settings
-    private getFlashColor(accuracyEvent: AccuracyRecordingEntry) {
-        let accuracies = this.config.accuracySettings;
-        let accuracyRank = this.getAccuracyRank(accuracyEvent, accuracies);
+    private getFlashColor(accuracyEvent: AccuracyEvent) {
+        let accuracyRank = AccuracyUtil.getAccuracyRank(accuracyEvent, this.config);
         let colorValues = this.accuracyColors[accuracyRank - 1];
         let p: p5 = global.p5Scene.sketchInstance;
         return p.color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
 
-    // Assumes symmetrical accuracy settings
-    private getNumColoredAccuracyRanks(accuracies: Accuracy[]) {
-        let bestAccuracyIndex = this.getBestAccuracyIndex(accuracies);
-        let numRanks = 1; // start with 1 because we at least have the best rank
-        for (let i = bestAccuracyIndex + 1; i < accuracies.length; i++) {
-            let accuracy: Accuracy = accuracies[i];
-            if (accuracy.lowerBound !== undefined && accuracy.upperBound !== undefined) {
-                numRanks++;
-            }
-        }
-        return numRanks
-    }
-
-    private getBestAccuracyIndex(accuracies: Accuracy[]) {
-        for (let i = 0; i < accuracies.length; i++) {
-            let accuracy: Accuracy = accuracies[i];
-            if (accuracy.lowerBound < 0 && 0 <= accuracy.upperBound) {
-                return i;
-            }
-        }
-        return null;
-    }
-
-    // Returns a rank where 1 is the best
-    private getAccuracyRank(accuracyEvent: AccuracyRecordingEntry, accuracies: Accuracy[]) {
-        if (accuracyEvent.accuracyMillis < 0) {
-            accuracies = this.getReversed(accuracies);
-        }
-        let bestAccuracyIndex = this.getBestAccuracyIndex(accuracies);
-        let currentRank = 1;
-        for (let i = bestAccuracyIndex; i < accuracies.length; i++) {
-            let accuracy = accuracies[i];
-            if (accuracy.lowerBound < accuracyEvent.accuracyMillis && accuracyEvent.accuracyMillis <= accuracy.upperBound) {
-                return currentRank;
-            }
-            currentRank++;
-        }
-    }
-
-    private getReversed(array: any[]) {
-        let arrayCopy: any[] = [];
-        for (let i = array.length - 1; i >= 0; i--) {
-            arrayCopy.push(array[i]);
-        }
-        return arrayCopy;
-    }
 
     private drawFlash(elapsedTimeInSeconds: number, centerX: number, centerY: number, color: p5.Color) {
         let p: p5 = global.p5Scene.sketchInstance;

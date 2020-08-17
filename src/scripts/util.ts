@@ -6,7 +6,7 @@ import * as p5 from "p5";
 import {Stepfile, StepfileState} from "./stepfile";
 import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
-import {SyncGameDisplay} from "./pages/audio_sync/sync_game_display";
+import {SyncGameDisplay} from "./pages/sync/sync_game_display";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
 import {PAGES} from "./page_manager";
 

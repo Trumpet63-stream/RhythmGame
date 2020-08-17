@@ -3,8 +3,8 @@ import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {Config} from "./config";
 import {HoldManager} from "./hold_manager";
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
-import {AccuracyEvent} from "./accuracy_recording";
 import {AccuracyUtil} from "./accuracy_util";
+import {AccuracyEvent} from "./accuracy_event";
 
 export class Accuracy {
     name: string;
@@ -129,7 +129,7 @@ export class AccuracyManager {
                 note.state = NoteState.HIT; // hit the tail of the hold
                 let accuracy = (note.timeInSeconds - currentTimeInSeconds) * 1000;
                 this.handleAccuracyEvent({
-                    accuracyName: "Release " + AccuracyUtil.getAccuracyEventName(accuracy, this.config),
+                    accuracyName: AccuracyUtil.getAccuracyEventName(accuracy, this.config),
                     trackNumber: trackNumber,
                     accuracyMillis: accuracy,
                     timeInSeconds: currentTimeInSeconds,
@@ -145,7 +145,7 @@ export class AccuracyManager {
                 this.noteManager.tracks[trackNumber][holdStartIndex - 1].state = NoteState.HIT; // hit the start of the hold
                 this.noteManager.tracks[trackNumber][holdStartIndex].state = NoteState.HIT; // hit the tail of the hold
                 this.handleAccuracyEvent({
-                    accuracyName: "Release " + AccuracyUtil.getAccuracyEventName(Infinity, this.config),
+                    accuracyName: AccuracyUtil.getAccuracyEventName(Infinity, this.config),
                     trackNumber: trackNumber,
                     accuracyMillis: Infinity,
                     timeInSeconds: currentTimeInSeconds,

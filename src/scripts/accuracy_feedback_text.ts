@@ -1,53 +1,33 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {AccuracyRecording, AccuracyRecordingEntry} from "./accuracy_recording";
 import {Config} from "./config";
-import {AccuracyUtil} from "./accuracy_util";
+import {Point2D} from "./point_2d";
+import {AccuracyEvent} from "./accuracy_event";
 
 export class AccuracyFeedbackText {
-    private accuracyRecording: AccuracyRecording;
-    private centerX: number;
-    private centerY: number;
     private config: Config;
+    private lastEvent: AccuracyEvent;
+    private center: Point2D;
 
-    constructor(accuracyRecording: AccuracyRecording, centerX: number, centerY: number, config: Config) {
-        this.accuracyRecording = accuracyRecording;
-        this.centerX = centerX;
-        this.centerY = centerY;
+    constructor(center: Point2D, config: Config) {
+        this.center = center;
         this.config = config;
     }
 
+    public update(accuracyEvent: AccuracyEvent) {
+        this.lastEvent = accuracyEvent;
+    }
+
     public draw(currentTimeInSeconds: number) {
-        let lastEvent: AccuracyRecordingEntry = this.getMostRecentAccuracyRecordingEntry();
-        if (lastEvent === null) {
+        if (this.lastEvent === undefined) {
             return;
         }
-        let timeSinceLastEvent = currentTimeInSeconds - lastEvent.timeInSeconds;
+        let timeSinceLastEvent = currentTimeInSeconds - this.lastEvent.timeInSeconds;
         let textSize = AccuracyFeedbackText.getFontSize(timeSinceLastEvent);
         if (textSize <= 0) {
             return;
         }
-        let eventName = AccuracyUtil.getAccuracyEventName(lastEvent.accuracyMillis, this.config);
-        this.drawEventText(eventName, textSize);
-    }
-
-    private getMostRecentAccuracyRecordingEntry(): AccuracyRecordingEntry {
-        let mostRecentTrack: AccuracyRecordingEntry[] = [];
-        let greatestTime = Number.NEGATIVE_INFINITY;
-        for (let trackNumber = 0; trackNumber < this.accuracyRecording.recording.length; trackNumber++) {
-            let track = this.accuracyRecording.recording[trackNumber];
-            if (track.length > 0) {
-                let lastEventTime = this.accuracyRecording.recording[trackNumber][track.length - 1].timeInSeconds;
-                if (lastEventTime > greatestTime) {
-                    greatestTime = lastEventTime;
-                    mostRecentTrack = track;
-                }
-            }
-        }
-        if (mostRecentTrack.length === 0) {
-            return null;
-        }
-        return mostRecentTrack[mostRecentTrack.length - 1];
+        this.drawEventText(this.lastEvent.accuracyName, textSize);
     }
 
     private static getFontSize(time: number): number {
@@ -68,7 +48,7 @@ export class AccuracyFeedbackText {
         p.textAlign(p.CENTER, p.CENTER);
         p.fill("white");
         p.textSize(textSize);
-        p.text(text, this.centerX, this.centerY);
+        p.text(text, this.center.x, this.center.y);
         p.pop();
     }
 }
