@@ -22,6 +22,8 @@ import {SyncResultsDisplay} from "../sync_results/sync_results_display";
 import {GameTimeManager} from "../../game_time_manager";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {AbstractPlayingDisplay} from "../../abstract_playing_display";
+import {ComboText} from "../../combo_text";
+import {Point2D} from "../../point_2d";
 
 export class SyncGameDisplay extends AbstractPlayingDisplay {
     protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene, returnPage: PAGES) {
@@ -80,6 +82,7 @@ export class SyncGameDisplay extends AbstractPlayingDisplay {
             this.handleAccuracyEvent.bind(this));
 
         this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
+        this.comboText = new ComboText(new Point2D(this.bounds.center.x, this.bounds.center.y + 18), this.config);
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
         this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);

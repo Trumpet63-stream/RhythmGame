@@ -4,10 +4,12 @@ import {
     booleanToYesNo,
     createLabeledInput,
     createLabeledSelect,
-    createLabeledTextArea, createUserInput,
+    createLabeledTextArea,
+    createUserInput,
     drawHeading,
     setElementToBottom,
-    YesNo, yesNoToBoolean
+    YesNo,
+    yesNoToBoolean
 } from "../../ui_util";
 import {global} from "../../index";
 import {Accuracy} from "../../accuracy_manager";
@@ -185,6 +187,18 @@ export abstract class Options {
             },
             scrollDiv.element);
 
+        createUserInput(() => createLabeledSelect("Combo Text",
+            "comboTextEnabledSelect", YesNo, booleanToYesNo(global.config.isComboTextEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidComboText.bind(this),
+            this.showComboTextInfo.bind(this),
+            this.showComboTextError.bind(this),
+            (input: number | string) => {
+                global.config.isComboTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.save();
+            },
+            scrollDiv.element);
+
         KeyBindingsUi.create(scrollDiv.element, Options.OPTIONS_CLASS);
 
         global.previewDisplay.draw();
@@ -196,10 +210,12 @@ export abstract class Options {
     private static isValidPauseAtStart(value: string | number): boolean {
         return this.isFloatGreaterThanOrEqualZero(value);
     }
+
     private static showPauseAtStartInfo(): void {
         Ticker.setMessage("Delay the start of the song to give yourself more time to get ready.",
             TickerState.INFORMATION);
     }
+
     private static showPauseAtStartError(): void {
         this.showNumberNotGreaterThanOrEqualZeroError();
     }
@@ -207,10 +223,12 @@ export abstract class Options {
     private static isValidScrollSpeed(value: string | number): boolean {
         return this.isFloatGreaterThanOrEqualZero(value);
     }
+
     private static showScrollSpeedInfo(): void {
         Ticker.setMessage("The movement speed of the notes. Higher values will make the notes look farther apart.",
             TickerState.INFORMATION);
     }
+
     private static showScrollSpeedError(): void {
         this.showNumberNotGreaterThanOrEqualZeroError();
     }
@@ -219,10 +237,12 @@ export abstract class Options {
         let enumValue: ScrollDirection = getEnum(value, ScrollDirection);
         return enumValue !== undefined;
     }
+
     private static showScrollDirectionInfo(): void {
         Ticker.setMessage("Controls which way the arrows go.",
             TickerState.INFORMATION);
     }
+
     private static showScrollDirectionError(): void {
         this.showSelectError();
     }
@@ -230,6 +250,7 @@ export abstract class Options {
     private static isValidReceptorPosition(value: string | number): boolean {
         return this.isFloat(value);
     }
+
     private static showReceptorPositionInfo(): void {
         let oppositeDirection: string;
         if (global.config.scrollDirection === ScrollDirection.Down) {
@@ -240,6 +261,7 @@ export abstract class Options {
         Ticker.setMessage("Increase this value to move the receptors " + oppositeDirection + ".",
             TickerState.INFORMATION);
     }
+
     private static showReceptorPositionError(): void {
         this.showValueNotNumberError();
     }
@@ -247,10 +269,12 @@ export abstract class Options {
     private static isValidAdditionalOffset(value: string | number): boolean {
         return this.isFloat(value);
     }
+
     private static showAdditionalOffsetInfo(): void {
         Ticker.setMessage("Shifts the time position of all the notes. Use this to help synchronize the music.",
             TickerState.INFORMATION);
     }
+
     private static showAdditionalOffsetError(): void {
         this.showValueNotNumberError();
     }
@@ -259,10 +283,12 @@ export abstract class Options {
         let stringValue: string = String(value);
         return parseAccuracySettingsJson(stringValue) !== null;
     }
+
     private static showAccuracySettingsInfo(): void {
         Ticker.setMessage("Controls what happens when you hit a note too early, too late, or exactly right.",
             TickerState.INFORMATION);
     }
+
     private static showAccuracySettingsError(): void {
         Ticker.setMessage("Error: unable to parse the JSON text.",
             TickerState.ERROR);
@@ -271,10 +297,12 @@ export abstract class Options {
     private static isValidAccuracyFlash(value: string | number): boolean {
         return this.isValidYesNo(value);
     }
+
     private static showAccuracyFlashInfo(): void {
         Ticker.setMessage("A flash effect that shows on the receptors when you hit a note.",
             TickerState.INFORMATION);
     }
+
     private static showAccuracyFlashError(): void {
         this.showSelectError();
     }
@@ -282,10 +310,12 @@ export abstract class Options {
     private static isValidAccuracyParticles(value: string | number): boolean {
         return this.isValidYesNo(value);
     }
+
     private static showAccuracyParticlesInfo(): void {
         Ticker.setMessage("Particles that shoot out of the receptors when you hit a note.",
             TickerState.INFORMATION);
     }
+
     private static showAccuracyParticlesError(): void {
         this.showSelectError();
     }
@@ -293,10 +323,12 @@ export abstract class Options {
     private static isValidAccuracyText(value: string | number): boolean {
         return this.isValidYesNo(value);
     }
+
     private static showAccuracyTextInfo(): void {
         Ticker.setMessage("Text that pops up telling you what accuracy you hit a note with.",
             TickerState.INFORMATION);
     }
+
     private static showAccuracyTextError(): void {
         this.showSelectError();
     }
@@ -304,10 +336,12 @@ export abstract class Options {
     private static isValidHoldParticles(value: string | number): boolean {
         return this.isValidYesNo(value);
     }
+
     private static showHoldParticlesInfo(): void {
         Ticker.setMessage("Particles that shoot out while you're holding a note.",
             TickerState.INFORMATION);
     }
+
     private static showHoldParticlesError(): void {
         this.showSelectError();
     }
@@ -315,11 +349,26 @@ export abstract class Options {
     private static isValidHoldGlow(value: string | number): boolean {
         return this.isValidYesNo(value);
     }
+
     private static showHoldGlowInfo(): void {
         Ticker.setMessage("A glow effect on the receptors that shows when you're holding a note.",
             TickerState.INFORMATION);
     }
+
     private static showHoldGlowError(): void {
+        this.showSelectError();
+    }
+
+    private static isValidComboText(value: string | number): boolean {
+        return this.isValidYesNo(value);
+    }
+
+    private static showComboTextInfo(): void {
+        Ticker.setMessage("Text that pops up telling you how many notes you have hit in a row.",
+            TickerState.INFORMATION);
+    }
+
+    private static showComboTextError(): void {
         this.showSelectError();
     }
 

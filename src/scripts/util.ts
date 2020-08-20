@@ -234,3 +234,13 @@ export function logArray(array: any[]) {
         console.log(logEntry);
     }
 }
+
+export function lerp(startValue: number, endValue: number, ratio: number) {
+    if (ratio <= 0) {
+        return startValue;
+    } else if (ratio > 0 && ratio < 1) {
+        return startValue + (endValue - startValue) * ratio;
+    } else {
+        return endValue;
+    }
+}

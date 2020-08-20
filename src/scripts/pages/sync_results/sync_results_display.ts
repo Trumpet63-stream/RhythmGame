@@ -33,8 +33,8 @@ export class SyncResultsDisplay {
 
     private getAllAccuracyEntries() {
         let events: AccuracyRecordingEntry[] = [];
-        for (let i = 0; i < this.accuracyRecording.recording.length; i++) {
-            let trackEvents: AccuracyRecordingEntry[] = this.accuracyRecording.recording[i];
+        for (let i = 0; i < this.accuracyRecording.perTrackRecording.length; i++) {
+            let trackEvents: AccuracyRecordingEntry[] = this.accuracyRecording.perTrackRecording[i];
             for (let j = 0; j < trackEvents.length; j++) {
                 events.push(trackEvents[j]);
             }

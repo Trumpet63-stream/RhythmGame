@@ -1,6 +1,7 @@
 import {Config} from "./config";
 import {Accuracy} from "./accuracy_manager";
 import {AccuracyEvent} from "./accuracy_event";
+import {AccuracyRecordingEntry} from "./accuracy_recording";
 
 export abstract class AccuracyUtil {
     public static isConfiguredForBoos(config: Config): boolean {
@@ -62,7 +63,7 @@ export abstract class AccuracyUtil {
         return null;
     }
 
-    public static eventIsAHit(accuracyEvent: AccuracyEvent, config: Config) {
+    public static eventIsAHit(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
         let accuracies = config.accuracySettings;
         if (accuracies[0].lowerBound === null &&
             accuracyEvent.accuracyMillis < accuracies[0].upperBound) {

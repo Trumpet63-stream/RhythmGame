@@ -1,32 +1,40 @@
-import * as p5 from "p5";
-import {global} from "./index";
-import {Config} from "./config";
-import {Point2D} from "./point_2d";
-import {AccuracyEvent} from "./accuracy_event";
 import {AccuracyObserver} from "./accuracy_observer";
 import {Drawable} from "./drawable";
+import {AccuracyEvent} from "./accuracy_event";
+import {Point2D} from "./point_2d";
+import {Config} from "./config";
+import * as p5 from "p5";
+import {global} from "./index";
+import {AccuracyUtil} from "./accuracy_util";
 import {lerp} from "./util";
 
-export class AccuracyFeedbackText implements AccuracyObserver, Drawable {
+export class ComboText implements AccuracyObserver, Drawable {
     private config: Config;
     private lastEvent: AccuracyEvent;
     private defaultCenter: Point2D;
     private center: Point2D;
-    private textSize: number = 30;
+    private textSize: number = 20;
     private alpha: number;
+    private combo: number;
 
     constructor(center: Point2D, config: Config) {
         this.defaultCenter = new Point2D(center.x, center.y);
         this.center = new Point2D(center.x, center.y);
         this.config = config;
+        this.combo = 0;
     }
 
-    public update(accuracyEvent: AccuracyEvent) {
+    update(accuracyEvent: AccuracyEvent): void {
         this.lastEvent = accuracyEvent;
+        if (AccuracyUtil.eventIsAHit(accuracyEvent, this.config)) {
+            this.combo++;
+        } else {
+            this.combo = 0;
+        }
     }
 
-    public draw(currentTimeInSeconds: number) {
-        if (this.lastEvent === undefined) {
+    draw(currentTimeInSeconds: number): void {
+        if (this.lastEvent === undefined || this.combo < 1) {
             return;
         }
         let timeSinceLastEvent = currentTimeInSeconds - this.lastEvent.timeInSeconds;
@@ -35,7 +43,7 @@ export class AccuracyFeedbackText implements AccuracyObserver, Drawable {
         if (this.alpha <= 0) {
             return;
         }
-        this.drawEventText(this.lastEvent.accuracyName);
+        this.drawEventText(this.combo + " Combo");
     }
 
     private getTextShift(time: number): number {

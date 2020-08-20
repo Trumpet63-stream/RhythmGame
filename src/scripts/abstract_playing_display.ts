@@ -21,6 +21,7 @@ import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {AccuracyEvent} from "./accuracy_event";
+import {ComboText} from "./combo_text";
 
 export abstract class AbstractPlayingDisplay {
     protected scene: P5Scene;
@@ -46,6 +47,7 @@ export abstract class AbstractPlayingDisplay {
     protected timeDiffInterval: number;
     protected returnPage: PAGES;
     protected bounds: Rectangle;
+    protected comboText: ComboText;
 
     public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
                        returnPage: PAGES) {
@@ -66,6 +68,7 @@ export abstract class AbstractPlayingDisplay {
         this.accuracyFeedbackParticles.update(accuracyEvent);
         this.accuracyFeedbackText.update(accuracyEvent);
         this.accuracyFeedbackFlash.update(accuracyEvent);
+        this.comboText.update(accuracyEvent);
     }
 
     public draw() {
@@ -79,6 +82,9 @@ export abstract class AbstractPlayingDisplay {
         this.receptorShrinkReaction.draw();
         if (this.config.isAccuracyTextEnabled) {
             this.accuracyFeedbackText.draw(currentTimeInSeconds);
+        }
+        if (this.config.isComboTextEnabled) {
+            this.comboText.draw(currentTimeInSeconds);
         }
         if (this.config.isHoldGlowEnabled) {
             this.holdGlow.draw(currentTimeInSeconds);

@@ -4,8 +4,10 @@ import * as p5 from "p5";
 import {global} from "./index";
 import {AccuracyEvent} from "./accuracy_event";
 import {AccuracyUtil} from "./accuracy_util";
+import {AccuracyObserver} from "./accuracy_observer";
+import {Drawable} from "./drawable";
 
-export class AccuracyFeedbackFlash {
+export class AccuracyFeedbackFlash implements AccuracyObserver, Drawable {
     private config: Config;
     private displayManager: DisplayManager;
     private numTracks: number;

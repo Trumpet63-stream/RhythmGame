@@ -2,7 +2,7 @@ import * as p5 from "p5";
 import {Accuracy} from "../../accuracy_manager";
 import {Config} from "../../config";
 import {NoteManager} from "../../note_manager";
-import {AccuracyRecording} from "../../accuracy_recording";
+import {AccuracyRecording, AccuracyRecordingEntry} from "../../accuracy_recording";
 import {AccuracyUtil} from "../../accuracy_util";
 
 export class ResultsDisplay {
@@ -81,27 +81,40 @@ export class ResultsDisplay {
         let maxTextWidth = this.getMaxTextWidth(accuracyLabels, textSize);
         let totalNotes = this.noteManager.getTotalNotes();
         let barSpacing = 10;
-        let totalHeight = accuracyLabels.length * barHeight + (accuracyLabels.length - 1) * barSpacing;
+        let numBars = accuracyLabels.length + 1;
+        let totalHeight = numBars * barHeight + (numBars - 1) * barSpacing;
         let startY = (p.height - totalHeight) / 2 + barHeight / 2;
         startY *= 0.8; // shift the results up to make room for exit button
 
-        for (let i = 0; i < accuracyLabels.length; i++) {
-            let accuracyLabel = accuracyLabels[i];
+        // combo bar
+        let barCenterY: number = this.getBarCenterY(startY, 0, barHeight, barSpacing);
+        let maxCombo = this.calculateMaxCombo();
+        let percentFilled = maxCombo / totalNotes;
+        this.drawAccuracyBar(centerX, barCenterY, "Combo", maxCombo.toString(),
+            totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+
+        for (let i = 1; i < numBars; i++) {
+            let accuracyLabel = accuracyLabels[i - 1];
             let numAccuracyEvents = this.getNumAccuracyEvents(accuracyLabel, this.config);
             let percentFilled = numAccuracyEvents / totalNotes;
+            let barCenterY: number = this.getBarCenterY(startY, i, barHeight, barSpacing);
 
-            if (isBooForLastAccuracy && i === accuracyLabels.length - 1) {
-                this.drawAccuracyWithNoBar(centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
-                    numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth);
+            if (isBooForLastAccuracy && i === numBars - 1) {
+                this.drawAccuracyWithNoBar(centerX, barCenterY, accuracyLabel, numAccuracyEvents.toString(),
+                    totalNotes.toString(), textSize, maxTextWidth, barWidth);
             } else {
-                this.drawAccuracyBar(centerX, startY + i * (barHeight + barSpacing), accuracyLabel,
-                    numAccuracyEvents.toString(), totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+                this.drawAccuracyBar(centerX, barCenterY, accuracyLabel, numAccuracyEvents.toString(),
+                    totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
             }
         }
     }
 
+    private getBarCenterY(startY: number, i: number, barHeight: number, barSpacing: number) {
+        return startY + i * (barHeight + barSpacing);
+    }
+
     private getNumAccuracyEvents(accuracyLabel: string, config: Config) {
-        return this.accuracyRecording.recording.reduce((sum, trackRecording) =>
+        return this.accuracyRecording.perTrackRecording.reduce((sum, trackRecording) =>
             sum + trackRecording.filter(accuracyEvent =>
             AccuracyUtil.getAccuracyEventName(accuracyEvent.accuracyMillis, config) === accuracyLabel).length, 0);
     }
@@ -186,5 +199,22 @@ export class ResultsDisplay {
         p.textAlign(p.LEFT, p.CENTER);
         p.text(label2, barCenterX - barWidth / 2, centerY + 2);
         p.pop();
+    }
+
+    private calculateMaxCombo(): number {
+        let maxCombo = 0;
+        let combo: number = 0;
+        for (let i = 0; i < this.accuracyRecording.linearRecording.length; i++) {
+            let entry: AccuracyRecordingEntry = this.accuracyRecording.linearRecording[i];
+            if (AccuracyUtil.eventIsAHit(entry, this.config)) {
+                combo++;
+            } else {
+                combo = 0;
+            }
+            if (combo > maxCombo) {
+                maxCombo = combo;
+            }
+        }
+        return maxCombo;
     }
 }

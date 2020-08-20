@@ -14,22 +14,25 @@ export interface AccuracyRecordingEntry {
 
 export class AccuracyRecording {
     public state: AccuracyRecordingState;
-    public recording: AccuracyRecordingEntry[][];
+    public perTrackRecording: AccuracyRecordingEntry[][];
+    public linearRecording: AccuracyRecordingEntry[];
 
     constructor(numTracks: number) {
         this.state = AccuracyRecordingState.INCOMPLETE;
-        this.recording = [];
+        this.perTrackRecording = [];
         for (let i = 0; i < numTracks; i++) {
-            this.recording.push([]);
+            this.perTrackRecording.push([]);
         }
+        this.linearRecording = [];
     }
 
     public update(accuracyEvent: AccuracyEvent) {
-        this.recording[accuracyEvent.trackNumber].push(
-            {
-                timeInSeconds: accuracyEvent.timeInSeconds,
-                accuracyMillis: accuracyEvent.accuracyMillis,
-                noteType: accuracyEvent.noteType
-            });
+        let entry = {
+            timeInSeconds: accuracyEvent.timeInSeconds,
+            accuracyMillis: accuracyEvent.accuracyMillis,
+            noteType: accuracyEvent.noteType
+        }
+        this.perTrackRecording[accuracyEvent.trackNumber].push(entry);
+        this.linearRecording.push(entry);
     }
 }

@@ -8,7 +8,7 @@ export let DEFAULT_CONFIG = {
     additionalOffsetInSeconds: 0,
     // This is a symmetrical version of FFR's accuracy
     accuracySettings: [
-        new Accuracy("Miss", null,-117),
+        new Accuracy("Miss", null, -117),
         new Accuracy("Average", -117, -83),
         new Accuracy("Good", -83, -50),
         new Accuracy("Perfect", -50, -17),
@@ -29,4 +29,5 @@ export let DEFAULT_CONFIG = {
     isAccuracyTextEnabled: true,
     isHoldParticlesEnabled: true,
     isHoldGlowEnabled: true,
+    isComboTextEnabled: true,
 };

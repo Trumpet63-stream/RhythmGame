@@ -22,6 +22,7 @@ export class Config {
     isAccuracyTextEnabled: boolean;
     isHoldParticlesEnabled: boolean;
     isHoldGlowEnabled: boolean;
+    isComboTextEnabled: boolean;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -40,6 +41,7 @@ export class Config {
                     isAccuracyTextEnabled?: boolean,
                     isHoldParticlesEnabled?: boolean,
                     isHoldGlowEnabled?: boolean,
+                    isComboTextEnabled?: boolean,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
@@ -65,6 +67,7 @@ export class Config {
         this.isHoldParticlesEnabled = defaultIfUndefined(args.isHoldParticlesEnabled,
             DEFAULT_CONFIG.isHoldParticlesEnabled);
         this.isHoldGlowEnabled = defaultIfUndefined(args.isHoldGlowEnabled, DEFAULT_CONFIG.isHoldGlowEnabled);
+        this.isComboTextEnabled = defaultIfUndefined(args.isComboTextEnabled, DEFAULT_CONFIG.isComboTextEnabled);
     }
 
     public save() {
@@ -97,7 +100,8 @@ export class Config {
                 console.log("Config loaded from cookie!");
                 console.log(config);
                 return config;
-            } catch(e) {}
+            } catch (e) {
+            }
         }
         console.log("No valid cookie found, returning default config!");
         return new Config({});
@@ -112,7 +116,7 @@ export class Config {
     private stringifyKeyBindings(): string {
         let string = "[";
         this.keyBindings.forEach((value: KeyBinding[], key: number) => {
-            string += "["+ key + "," + JSON.stringify(value) +"]";
+            string += "[" + key + "," + JSON.stringify(value) + "]";
         })
         string += "]";
         return string;
