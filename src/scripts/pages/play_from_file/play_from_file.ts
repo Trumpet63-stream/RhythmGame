@@ -12,7 +12,7 @@ import {Stepfile, StepfileState} from "../../stepfile";
 import {AudioFile, AudioFileState} from "../../audio/audio_file";
 import {getModeOptionsForDisplay, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Mode} from "../../parsing/parse_sm";
-import {PageManager, PAGES} from "../../page_manager";
+import {PageManager, Pages} from "../../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 import {FileDropZone} from "./file_drop_zone";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
@@ -76,8 +76,9 @@ export abstract class PlayFromFile {
         syncButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, PAGES.PLAY_FROM_FILE);
-            PageManager.setCurrentPage(PAGES.SYNC);
+            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
+                playFromFileStepfile.songTitle);
+            PageManager.setCurrentPage(Pages.SYNC);
         });
     }
 
@@ -85,8 +86,9 @@ export abstract class PlayFromFile {
         playButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, PAGES.PLAY_FROM_FILE);
-            PageManager.setCurrentPage(PAGES.PLAY);
+            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
+                playFromFileStepfile.songTitle);
+            PageManager.setCurrentPage(Pages.PLAY);
         });
     }
 

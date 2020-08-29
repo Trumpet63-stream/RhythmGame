@@ -33,6 +33,7 @@ export class OnlinePlaylist {
     public displayedPlaylist: DisplayableSong[];
     private pageNumber: number;
     private pageSize: number;
+    private loadedSongName: string;
 
     constructor() {
         this.state = OnlinePlaylistState.NO_PLAYLIST;
@@ -56,9 +57,10 @@ export class OnlinePlaylist {
     public kickOffLoadSong(displayedSongIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
         audioFile.reset();
         stepfile.state = StepfileState.NO_STEPFILE;
+        this.loadedSongName = this.displayedPlaylist[displayedSongIndex].toString();
         this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
             .then((swfParseResponse) =>
-                OnlinePlaylist.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
+                this.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
             .catch(() => this.state = OnlinePlaylistState.SONG_ERROR);
     }
 
@@ -66,8 +68,8 @@ export class OnlinePlaylist {
         return displayedSongIndex + this.pageSize * this.pageNumber;
     }
 
-    private static loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
-        stepfile.loadFfrBeatmap(swfParseResponse.chartData);
+    private loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
+        stepfile.loadFfrBeatmap(swfParseResponse.chartData, this.loadedSongName);
         audioFile.loadBlob(swfParseResponse.blob);
     }
 

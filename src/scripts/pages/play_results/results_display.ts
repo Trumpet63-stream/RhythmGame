@@ -4,34 +4,54 @@ import {Config} from "../../config";
 import {NoteManager} from "../../note_manager";
 import {AccuracyRecording, AccuracyRecordingEntry} from "../../accuracy_recording";
 import {AccuracyUtil} from "../../accuracy_util";
+import {PageDescription} from "../../page_manager";
+import {Rectangle} from "../../rectangle";
 
 export class ResultsDisplay {
     private config: Config;
     private noteManager: NoteManager;
     private accuracyRecording: AccuracyRecording;
     private p: p5;
+    private songTitle: string;
+    private returnPage: PageDescription;
 
-    constructor(config: Config, noteManager: NoteManager, p: p5, accuracyRecording: AccuracyRecording) {
+    constructor(config: Config, noteManager: NoteManager, p: p5, accuracyRecording: AccuracyRecording, songTitle: string,
+                returnPage: PageDescription) {
         this.config = config;
         this.noteManager = noteManager;
         this.p = p;
         this.accuracyRecording = accuracyRecording;
+        this.songTitle = songTitle;
+        this.returnPage = returnPage;
     }
 
     draw() {
+        let heading: string = this.returnPage.name + "// " + this.songTitle;
+        this.drawHeadingText(heading);
+        this.drawResults(Rectangle.fromTopLeft(60, 50, this.p.width - 60, this.p.height - 100));
+    }
+
+    private drawHeadingText(heading: string) {
         let p = this.p;
-        let centerX = p.width / 2;
-        let centerY = p.height / 2;
-        let barWidth = p.width * 0.6;
+        p.push();
+        p.textAlign(p.LEFT, p.TOP);
+        p.fill("white");
+        p.textSize(20);
+        p.text(heading, 8, 8);
+        p.pop();
+    }
+
+    private drawResults(bounds: Rectangle) {
+        let barWidth = bounds.width * 0.6;
         let barHeight = barWidth / 10;
         let leftLabelHeight = 0.8 * barHeight;
-        let accuracyListForResults = this.getResultsAccuracyList(this.config.accuracySettings);
-        this.drawAccuracyBars(accuracyListForResults, centerX, centerY, leftLabelHeight, barWidth, barHeight,
+        let accuracyListForResults = this.getAccuracyNamesDescending(this.config.accuracySettings);
+        this.drawAccuracyBars(accuracyListForResults, bounds.center.x, bounds.center.y, leftLabelHeight, barWidth, barHeight,
             AccuracyUtil.isConfiguredForBoos(this.config));
     }
 
     // return a list of unique accuracies sorted by the offset, with the best accuracy being first
-    private getResultsAccuracyList(accuracySettings: Accuracy[]): string[] {
+    private getAccuracyNamesDescending(accuracySettings: Accuracy[]): string[] {
         let accuracyTable: { accuracyName: string, sortValue: number }[] = accuracySettings.map(accuracy => {
             return {
                 accuracyName: accuracy.name,
@@ -93,6 +113,7 @@ export class ResultsDisplay {
         this.drawAccuracyBar(centerX, barCenterY, "Combo", maxCombo.toString(),
             totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
 
+        // other bars
         for (let i = 1; i < numBars; i++) {
             let accuracyLabel = accuracyLabels[i - 1];
             let numAccuracyEvents = this.getNumAccuracyEvents(accuracyLabel, this.config);

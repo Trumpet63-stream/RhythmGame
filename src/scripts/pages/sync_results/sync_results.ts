@@ -1,7 +1,7 @@
 import {global} from "../../index";
 import {setElementCenterPositionRelative} from "../../ui_util";
 import * as p5 from "p5";
-import {PageManager, PAGES} from "../../page_manager";
+import {PageManager, Pages} from "../../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 
 export abstract class SyncResults {
@@ -20,7 +20,7 @@ export abstract class SyncResults {
             applyButton.element.mouseClicked(() => {
                 global.syncResultsDisplay.applyRecommendedChange();
                 global.syncGameDisplay.replay();
-                PageManager.setCurrentPage(PAGES.SYNC);
+                PageManager.setCurrentPage(Pages.SYNC);
             })
         }
 

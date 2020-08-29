@@ -14,6 +14,7 @@ export class Stepfile {
     public file: File;
     public partialParse: PartialParse;
     public fullParse: FullParse;
+    public songTitle: string = "song title";
 
     public constructor() {
         this.state = StepfileState.NO_STEPFILE;
@@ -21,6 +22,7 @@ export class Stepfile {
 
     public loadFile(file: File) {
         this.file = file;
+        this.songTitle = this.file.name;
         this.loadTextFile(this.file, ((event: ProgressEvent<FileReader>) => {
             this.state = StepfileState.DONE_READING;
             this.partialParse = getPartialParse(<string>event.target.result);
@@ -32,7 +34,8 @@ export class Stepfile {
         }));
     }
 
-    public loadFfrBeatmap(beatmap: [number, string, string][]) {
+    public loadFfrBeatmap(beatmap: [number, string, string][], songTitle: string) {
+        this.songTitle = songTitle;
         let tracks: Note[][] = ParsingHelper.beatmapToTrackArray(beatmap);
 
         let partialParse = new PartialParse();

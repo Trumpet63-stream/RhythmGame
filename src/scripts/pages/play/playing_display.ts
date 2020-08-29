@@ -10,7 +10,7 @@ import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
 import {global} from "../../index";
-import {PageManager, PAGES} from "../../page_manager";
+import {PageDescription, PageManager, Pages} from "../../page_manager";
 import {AccuracyRecording} from "../../accuracy_recording";
 import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
 import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
@@ -27,7 +27,7 @@ import {Point2D} from "../../point_2d";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
-                         returnPage: PAGES) {
+                         returnPage: PageDescription) {
         this.showResultsScreen = false;
         this.audioFile = audioFile;
         this.config = config;
@@ -106,8 +106,8 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
     protected endSong() {
         this.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.scene.sketchInstance,
-            this.accuracyRecording);
-        PageManager.setCurrentPage(PAGES.PLAY_RESULTS);
+            this.accuracyRecording, this.songTitle, this.returnPage);
+        PageManager.setCurrentPage(Pages.PLAY_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
     }

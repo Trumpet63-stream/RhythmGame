@@ -3,6 +3,7 @@ import {AudioFile, AudioFileState} from "./audio_file";
 export class HtmlAudioElementHelper extends AudioFile {
     private audioElement: HTMLAudioElement;
     private sourceUrl: string;
+    private timeoutId: number;
 
     public loadFile(file: File) {
         this.source = file;
@@ -40,10 +41,11 @@ export class HtmlAudioElementHelper extends AudioFile {
     }
 
     public play(delayInSeconds: number = 0) {
-        setTimeout(this.audioElement.play.bind(this.audioElement), delayInSeconds * 1000);
+        this.timeoutId = setTimeout(this.audioElement.play.bind(this.audioElement), delayInSeconds * 1000);
     }
 
     public stop() {
+        clearTimeout(this.timeoutId);
         this.audioElement.pause();
         this.state = AudioFileState.BUFFERED;
         this.audioElement.load();
@@ -55,7 +57,7 @@ export class HtmlAudioElementHelper extends AudioFile {
 
     public playFromTimeInSeconds(startTimeInSeconds: number): void {
         if (startTimeInSeconds < 0) {
-            setTimeout(this.audioElement.play.bind(this.audioElement), -startTimeInSeconds * 1000);
+            this.timeoutId = setTimeout(this.audioElement.play.bind(this.audioElement), -startTimeInSeconds * 1000);
         } else {
             this.audioElement.currentTime = startTimeInSeconds;
             this.audioElement.play();

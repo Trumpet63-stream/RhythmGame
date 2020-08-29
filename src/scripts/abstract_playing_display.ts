@@ -14,7 +14,7 @@ import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
 import {HoldParticles} from "./hold_particles";
 import {HoldGlow} from "./hold_glow";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
-import {PAGES} from "./page_manager";
+import {PageDescription} from "./page_manager";
 import {Rectangle} from "./rectangle";
 import {Note} from "./parsing/parse_sm";
 import {global} from "./index";
@@ -45,23 +45,25 @@ export abstract class AbstractPlayingDisplay {
     protected holdGlow: HoldGlow;
     protected audioFile: HtmlAudioElementHelper;
     protected timeDiffInterval: number;
-    protected returnPage: PAGES;
+    protected returnPage: PageDescription;
     protected bounds: Rectangle;
     protected comboText: ComboText;
+    protected songTitle: string;
 
     public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
-                       returnPage: PAGES) {
+                       returnPage: PageDescription, songTitle: string) {
         this.bounds = Rectangle.fromTopLeft(
             (scene.sketchInstance.width - 240) / 2,
             (scene.sketchInstance.height - 480) / 2,
             240,
             480
         )
+        this.songTitle = songTitle;
         this.initialize(tracks, audioFile, config, scene, returnPage);
     }
 
     protected abstract initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
-                                  returnPage: PAGES): void;
+                                  returnPage: PageDescription): void;
 
     protected handleAccuracyEvent(accuracyEvent: AccuracyEvent) {
         this.accuracyRecording.update(accuracyEvent);

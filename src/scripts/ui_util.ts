@@ -1,14 +1,9 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {PageManager, PAGES} from "./page_manager";
-import {
-    enumToString,
-    enumToStringArray, generatePreviewNotes,
-    getFirstElementByTagName, getInt,
-} from "./util";
+import {PageManager, Pages} from "./page_manager";
+import {enumToString, enumToStringArray, getFirstElementByTagName,} from "./util";
 import {DOMWrapper} from "./dom_wrapper";
 import {Options} from "./pages/options/options";
-import {PreviewDisplay} from "./pages/options/preview_display";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -19,7 +14,7 @@ export function drawHeading() {
     }, "playFromFileButton");
     setElementCenterPositionRelative(playFromFileButton.element, 0.25, 0.036, 130, 34);
     playFromFileButton.element.mousePressed(() => {
-        PageManager.setCurrentPage(PAGES.PLAY_FROM_FILE);
+        PageManager.setCurrentPage(Pages.PLAY_FROM_FILE);
     });
     if (!playFromFileButton.alreadyExists) {
         playFromFileButton.element.addClass(headingClass);
@@ -31,7 +26,7 @@ export function drawHeading() {
     }, "playFromOnlineButton");
     setElementCenterPositionRelative(playFromOnlineButton.element, 0.5, 0.036, 90, 34);
     playFromOnlineButton.element.mousePressed(() => {
-        PageManager.setCurrentPage(PAGES.PLAY_FROM_ONLINE);
+        PageManager.setCurrentPage(Pages.PLAY_FROM_ONLINE);
     });
     if (!playFromOnlineButton.alreadyExists) {
         playFromOnlineButton.element.addClass(headingClass);
@@ -44,7 +39,7 @@ export function drawHeading() {
     }, "optionsButton");
     setElementCenterPositionRelative(optionsButton.element, 0.8, 0.036, 90, 34);
     optionsButton.element.mousePressed(() => {
-        PageManager.setCurrentPage(PAGES.OPTIONS);
+        PageManager.setCurrentPage(Pages.OPTIONS);
     });
     if (!optionsButton.alreadyExists) {
         optionsButton.element.addClass(headingClass);
@@ -311,17 +306,17 @@ export function fixRadioDivElement(radioDivP5Element: p5.Element) {
 
 export function styleRadioOptions(p: p5, radioDivP5Element: p5.Element, styleClasses: string[]) {
     let divs: p5.Element[] = selectAll(p, 'div', radioDivP5Element);
-    for(let i = 0; i < divs.length; i++) {
+    for (let i = 0; i < divs.length; i++) {
         divs[i].addClass(styleClasses.join(" "));
     }
 
     let inputs: p5.Element[] = selectAll(p, 'input', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
+    for (let i = 0; i < inputs.length; i++) {
         inputs[i].addClass(styleClasses.join(" "));
     }
 
-    let labels: p5.Element[]  = selectAll(p, 'label', radioDivP5Element);
-    for(let i = 0; i < inputs.length; i++) {
+    let labels: p5.Element[] = selectAll(p, 'label', radioDivP5Element);
+    for (let i = 0; i < inputs.length; i++) {
         labels[i].addClass(styleClasses.join(" "));
     }
 }
@@ -350,14 +345,14 @@ function selectAll(p: p5, tagName: string, container: p5.Element): p5.Element[] 
     return p.selectAll(tagName, id);
 }
 
-export function createUserInput(create: () => {element: p5.Element, alreadyExists: boolean},
+export function createUserInput(create: () => { element: p5.Element, alreadyExists: boolean },
                                 isValidInput: (input: number | string) => boolean,
                                 showInfo: () => void,
                                 showError: () => void,
                                 onValidInput: (input: number | string) => void,
                                 parent: p5.Element
-): {element: p5.Element, alreadyExists: boolean} {
-    let created: {element: p5.Element, alreadyExists: boolean} = create();
+): { element: p5.Element, alreadyExists: boolean } {
+    let created: { element: p5.Element, alreadyExists: boolean } = create();
     if (!created.alreadyExists) {
         let element = created.element;
         parent.child(element.parent());

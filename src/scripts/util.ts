@@ -8,7 +8,7 @@ import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
 import {SyncGameDisplay} from "./pages/sync/sync_game_display";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
-import {PAGES} from "./page_manager";
+import {PageDescription} from "./page_manager";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -197,12 +197,14 @@ export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
     return stepfileReady && audioFileReady;
 }
 
-export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PAGES) {
-    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, returnPage);
+export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PageDescription, songTitle: string) {
+    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config,
+        global.p5Scene, returnPage, songTitle);
 }
 
-export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PAGES) {
-    global.syncGameDisplay = new SyncGameDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config, global.p5Scene, returnPage);
+export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PageDescription, songTitle: string) {
+    global.syncGameDisplay = new SyncGameDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config,
+        global.p5Scene, returnPage, songTitle);
 }
 
 export function enumToString(TheEnum: any, value: any) {

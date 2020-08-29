@@ -9,7 +9,7 @@ import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
 import {global} from "../../index";
-import {PageManager, PAGES} from "../../page_manager";
+import {PageDescription, PageManager, Pages} from "../../page_manager";
 import {AccuracyRecording} from "../../accuracy_recording";
 import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
 import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
@@ -26,7 +26,8 @@ import {ComboText} from "../../combo_text";
 import {Point2D} from "../../point_2d";
 
 export class SyncGameDisplay extends AbstractPlayingDisplay {
-    protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene, returnPage: PAGES) {
+    protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
+                         returnPage: PageDescription) {
         this.showResultsScreen = false;
         this.audioFile = audioFile;
         this.config = config;
@@ -113,7 +114,7 @@ export class SyncGameDisplay extends AbstractPlayingDisplay {
         this.audioFile.stop();
         global.syncResultsDisplay = new SyncResultsDisplay(this.accuracyRecording, this.accuracyManager,
             this.config);
-        PageManager.setCurrentPage(PAGES.SYNC_RESULTS);
+        PageManager.setCurrentPage(Pages.SYNC_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
     }

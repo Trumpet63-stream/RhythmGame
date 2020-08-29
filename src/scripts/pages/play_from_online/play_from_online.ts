@@ -9,7 +9,7 @@ import {
     styleRadioOptions
 } from "../../ui_util";
 import {DOMWrapper} from "../../dom_wrapper";
-import {PageManager, PAGES} from "../../page_manager";
+import {PageManager, Pages} from "../../page_manager";
 import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
 import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Stepfile} from "../../stepfile";
@@ -111,8 +111,8 @@ export abstract class PlayFromOnline {
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndPlayButton, playlistMenu, onlinePlaylist,
                 () => {
                     initPlayingDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
-                        PAGES.PLAY_FROM_ONLINE);
-                    PageManager.setCurrentPage(PAGES.PLAY);
+                        Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle);
+                    PageManager.setCurrentPage(Pages.PLAY);
                 }));
     }
 
@@ -122,8 +122,8 @@ export abstract class PlayFromOnline {
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndSyncButton, playlistMenu, onlinePlaylist,
                 () => {
                     initSyncGameDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
-                        PAGES.PLAY_FROM_ONLINE);
-                    PageManager.setCurrentPage(PAGES.SYNC);
+                        Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle);
+                    PageManager.setCurrentPage(Pages.SYNC);
                 }));
     }
 
