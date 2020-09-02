@@ -72,14 +72,9 @@ export class Config {
 
     public save() {
         let configString = this.getConfigAsString();
-        let expires = this.getDateOfOneYearFromNow();
-        let path = '/';
-        let cookieString = "config=" + escape(configString)
-            + ';path=' + path
-            + ';expires=' + expires.toUTCString();
-        console.log(cookieString);
-        document.cookie = cookieString;
-        console.log("Config saved to cookie!");
+        window.localStorage.setItem("rhythm_config", configString);
+        console.log(configString);
+        console.log("Config saved to local storage!");
     }
 
     private getConfigAsString() {
@@ -90,27 +85,22 @@ export class Config {
     }
 
     public static load(): Config {
-        let configCookie = Config.getFromCookie("config");
-        console.log(configCookie);
-        if (configCookie !== null) {
+        let configString = Config.getFromStorage();
+        console.log(configString);
+        if (configString !== null) {
             try {
-                let configJSON = JSON.parse(unescape(configCookie));
+                let configJSON = JSON.parse(configString);
+                // let configJSON = JSON.parse(unescape(configString));
                 configJSON.keyBindings = new Map(configJSON.keyBindings);
                 let config: Config = new Config(configJSON);
-                console.log("Config loaded from cookie!");
+                console.log("Config loaded from local storage!");
                 console.log(config);
                 return config;
             } catch (e) {
             }
         }
-        console.log("No valid cookie found, returning default config!");
+        console.log("No valid local storage entry found, returning default config!");
         return new Config({});
-    }
-
-    private getDateOfOneYearFromNow() {
-        let date = new Date();
-        date.setFullYear(date.getFullYear() + 1);
-        return date;
     }
 
     private stringifyKeyBindings(): string {
@@ -122,14 +112,7 @@ export class Config {
         return string;
     }
 
-    private static getFromCookie(key: string): string {
-        try {
-            return document.cookie
-                .split("; ")
-                .find(row => row.startsWith(key))
-                .split("=")[1];
-        } catch (e) {
-            return null;
-        }
+    private static getFromStorage(): string {
+        return window.localStorage.getItem("rhythm_config");
     }
 }
