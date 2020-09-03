@@ -22,6 +22,7 @@ import {KeyBinding} from "./key_binding_helper";
 import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {AccuracyEvent} from "./accuracy_event";
 import {ComboText} from "./combo_text";
+import {LiveComparison} from "./live_comparison";
 
 export abstract class AbstractPlayingDisplay {
     protected scene: P5Scene;
@@ -49,6 +50,7 @@ export abstract class AbstractPlayingDisplay {
     protected bounds: Rectangle;
     protected comboText: ComboText;
     protected songTitle: string;
+    protected liveComparison: LiveComparison;
 
     public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
                        returnPage: PageDescription, songTitle: string) {
@@ -71,6 +73,9 @@ export abstract class AbstractPlayingDisplay {
         this.accuracyFeedbackText.update(accuracyEvent);
         this.accuracyFeedbackFlash.update(accuracyEvent);
         this.comboText.update(accuracyEvent);
+        if (this.liveComparison !== undefined) {
+            this.liveComparison.update(accuracyEvent);
+        }
     }
 
     public draw() {
@@ -99,6 +104,9 @@ export abstract class AbstractPlayingDisplay {
         }
         if (this.config.isHoldParticlesEnabled) {
             this.holdParticles.draw(currentTimeInSeconds);
+        }
+        if (this.liveComparison !== undefined) {
+            this.liveComparison.draw(currentTimeInSeconds);
         }
     }
 

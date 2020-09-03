@@ -6,6 +6,8 @@ import {AccuracyRecording, AccuracyRecordingEntry} from "../../accuracy_recordin
 import {AccuracyUtil} from "../../accuracy_util";
 import {PageDescription} from "../../page_manager";
 import {Rectangle} from "../../rectangle";
+import {Score, ScoreProvider} from "../../score_provider";
+import {LocalStorage} from "../../local_storage";
 
 export class ResultsDisplay {
     private config: Config;
@@ -14,6 +16,7 @@ export class ResultsDisplay {
     private p: p5;
     private songTitle: string;
     private returnPage: PageDescription;
+    private readonly totalNotes: number;
 
     constructor(config: Config, noteManager: NoteManager, p: p5, accuracyRecording: AccuracyRecording, songTitle: string,
                 returnPage: PageDescription) {
@@ -23,6 +26,13 @@ export class ResultsDisplay {
         this.accuracyRecording = accuracyRecording;
         this.songTitle = songTitle;
         this.returnPage = returnPage;
+        this.totalNotes = this.noteManager.getTotalNotes();
+        LocalStorage.saveReplay(accuracyRecording, noteManager);
+
+        console.log("total notes = " + this.totalNotes);
+        let scoreProvider: ScoreProvider = new ScoreProvider(this.config, this.totalNotes);
+        let score: Score = scoreProvider.score(this.accuracyRecording.linearRecording);
+        console.log("score = " + score.totalScore + ", percent = " + score.percentScore);
     }
 
     draw() {
@@ -99,7 +109,6 @@ export class ResultsDisplay {
                              isBooForLastAccuracy: boolean) {
         let p: p5 = this.p;
         let maxTextWidth = this.getMaxTextWidth(accuracyLabels, textSize);
-        let totalNotes = this.noteManager.getTotalNotes();
         let barSpacing = 10;
         let numBars = accuracyLabels.length + 1;
         let totalHeight = numBars * barHeight + (numBars - 1) * barSpacing;
@@ -108,24 +117,24 @@ export class ResultsDisplay {
 
         // combo bar
         let barCenterY: number = this.getBarCenterY(startY, 0, barHeight, barSpacing);
-        let maxCombo = this.calculateMaxCombo();
-        let percentFilled = maxCombo / totalNotes;
-        this.drawAccuracyBar(centerX, barCenterY, "Combo", maxCombo.toString(),
-            totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+        let combo = this.calculateCombo();
+        let percentFilled = combo / this.totalNotes;
+        this.drawAccuracyBar(centerX, barCenterY, "Combo", combo.toString(),
+            this.totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
 
         // other bars
         for (let i = 1; i < numBars; i++) {
             let accuracyLabel = accuracyLabels[i - 1];
             let numAccuracyEvents = this.getNumAccuracyEvents(accuracyLabel, this.config);
-            let percentFilled = numAccuracyEvents / totalNotes;
+            let percentFilled = numAccuracyEvents / this.totalNotes;
             let barCenterY: number = this.getBarCenterY(startY, i, barHeight, barSpacing);
 
             if (isBooForLastAccuracy && i === numBars - 1) {
                 this.drawAccuracyWithNoBar(centerX, barCenterY, accuracyLabel, numAccuracyEvents.toString(),
-                    totalNotes.toString(), textSize, maxTextWidth, barWidth);
+                    this.totalNotes.toString(), textSize, maxTextWidth, barWidth);
             } else {
                 this.drawAccuracyBar(centerX, barCenterY, accuracyLabel, numAccuracyEvents.toString(),
-                    totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
+                    this.totalNotes.toString(), textSize, maxTextWidth, barWidth, barHeight, percentFilled);
             }
         }
     }
@@ -222,7 +231,7 @@ export class ResultsDisplay {
         p.pop();
     }
 
-    private calculateMaxCombo(): number {
+    private calculateCombo(): number {
         let maxCombo = 0;
         let combo: number = 0;
         for (let i = 0; i < this.accuracyRecording.linearRecording.length; i++) {

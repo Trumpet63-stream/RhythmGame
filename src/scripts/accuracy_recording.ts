@@ -7,9 +7,16 @@ export enum AccuracyRecordingState {
 }
 
 export interface AccuracyRecordingEntry {
+    trackNumber: number,
     timeInSeconds: number,
     accuracyMillis: number,
     noteType: NoteType
+}
+
+export interface Replay {
+    numTracks: number,
+    numNotes: number,
+    entries: AccuracyRecordingEntry[]
 }
 
 export class AccuracyRecording {
@@ -26,13 +33,23 @@ export class AccuracyRecording {
         this.linearRecording = [];
     }
 
-    public update(accuracyEvent: AccuracyEvent) {
+    public update(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry) {
         let entry = {
+            trackNumber: accuracyEvent.trackNumber,
             timeInSeconds: accuracyEvent.timeInSeconds,
             accuracyMillis: accuracyEvent.accuracyMillis,
             noteType: accuracyEvent.noteType
         }
         this.perTrackRecording[accuracyEvent.trackNumber].push(entry);
         this.linearRecording.push(entry);
+    }
+
+    public static ofReplay(replay: Replay): AccuracyRecording {
+        let recording: AccuracyRecording = new AccuracyRecording(replay.numNotes);
+        let entries: AccuracyRecordingEntry[] = replay.entries;
+        for (let i = 0; i < entries.length; i++) {
+            recording.update(entries[i]);
+        }
+        return recording;
     }
 }

@@ -64,17 +64,20 @@ export abstract class AccuracyUtil {
     }
 
     public static eventIsAHit(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
-        let accuracies = config.accuracySettings;
-        if (accuracies[0].lowerBound === null &&
-            accuracyEvent.accuracyMillis < accuracies[0].upperBound) {
-            return false; // Handle miss if it exists
-        }
-        if (accuracies[accuracies.length - 1].upperBound === null &&
-            accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound) {
-            return false; // Handle boo if it exists
-        }
+        return !this.eventIsABoo(accuracyEvent, config) &&
+            !this.eventIsAMiss(accuracyEvent, config);
+    }
 
-        return true;
+    public static eventIsABoo(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
+        let accuracies = config.accuracySettings;
+        return accuracies[accuracies.length - 1].upperBound === null &&
+            accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound;
+    }
+
+    public static eventIsAMiss(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
+        let accuracies = config.accuracySettings;
+        return accuracies[0].lowerBound === null &&
+            accuracyEvent.accuracyMillis < accuracies[0].upperBound;
     }
 
     // Assumes symmetrical accuracy settings
@@ -90,5 +93,4 @@ export abstract class AccuracyUtil {
         }
         return numRanks
     }
-
 }

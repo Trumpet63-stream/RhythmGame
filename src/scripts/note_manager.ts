@@ -1,7 +1,7 @@
 import {Note, NoteState, NoteType} from "./parsing/parse_sm";
 
 export class NoteManager {
-    tracks: Note[][];
+    public tracks: Note[][];
 
     constructor(tracks: Note[][]) {
         this.tracks = tracks;
@@ -92,7 +92,7 @@ export class NoteManager {
         return latestNote;
     }
 
-    getTotalNotes() {
+    public getTotalNotes() {
         return this.tracks.reduce((sum, track) => sum + track.length, 0);
     }
 

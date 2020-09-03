@@ -11,7 +11,7 @@ import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
 import {global} from "../../index";
 import {PageDescription, PageManager, Pages} from "../../page_manager";
-import {AccuracyRecording} from "../../accuracy_recording";
+import {AccuracyRecording, Replay} from "../../accuracy_recording";
 import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
 import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
 import {AccuracyFeedbackFlash} from "../../accuracy_feedback_flash";
@@ -24,6 +24,9 @@ import {AbstractPlayingDisplay} from "../../abstract_playing_display";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {ComboText} from "../../combo_text";
 import {Point2D} from "../../point_2d";
+import {LiveComparison} from "../../live_comparison";
+import {LocalStorage} from "../../local_storage";
+import {ScoreProvider} from "../../score_provider";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
@@ -38,16 +41,6 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         if (!this.isDebugMode) {
             this.timeManager = new GameTimeManager(this.config);
             this.audioFile.play(config.pauseAtStartInSeconds);
-
-            // This is just for debugging
-            this.timeDiffInterval = setInterval(() => {
-                let audioTime = this.audioFile.getCurrentTimeInSeconds();
-                console.log("Audio time: " + audioTime);
-                let gameTime = this.timeManager.getCurrentTimeInSeconds(performance.now());
-                console.log("Game time: " + gameTime);
-                let timeDiff = audioTime - gameTime;
-                console.log("Time diff: " + timeDiff);
-            }, 5000);
         }
 
         this.noteManager = new NoteManager(tracks);
@@ -77,6 +70,11 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
         this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
+        let replay: Replay = LocalStorage.loadReplay(tracks);
+        if (replay !== null) {
+            this.liveComparison = new LiveComparison(LocalStorage.loadReplay(tracks),
+                new ScoreProvider(this.config, this.noteManager.getTotalNotes()));
+        }
 
         if (!isKeyBindingsDefined(numTracks)) {
             initializeKeyBindings(numTracks);

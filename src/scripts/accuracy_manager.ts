@@ -18,6 +18,9 @@ export class Accuracy {
     }
 }
 
+/* TODO: When the user releases a note too early it results in a BOO which typically isn't counted as a note on the
+     results screen, even though it should be, because lifts ARE hittable
+     */
 export class AccuracyManager {
     private noteManager: NoteManager;
     private holdManager: HoldManager;

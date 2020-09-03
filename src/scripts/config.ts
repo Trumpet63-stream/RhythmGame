@@ -72,7 +72,7 @@ export class Config {
 
     public save() {
         let configString = this.getConfigAsString();
-        window.localStorage.setItem("rhythm_config", configString);
+        window.localStorage.setItem("config", configString);
         console.log(configString);
         console.log("Config saved to local storage!");
     }
@@ -97,6 +97,7 @@ export class Config {
                 console.log(config);
                 return config;
             } catch (e) {
+                console.log(e);
             }
         }
         console.log("No valid local storage entry found, returning default config!");
@@ -113,6 +114,6 @@ export class Config {
     }
 
     private static getFromStorage(): string {
-        return window.localStorage.getItem("rhythm_config");
+        return window.localStorage.getItem("config");
     }
 }

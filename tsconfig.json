@@ -6,7 +6,8 @@
     "module": "es6",
     "target": "es2020",
     "jsx": "react",
-    "allowJs": false
+    "allowJs": false,
+    "moduleResolution": "Node"
   },
   "exclude": [
     "node_modules"
