@@ -30,7 +30,6 @@ export class LiveComparison implements AccuracyObserver, Drawable {
 
     constructor(pbReplay: Replay, scoreProvider: ScoreProvider) {
         this.personalBest = AccuracyRecording.ofReplay(pbReplay);
-        console.log(this.personalBest.perTrackRecording);
         this.scoreProvider = scoreProvider;
         this.maxTotalScore = scoreProvider.getMaxScore();
         this.currentScore = new Score(0, 0);
@@ -59,13 +58,19 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         percent -= 2 * colorUnit;
         spectrum.push({percentScore: percent, color: black});
         this.spectrum = spectrum;
-        console.log(this.spectrum.map(e => e.percentScore));
     }
 
     public update(accuracyEvent: AccuracyEvent): void {
-        let matchingEntry: AccuracyRecordingEntry = this.removeMatchingPBEntry(accuracyEvent);
-        if (matchingEntry !== undefined) {
-            this.updatePBScore(matchingEntry);
+        if (!this.entryIsABoo(accuracyEvent)) {
+            let matchingEntry: AccuracyRecordingEntry = this.removeMatchingPBEntry(accuracyEvent);
+            if (matchingEntry !== undefined) {
+                this.updatePBScore(matchingEntry);
+            } else {
+                console.error("@" +
+                    accuracyEvent.timeInSeconds.toFixed(3) +
+                    "s No matching entry found: track " +
+                    accuracyEvent.trackNumber);
+            }
         }
         this.updateCurrentScore(accuracyEvent);
         this.updateActualScoreDifference(accuracyEvent.timeInSeconds);
@@ -94,18 +99,32 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         this.updateDrawnScoreDifference(currentTimeInSeconds);
         this.drawGradient();
         this.drawTickMarks();
+        this.drawMeterNeedle();
         this.drawScoreDifference();
         this.lastDrawTimeInSeconds = currentTimeInSeconds;
+    }
+
+    private drawMeterNeedle() {
+        let p: p5 = global.p5Scene.sketchInstance;
+        let width = 120;
+        let height = width / 430 * 120;
+        let rect = Rectangle.fromTopLeft(
+            this.bounds.topLeftX + this.bounds.width / 2,
+            this.bounds.centerY - height / 2,
+            width,
+            height
+        );
+        p.image(global.meterNeedle, rect.topLeftX, rect.topLeftY, rect.width, rect.height);
     }
 
     private drawScoreDifference() {
         let scoreDifference: string = this.formatNumber(this.drawnScoreDifference.percentScore);
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
-        p.textSize(20);
+        p.textFont(global.meterFont, 18);
         p.fill("white");
         p.textAlign(p.LEFT, p.CENTER);
-        p.text(scoreDifference, this.bounds.topLeftX + this.bounds.width + 12, this.bounds.centerY);
+        p.text(scoreDifference, this.bounds.topLeftX + this.bounds.width + 18, this.bounds.centerY - 2);
         p.pop();
     }
 
@@ -154,7 +173,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
     }
 
     private formatNumber(x: number): string {
-        let s: string = x.toFixed(2);
+        let s: string = x.toFixed(2) + "%";
         if (x > 0) {
             s = "+" + s;
         }

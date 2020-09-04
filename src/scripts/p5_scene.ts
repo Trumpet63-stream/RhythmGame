@@ -29,6 +29,8 @@ export class P5Scene {
                 );
                 global.playFromFileBackground = p.loadImage("../assets/play_from_file_background.jpg");
                 global.optionsBackground = global.playFromFileBackground;
+                global.meterNeedle = p.loadImage("../assets/meter_needle.png");
+                global.meterFont = p.loadFont("../assets/RobotoMono-Bold.ttf");
             }
 
             p.setup = function () {
