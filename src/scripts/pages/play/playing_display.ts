@@ -70,9 +70,9 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
         this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
-        let replay: Replay = LocalStorage.loadReplay(tracks);
+        let replay: Replay | null = LocalStorage.loadReplay(tracks);
         if (replay !== null) {
-            this.liveComparison = new LiveComparison(LocalStorage.loadReplay(tracks),
+            this.liveComparison = new LiveComparison(replay,
                 new ScoreProvider(this.config, this.noteManager.getTotalNotes()));
         }
 

@@ -17,58 +17,53 @@ export interface LiveComparisonEvent {
  the compared score, with exception to boos */
 export class LiveComparison implements AccuracyObserver, Drawable {
     private readonly personalBest: AccuracyRecording;
-    private pbScore: Score;
+    private currentPBScore: Score;
     private currentScore: Score;
-    // private pbRemainingScore: Score;
     private readonly maxTotalScore: number;
-    private trackIndices: number[];
     private readonly scoreProvider: ScoreProvider;
-    // private currentPBScore: Score;
     private actualScoreDifference: Score;
-    // private previousScoreDifference: Score;
     private drawnScoreDifference: Score;
-    private lastDrawTimeInSeconds: number;
+    private lastDrawTimeInSeconds: number = 0;
     private readonly animationEasing: number = 0.2;
-    private readonly g: [number, p5.Color][];
+    private readonly spectrum: { percentScore: number, color: p5.Color }[];
     private readonly bounds: Rectangle;
 
     constructor(pbReplay: Replay, scoreProvider: ScoreProvider) {
         this.personalBest = AccuracyRecording.ofReplay(pbReplay);
+        console.log(this.personalBest.perTrackRecording);
         this.scoreProvider = scoreProvider;
         this.maxTotalScore = scoreProvider.getMaxScore();
-        this.trackIndices = [];
-        for (let i = 0; i < pbReplay.numTracks; i++) {
-            this.trackIndices.push(0);
-        }
         this.currentScore = new Score(0, 0);
-        this.pbScore = this.scoreProvider.score(this.personalBest.linearRecording);
+        this.currentPBScore = new Score(0, 0);
         this.actualScoreDifference = new Score(0, 0);
         this.drawnScoreDifference = new Score(0, 0);
-        this.bounds = Rectangle.fromTopLeft(500, 120, 20, 240);
+        this.bounds = Rectangle.fromTopLeft(520, 110, 20, 240);
 
-        let colorUnit = (100 - this.pbScore.percentScore) / 2;
+        let pbScore: Score = scoreProvider.score(this.personalBest.linearRecording);
+        let colorUnit = (100 - pbScore.percentScore) / 2;
         let p: p5 = global.p5Scene.sketchInstance;
         let gold: p5.Color = p.color(255, 215, 0);
-        let green: p5.Color = p.color(0, 240, 0);
+        let green: p5.Color = p.color(0, 199, 43);
         let blue: p5.Color = p.color(46, 108, 199);
         let red: p5.Color = p.color(255, 0, 0);
         let black: p5.Color = p.color(0, 0, 0);
-        let g: [number, p5.Color][] = [];
-        let current: number = 100;
-        g.push([current, gold]);
-        current -= colorUnit;
-        g.push([current, green]);
-        current -= colorUnit;
-        g.push([current, blue]);
-        current -= 2 * colorUnit;
-        g.push([current, red]);
-        current -= 2 * colorUnit;
-        g.push([current, black]);
-        this.g = g;
+        let spectrum: { percentScore: number, color: p5.Color }[] = [];
+        let percent: number = 2 * colorUnit;
+        spectrum.push({percentScore: percent, color: gold});
+        percent -= colorUnit;
+        spectrum.push({percentScore: percent, color: green});
+        percent -= colorUnit;
+        spectrum.push({percentScore: percent, color: blue});
+        percent -= 2 * colorUnit;
+        spectrum.push({percentScore: percent, color: red});
+        percent -= 2 * colorUnit;
+        spectrum.push({percentScore: percent, color: black});
+        this.spectrum = spectrum;
+        console.log(this.spectrum.map(e => e.percentScore));
     }
 
     public update(accuracyEvent: AccuracyEvent): void {
-        let matchingEntry: AccuracyRecordingEntry = this.getMatchingPBEntry(accuracyEvent);
+        let matchingEntry: AccuracyRecordingEntry = this.removeMatchingPBEntry(accuracyEvent);
         if (matchingEntry !== undefined) {
             this.updatePBScore(matchingEntry);
         }
@@ -76,9 +71,9 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         this.updateActualScoreDifference(accuracyEvent.timeInSeconds);
     }
 
-    private getMatchingPBEntry(accuracyEvent: AccuracyEvent) {
+    private removeMatchingPBEntry(accuracyEvent: AccuracyEvent) {
         let trackNumber: number = accuracyEvent.trackNumber;
-        let noteIndex: number = this.trackIndices[trackNumber];
+        let noteIndex: number = 0;
         while (true) {
             let trackRecording: AccuracyRecordingEntry[] = this.personalBest.perTrackRecording[trackNumber];
             let mostRecentEntry = trackRecording[noteIndex];
@@ -86,6 +81,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
                 break;
             }
             if (!this.entryIsABoo(mostRecentEntry)) {
+                trackRecording.splice(noteIndex, 1);
                 return mostRecentEntry;
             }
             noteIndex++;
@@ -94,47 +90,88 @@ export class LiveComparison implements AccuracyObserver, Drawable {
     }
 
     public draw(currentTimeInSeconds: number): void {
-        this.updateTrackIndicesAndHandleBoos(currentTimeInSeconds);
+        this.handleBoos(currentTimeInSeconds);
         this.updateDrawnScoreDifference(currentTimeInSeconds);
-        this.drawGradient(this.bounds);
-        this.drawScoreDifference(this.bounds);
+        this.drawGradient();
+        this.drawTickMarks();
+        this.drawScoreDifference();
+        this.lastDrawTimeInSeconds = currentTimeInSeconds;
     }
 
-    private drawScoreDifference(bounds: Rectangle) {
-        let scoreDifference: string = this.drawnScoreDifference.percentScore.toFixed(2);
+    private drawScoreDifference() {
+        let scoreDifference: string = this.formatNumber(this.drawnScoreDifference.percentScore);
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
         p.textSize(20);
         p.fill("white");
-        p.text(scoreDifference, bounds.topLeftX + bounds.width + 8, bounds.centerY);
+        p.textAlign(p.LEFT, p.CENTER);
+        p.text(scoreDifference, this.bounds.topLeftX + this.bounds.width + 12, this.bounds.centerY);
         p.pop();
     }
 
-    private drawGradient(bounds: Rectangle) {
+    private drawGradient() {
         let low: number = this.drawnScoreDifference.percentScore - 2;
         let high: number = this.drawnScoreDifference.percentScore + 2;
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
-        for (let y = bounds.topLeftY; y <= bounds.topLeftY + bounds.height; y++) {
-            let rectPercent = (y - bounds.topLeftY) / bounds.height;
+        for (let y = this.bounds.topLeftY; y <= this.bounds.topLeftY + this.bounds.height; y++) {
+            // bottom is 0%, top is 100%
+            let rectPercent = 1 - (y - this.bounds.topLeftY) / this.bounds.height;
             let percentScore = lerp(low, high, rectPercent);
             let color = this.getColorForPercent(percentScore);
             p.stroke(color);
-            p.line(bounds.topLeftX, y, bounds.topLeftX + bounds.width, y);
+            p.line(this.bounds.topLeftX, y, this.bounds.topLeftX + this.bounds.width, y);
         }
         p.pop();
     }
 
+    private drawTickMarks() {
+        let low: number = this.drawnScoreDifference.percentScore - 2;
+        let high: number = this.drawnScoreDifference.percentScore + 2;
+        let ticksToDraw: number[] = [];
+        let x = Math.ceil(low);
+        while (x < high) {
+            ticksToDraw.push(x);
+            x++;
+        }
+
+        let p: p5 = global.p5Scene.sketchInstance;
+        p.push();
+        p.textSize(11);
+        p.fill("white");
+        p.textAlign(p.LEFT, p.CENTER);
+        p.stroke("white");
+        for (let i = 0; i < ticksToDraw.length; i++) {
+            let percentScore: number = ticksToDraw[i];
+            // bottom is 0%, top is 100%
+            let ratio: number = (percentScore - low) / (high - low);
+            let y = lerp(this.bounds.topLeftY + this.bounds.height, this.bounds.topLeftY, ratio);
+
+            p.line(this.bounds.topLeftX, y, this.bounds.topLeftX + this.bounds.width, y);
+            p.text(this.formatNumber(percentScore), this.bounds.topLeftX + this.bounds.width + 2, y);
+        }
+        p.pop();
+    }
+
+    private formatNumber(x: number): string {
+        let s: string = x.toFixed(2);
+        if (x > 0) {
+            s = "+" + s;
+        }
+        return s;
+    }
+
     private getColorForPercent(percentScore: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        for (let i = 1; i < this.g.length; i++) {
-            if (this.g[i - 1][0] <= percentScore && percentScore <= this.g[i][0]) {
-                let ratio: number = (percentScore - this.g[i][0]) / (this.g[i - 1][0] - this.g[i][0]);
-                return p.lerpColor(this.g[i][1], this.g[i - 1][1], ratio);
+        for (let i = 1; i < this.spectrum.length; i++) {
+            let upper = this.spectrum[i - 1];
+            let lower = this.spectrum[i];
+            if (lower.percentScore <= percentScore && percentScore <= upper.percentScore) {
+                let ratio: number = (percentScore - lower.percentScore) / (upper.percentScore - lower.percentScore);
+                return p.lerpColor(lower.color, upper.color, ratio);
             }
         }
-        // return this.g[this.g.length - 1][1];
-        return p.color("white");
+        return this.spectrum[this.spectrum.length - 1].color;
     }
 
     private updateDrawnScoreDifference(currentTimeInSeconds: number) {
@@ -146,19 +183,17 @@ export class LiveComparison implements AccuracyObserver, Drawable {
             lerp(this.drawnScoreDifference.totalScore, this.actualScoreDifference.totalScore, ratio);
     }
 
-    // private getAnimationRatio(timeDifferenceInSeconds: number) {
-    //     return 1 / (1 + Math.exp(-5 * (timeDifferenceInSeconds - 1)));
-    // }
-
-    private updateTrackIndicesAndHandleBoos(currentTimeInSeconds: number) {
-        for (let trackNumber = 0; trackNumber < this.trackIndices.length; trackNumber++) {
-            this.updateTrackIndex(currentTimeInSeconds, trackNumber);
+    private handleBoos(currentTimeInSeconds: number) {
+        for (let trackNumber = 0; trackNumber < this.personalBest.perTrackRecording.length; trackNumber++) {
+            this.handleBoosForTrack(currentTimeInSeconds, trackNumber);
         }
     }
 
-    private updateTrackIndex(currentTimeInSeconds: number, trackNumber: number) {
+    private handleBoosForTrack(currentTimeInSeconds: number, trackNumber: number) {
+        let noteIndex: number = 0;
         while (true) {
-            let mostRecentEntry = this.getMostRecentEntryInPB(trackNumber);
+            let trackRecording: AccuracyRecordingEntry[] = this.personalBest.perTrackRecording[trackNumber];
+            let mostRecentEntry = trackRecording[noteIndex];
             if (mostRecentEntry === undefined) {
                 break;
             }
@@ -166,18 +201,14 @@ export class LiveComparison implements AccuracyObserver, Drawable {
                 if (this.entryIsABoo(mostRecentEntry)) {
                     this.updatePBScore(mostRecentEntry);
                     this.updateActualScoreDifference(currentTimeInSeconds);
+                    trackRecording.splice(noteIndex, 1);
+                    noteIndex--;
                 }
             } else {
                 break;
             }
-            this.skipToNextEntry(trackNumber);
+            noteIndex++;
         }
-    }
-
-    private getMostRecentEntryInPB(trackNumber: number) {
-        let noteIndex: number = this.trackIndices[trackNumber];
-        let trackRecording: AccuracyRecordingEntry[] = this.personalBest.perTrackRecording[trackNumber];
-        return trackRecording[noteIndex];
     }
 
     private entryIsABoo(mostRecentEntry: AccuracyRecordingEntry): boolean {
@@ -185,7 +216,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
     }
 
     private updatePBScore(entry: AccuracyRecordingEntry) {
-        this.updateScore(this.pbScore, entry);
+        this.updateScore(this.currentPBScore, entry);
     }
 
     private updateCurrentScore(entry: AccuracyRecordingEntry) {
@@ -200,13 +231,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
     }
 
     private updateActualScoreDifference(currentTimeInSeconds: number) {
-        // this.previousScoreDifference = new Score(this.actualScoreDifference.totalScore, this.actualScoreDifference.percentScore)
-        this.actualScoreDifference.totalScore = this.currentScore.totalScore - this.pbScore.totalScore;
-        this.actualScoreDifference.percentScore = this.currentScore.percentScore - this.pbScore.percentScore;
-        // this.lastDifferenceUpdateTime = currentTimeInSeconds;
-    }
-
-    private skipToNextEntry(trackNumber: number) {
-        this.trackIndices[trackNumber]++;
+        this.actualScoreDifference.totalScore = this.currentPBScore.totalScore - this.currentScore.totalScore;
+        this.actualScoreDifference.percentScore = this.currentPBScore.percentScore - this.currentScore.percentScore;
     }
 }
