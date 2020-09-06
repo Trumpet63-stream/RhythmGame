@@ -30,4 +30,5 @@ export let DEFAULT_CONFIG = {
     isHoldParticlesEnabled: true,
     isHoldGlowEnabled: true,
     isComboTextEnabled: true,
+    isLiveComparisonEnabled: true,
 };

@@ -39,13 +39,13 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         this.bounds = Rectangle.fromTopLeft(520, 110, 20, 240);
 
         let pbScore: Score = scoreProvider.score(this.personalBest.linearRecording);
-        let colorUnit = (100 - pbScore.percentScore) / 2;
+        let colorUnit = Math.min(2, (100 - pbScore.percentScore) / 2);
         let p: p5 = global.p5Scene.sketchInstance;
         let gold: p5.Color = p.color(255, 215, 0);
         let green: p5.Color = p.color(0, 199, 43);
-        let blue: p5.Color = p.color(46, 108, 199);
+        let blue: p5.Color = p.color(66, 135, 245);
         let red: p5.Color = p.color(255, 0, 0);
-        let black: p5.Color = p.color(0, 0, 0);
+        let black: p5.Color = p.color(100, 0, 0);
         let spectrum: { percentScore: number, color: p5.Color }[] = [];
         let percent: number = 2 * colorUnit;
         spectrum.push({percentScore: percent, color: gold});
@@ -53,9 +53,9 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         spectrum.push({percentScore: percent, color: green});
         percent -= colorUnit;
         spectrum.push({percentScore: percent, color: blue});
-        percent -= 2 * colorUnit;
+        percent -= 3;
         spectrum.push({percentScore: percent, color: red});
-        percent -= 2 * colorUnit;
+        percent -= 3;
         spectrum.push({percentScore: percent, color: black});
         this.spectrum = spectrum;
     }
@@ -121,10 +121,11 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         let scoreDifference: string = this.formatNumber(this.drawnScoreDifference.percentScore);
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
-        p.textFont(global.meterFont, 18);
-        p.fill("white");
+        let fontSize: number = 20;
+        p.textFont(global.meterFont, 20);
+        p.fill(this.getColorForPercent(this.drawnScoreDifference.percentScore));
         p.textAlign(p.LEFT, p.CENTER);
-        p.text(scoreDifference, this.bounds.topLeftX + this.bounds.width + 18, this.bounds.centerY - 2);
+        p.text(scoreDifference, this.bounds.topLeftX + this.bounds.width + 18, this.bounds.centerY - fontSize / 6);
         p.pop();
     }
 
@@ -190,7 +191,11 @@ export class LiveComparison implements AccuracyObserver, Drawable {
                 return p.lerpColor(lower.color, upper.color, ratio);
             }
         }
-        return this.spectrum[this.spectrum.length - 1].color;
+        if (percentScore > this.spectrum[0].percentScore) {
+            return this.spectrum[0].color;
+        } else {
+            return this.spectrum[this.spectrum.length - 1].color;
+        }
     }
 
     private updateDrawnScoreDifference(currentTimeInSeconds: number) {

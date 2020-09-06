@@ -2,6 +2,7 @@ import {AccuracyRecording, AccuracyRecordingEntry, Replay} from "./accuracy_reco
 import {Note, NoteType} from "./parsing/parse_sm";
 import {SHA3} from "sha3";
 import {NoteManager} from "./note_manager";
+import {ScoreProvider} from "./score_provider";
 
 interface LocalStorageNote {
     noteType: NoteType;
@@ -10,17 +11,39 @@ interface LocalStorageNote {
 }
 
 export abstract class LocalStorage {
-    public static saveReplay(recording: AccuracyRecording, noteManager: NoteManager): void {
-        let key: string = this.getSongKey(noteManager.tracks);
-        let replay: Replay = {
+    private static allEntries: { key: string, value: string }[] = [];
+
+    public static saveReplay(recording: AccuracyRecording, noteManager: NoteManager, songTitle: string): void {
+        let replays: Replay[] | null = this.loadReplays(noteManager.tracks);
+        if (replays === null) {
+            replays = [];
+        }
+        let newReplay: Replay = {
+            songTitle: songTitle,
             numTracks: noteManager.tracks.length,
             numNotes: noteManager.getTotalNotes(),
-            entries: this.censor(recording.linearRecording)
+            entries: recording.linearRecording
         };
-        let replayString: string = JSON.stringify(replay);
-        window.localStorage.setItem(key, replayString);
+        replays.push(newReplay);
+        let key: string = this.getKeyFromTracks(noteManager.tracks);
+        let value: string = this.replaysToString(replays);
+        window.localStorage.setItem(key, value);
         console.log("replay saved");
         console.log(key);
+    }
+
+    private static replaysToString(replays: Replay[]): string {
+        let censoredReplays: any[] = [];
+        for (let i = 0; i < replays.length; i++) {
+            let replay = replays[i];
+            censoredReplays.push({
+                songTitle: replay.songTitle,
+                numTracks: replay.numTracks,
+                numNotes: replay.numNotes,
+                entries: this.censor(replay.entries)
+            })
+        }
+        return JSON.stringify(censoredReplays);
     }
 
     private static censor(entries: AccuracyRecordingEntry[]): any[] {
@@ -69,22 +92,67 @@ export abstract class LocalStorage {
         return x;
     }
 
-    public static loadReplay(tracks: Note[][]): Replay | null {
-        let key: string = this.getSongKey(tracks);
-        console.log(key);
+    public static loadPBReplay(identifier: Note[][] | number, scoreProvider: ScoreProvider): Replay | null {
+        let replays: Replay[] | null = this.loadReplays(identifier);
+        if (replays === null) {
+            return null;
+        }
+        return this.getBestReplay(replays, scoreProvider);
+    }
+
+    //TODO: move this method out of this class
+    public static getBestReplay(replays: Replay[], scoreProvider: ScoreProvider) {
+        let bestScore: number = Number.NEGATIVE_INFINITY;
+        let pbIndex: number = -1;
+        for (let i = 0; i < replays.length; i++) {
+            let score: number = scoreProvider.score(replays[i].entries).totalScore;
+            if (score > bestScore) {
+                bestScore = score;
+                pbIndex = i;
+            }
+        }
+        return replays[pbIndex];
+    }
+
+    public static loadReplays(identifier: Note[][] | number): Replay[] | null {
+        let key: string = this.getKeyFromIdentifier(identifier);
         let replayString: string = window.localStorage.getItem(key);
         if (replayString !== null) {
-            console.log("loaded replay");
-            let replay: any = JSON.parse(replayString);
-            replay.entries = this.uncensor(replay.entries);
-            return replay
+            console.log("loaded replays");
+            return this.stringToReplays(replayString);
         } else {
-            console.log("no replay to load");
+            console.log("no replays to load");
         }
         return null;
     }
 
-    private static getSongKey(tracks: Note[][]) {
+    private static getKeyFromIdentifier(identifier: Note[][] | number) {
+        if (this.isTracks(identifier)) {
+            return this.getKeyFromTracks(<Note[][]>identifier);
+        } else {
+            return window.localStorage.key(<number>identifier);
+        }
+    }
+
+    private static isTracks(object: any): boolean {
+        try {
+            let firstNote: Note = object[0][0];
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private static stringToReplays(s: string): Replay[] {
+        let replays: any[] = JSON.parse(s);
+        for (let i = 0; i < replays.length; i++) {
+            let replay: any = replays[i];
+            replay.entries = this.uncensor(replay.entries);
+        }
+        return replays;
+    }
+
+    private static getKeyFromTracks(tracks: Note[][]) {
         let hash: SHA3 = new SHA3(512);
         let convertedNotes: LocalStorageNote[][] = this.convertNotes(tracks);
         let notesString: string = JSON.stringify(convertedNotes);
@@ -106,5 +174,25 @@ export abstract class LocalStorage {
             }
         }
         return convertedNotes;
+    }
+
+    public static getNumEntries(): number {
+        return this.allEntries.length;
+    }
+
+    public static getEntries(): { key: string, value: string }[] {
+        return this.allEntries;
+    }
+
+    public static async loadAllEntries() {
+        for (let i = 0; i < window.localStorage.length; i++) {
+            let key: string = window.localStorage.key(i);
+            let value: string = window.localStorage.getItem(key);
+            LocalStorage.allEntries[i] = {key: key, value: value};
+        }
+        let extraEntries = LocalStorage.allEntries.length - window.localStorage.length;
+        if (extraEntries > 0) {
+            LocalStorage.allEntries.slice(-extraEntries);
+        }
     }
 }

@@ -122,6 +122,6 @@ export class OnlinePlaylist {
     }
 
     private getMaxPageNumber(pageSize: number) {
-        return Math.floor(this.playlistClient.getPlaylist().length / pageSize) - 1;
+        return Math.floor(this.playlistClient.getPlaylist().length / pageSize);
     }
 }

@@ -199,6 +199,18 @@ export abstract class Options {
             },
             scrollDiv.element);
 
+        createUserInput(() => createLabeledSelect("Live Comparison",
+            "liveComparisonEnabledSelect", YesNo, booleanToYesNo(global.config.isLiveComparisonEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidLiveComparison.bind(this),
+            this.showLiveComparisonInfo.bind(this),
+            this.showLiveComparisonError.bind(this),
+            (input: number | string) => {
+                global.config.isLiveComparisonEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.save();
+            },
+            scrollDiv.element);
+
         KeyBindingsUi.create(scrollDiv.element, Options.OPTIONS_CLASS);
 
         global.previewDisplay.draw();
@@ -369,6 +381,20 @@ export abstract class Options {
     }
 
     private static showComboTextError(): void {
+        this.showSelectError();
+    }
+
+    private static isValidLiveComparison(value: string | number): boolean {
+        return this.isValidYesNo(value);
+    }
+
+    private static showLiveComparisonInfo(): void {
+        Ticker.setMessage(
+            "A colored gauge that indicates how well you're doing compared to your personal best.",
+            TickerState.INFORMATION);
+    }
+
+    private static showLiveComparisonError(): void {
         this.showSelectError();
     }
 

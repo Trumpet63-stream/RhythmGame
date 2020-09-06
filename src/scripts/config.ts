@@ -23,6 +23,8 @@ export class Config {
     isHoldParticlesEnabled: boolean;
     isHoldGlowEnabled: boolean;
     isComboTextEnabled: boolean;
+    isLiveComparisonEnabled: boolean;
+    public static STORAGE_KEY = "config";
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -42,6 +44,7 @@ export class Config {
                     isHoldParticlesEnabled?: boolean,
                     isHoldGlowEnabled?: boolean,
                     isComboTextEnabled?: boolean,
+                    isLiveComparisonEnabled?: boolean,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
@@ -68,11 +71,12 @@ export class Config {
             DEFAULT_CONFIG.isHoldParticlesEnabled);
         this.isHoldGlowEnabled = defaultIfUndefined(args.isHoldGlowEnabled, DEFAULT_CONFIG.isHoldGlowEnabled);
         this.isComboTextEnabled = defaultIfUndefined(args.isComboTextEnabled, DEFAULT_CONFIG.isComboTextEnabled);
+        this.isLiveComparisonEnabled = defaultIfUndefined(args.isLiveComparisonEnabled, DEFAULT_CONFIG.isLiveComparisonEnabled)
     }
 
     public save() {
         let configString = this.getConfigAsString();
-        window.localStorage.setItem("config", configString);
+        window.localStorage.setItem(Config.STORAGE_KEY, configString);
         console.log(configString);
         console.log("Config saved to local storage!");
     }
@@ -114,6 +118,6 @@ export class Config {
     }
 
     private static getFromStorage(): string {
-        return window.localStorage.getItem("config");
+        return window.localStorage.getItem(Config.STORAGE_KEY);
     }
 }

@@ -27,9 +27,8 @@ export class ResultsDisplay {
         this.songTitle = songTitle;
         this.returnPage = returnPage;
         this.totalNotes = this.noteManager.getTotalNotes();
-        LocalStorage.saveReplay(accuracyRecording, noteManager);
+        LocalStorage.saveReplay(accuracyRecording, noteManager, songTitle);
 
-        console.log("total notes = " + this.totalNotes);
         let scoreProvider: ScoreProvider = new ScoreProvider(this.config, this.totalNotes);
         let score: Score = scoreProvider.score(this.accuracyRecording.linearRecording);
         console.log("score = " + score.totalScore + ", percent = " + score.percentScore);
@@ -38,7 +37,7 @@ export class ResultsDisplay {
     draw() {
         let heading: string = this.returnPage.name + "// " + this.songTitle;
         this.drawHeadingText(heading);
-        this.drawResults(Rectangle.fromTopLeft(60, 50, this.p.width - 60, this.p.height - 100));
+        this.drawResults(Rectangle.fromTopLeft(0, 35, this.p.width * 0.9, this.p.height * 0.4));
     }
 
     private drawHeadingText(heading: string) {
@@ -53,7 +52,7 @@ export class ResultsDisplay {
 
     private drawResults(bounds: Rectangle) {
         let barWidth = bounds.width * 0.6;
-        let barHeight = barWidth / 10;
+        let barHeight = bounds.height / 10;
         let leftLabelHeight = 0.8 * barHeight;
         let accuracyListForResults = this.getAccuracyNamesDescending(this.config.accuracySettings);
         this.drawAccuracyBars(accuracyListForResults, bounds.center.x, bounds.center.y, leftLabelHeight, barWidth, barHeight,

@@ -14,6 +14,7 @@ export interface AccuracyRecordingEntry {
 }
 
 export interface Replay {
+    songTitle: string
     numTracks: number,
     numNotes: number,
     entries: AccuracyRecordingEntry[]

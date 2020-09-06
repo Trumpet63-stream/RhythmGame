@@ -6,6 +6,7 @@ import {DOMWrapper} from "./dom_wrapper";
 import {PlayFromOnline} from "./pages/play_from_online/play_from_online";
 import {Sync} from "./pages/sync/sync";
 import {SyncResults} from "./pages/sync_results/sync_results";
+import {Storage} from "./pages/storage/storage";
 
 export class PageDescription {
     public name: string;
@@ -35,9 +36,12 @@ export abstract class Pages {
 
     public static readonly SYNC: PageDescription =
         new PageDescription("Sync", Sync.draw.bind(Sync));
-    
+
     public static readonly SYNC_RESULTS: PageDescription =
         new PageDescription("Sync Results", SyncResults.draw.bind(SyncResults));
+
+    public static readonly STORAGE: PageDescription =
+        new PageDescription("Storage", Storage.draw.bind(Storage));
 }
 
 export abstract class PageManager {

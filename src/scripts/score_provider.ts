@@ -13,8 +13,8 @@ export class Score {
 }
 
 export class ScoreProvider {
-    private config: Config;
-    private numNotes: number;
+    private readonly config: Config;
+    private readonly numNotes: number;
 
     constructor(config: Config, numNotes: number) {
         this.config = config;

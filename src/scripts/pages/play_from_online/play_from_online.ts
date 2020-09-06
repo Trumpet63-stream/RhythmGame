@@ -14,6 +14,7 @@ import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
 import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Stepfile} from "../../stepfile";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
+import {MenuItem} from "../../menu_item";
 
 const playFromOnlineStepfile = new Stepfile();
 const playFromOnlineAudioFile = new HtmlAudioElementHelper();
@@ -140,10 +141,6 @@ export abstract class PlayFromOnline {
             isSwfLoadStarted = true;
         }
     }
-}
-
-interface MenuItem {
-    toString: () => string;
 }
 
 function drawRadioMenu(p: p5, uniqueId: string, items: MenuItem[]): p5.Element {

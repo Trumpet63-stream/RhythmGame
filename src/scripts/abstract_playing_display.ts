@@ -105,7 +105,7 @@ export abstract class AbstractPlayingDisplay {
         if (this.config.isHoldParticlesEnabled) {
             this.holdParticles.draw(currentTimeInSeconds);
         }
-        if (this.liveComparison !== undefined) {
+        if (this.liveComparison !== undefined && this.config.isLiveComparisonEnabled) {
             this.liveComparison.draw(currentTimeInSeconds);
         }
     }
