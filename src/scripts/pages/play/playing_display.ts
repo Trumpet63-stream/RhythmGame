@@ -29,6 +29,8 @@ import {LocalStorage} from "../../local_storage";
 import {ScoreProvider} from "../../score_provider";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
+    private comparisonReplay: Replay;
+
     protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
                          returnPage: PageDescription) {
         this.showResultsScreen = false;
@@ -75,6 +77,7 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
             let scoreProvider = new ScoreProvider(this.config, this.noteManager.getTotalNotes());
             let replay: Replay | null = LocalStorage.loadPBReplay(tracks, scoreProvider);
             if (replay !== null) {
+                this.comparisonReplay = replay;
                 this.liveComparison = new LiveComparison(replay, scoreProvider);
             }
         }
@@ -107,7 +110,7 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
     protected endSong() {
         this.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.scene.sketchInstance,
-            this.accuracyRecording, this.songTitle, this.returnPage);
+            this.accuracyRecording, this.comparisonReplay, this.songTitle, this.returnPage);
         PageManager.setCurrentPage(Pages.PLAY_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);

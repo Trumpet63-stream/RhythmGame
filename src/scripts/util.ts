@@ -246,3 +246,12 @@ export function lerp(startValue: number, endValue: number, ratio: number) {
         return endValue;
     }
 }
+
+export function getTextWidth(text: string, textSize: number): number {
+    let p: p5 = this.p;
+    p.push();
+    p.textSize(textSize);
+    let textWidth: number = p.textWidth(text);
+    p.pop();
+    return textWidth;
+}
