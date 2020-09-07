@@ -45,7 +45,7 @@ export class ResultsDisplay {
         let heading: string = this.returnPage.name + "// " + this.songTitle;
         this.drawHeadingText(heading);
 
-        let barsBounds: Rectangle = Rectangle.fromTopLeft(0, 60, this.p.width * 0.9, this.p.height * 0.50);
+        let barsBounds: Rectangle = Rectangle.fromTopLeft(0, 80, this.p.width * 0.9, this.p.height * 0.47);
         this.drawBars(barsBounds);
 
         let scoreSummaryBounds: Rectangle = Rectangle.fromTopLeft(this.p.width * 0.2,

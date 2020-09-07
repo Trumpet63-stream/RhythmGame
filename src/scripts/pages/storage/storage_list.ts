@@ -77,6 +77,7 @@ export class StorageList {
             let scoreProvider = new ScoreProvider(this.config, replays[0].numNotes);
             let bestReplay = this.storageClient.getBestReplay(replays, scoreProvider);
             let bestScore: Score = scoreProvider.score(bestReplay.entries);
+            let storedSizeKb: number = JSON.stringify(replays).length / 1000;
             return bestReplay.songTitle +
                 ", " +
                 bestScore.percentScore.toFixed(2) +
@@ -85,7 +86,7 @@ export class StorageList {
                 " " +
                 (replays.length > 1 ? "plays" : "play") +
                 ", " +
-                (JSON.stringify(replays).length / 1000).toFixed(1) +
+                storedSizeKb.toFixed(1) +
                 "KB";
         } else {
             return entry.key;
