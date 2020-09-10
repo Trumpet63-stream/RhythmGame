@@ -3,6 +3,7 @@ import {Accuracy} from "./accuracy_manager";
 import {defaultIfUndefined} from "./util";
 import {DEFAULT_CONFIG} from "./default_config";
 import {KeyBinding} from "./key_binding_helper";
+import {LocalStorage} from "./local_storage";
 
 /* Stores user settings. Expected not to change during play */
 export class Config {
@@ -76,9 +77,8 @@ export class Config {
 
     public save() {
         let configString = this.getConfigAsString();
-        window.localStorage.setItem(Config.STORAGE_KEY, configString);
-        console.log(configString);
-        console.log("Config saved to local storage!");
+        console.log("saving config to local storage");
+        LocalStorage.setItem(Config.STORAGE_KEY, configString);
     }
 
     private getConfigAsString() {
@@ -89,22 +89,21 @@ export class Config {
     }
 
     public static load(): Config {
-        let configString = Config.getFromStorage();
-        console.log(configString);
+        let configString = LocalStorage.getItem(Config.STORAGE_KEY);
         if (configString !== null) {
             try {
                 let configJSON = JSON.parse(configString);
                 // let configJSON = JSON.parse(unescape(configString));
                 configJSON.keyBindings = new Map(configJSON.keyBindings);
                 let config: Config = new Config(configJSON);
-                console.log("Config loaded from local storage!");
+                console.log("Config loaded from local storage");
                 console.log(config);
                 return config;
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         }
-        console.log("No valid local storage entry found, returning default config!");
+        console.log("No valid local storage entry found, returning default config");
         return new Config({});
     }
 
@@ -115,9 +114,5 @@ export class Config {
         })
         string += "]";
         return string;
-    }
-
-    private static getFromStorage(): string {
-        return window.localStorage.getItem(Config.STORAGE_KEY);
     }
 }

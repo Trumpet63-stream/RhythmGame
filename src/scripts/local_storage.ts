@@ -27,9 +27,8 @@ export abstract class LocalStorage {
         replays.push(newReplay);
         let key: string = this.getKeyFromTracks(noteManager.tracks);
         let value: string = this.replaysToString(replays);
-        window.localStorage.setItem(key, value);
-        console.log("replay saved");
-        console.log(key);
+        console.log("saving replay to local storage with key: \n" + key);
+        this.setItem(key, value);
     }
 
     private static replaysToString(replays: Replay[]): string {
@@ -116,7 +115,7 @@ export abstract class LocalStorage {
 
     public static loadReplays(identifier: Note[][] | number): Replay[] | null {
         let key: string = this.getKeyFromIdentifier(identifier);
-        let replayString: string = window.localStorage.getItem(key);
+        let replayString: string = this.getItem(key);
         if (replayString !== null) {
             console.log("loaded replays");
             return this.stringToReplays(replayString);
@@ -130,7 +129,7 @@ export abstract class LocalStorage {
         if (this.isTracks(identifier)) {
             return this.getKeyFromTracks(<Note[][]>identifier);
         } else {
-            return window.localStorage.key(<number>identifier);
+            return this.key(<number>identifier);
         }
     }
 
@@ -185,14 +184,50 @@ export abstract class LocalStorage {
     }
 
     public static async loadAllEntries() {
-        for (let i = 0; i < window.localStorage.length; i++) {
-            let key: string = window.localStorage.key(i);
-            let value: string = window.localStorage.getItem(key);
+        let storageLength: number | null = this.getLength();
+        if (storageLength === null) {
+            return;
+        }
+        for (let i = 0; i < storageLength; i++) {
+            let key: string = this.key(i);
+            let value: string = this.getItem(key);
             LocalStorage.allEntries[i] = {key: key, value: value};
         }
-        let extraEntries = LocalStorage.allEntries.length - window.localStorage.length;
+        let extraEntries = LocalStorage.allEntries.length - storageLength;
         if (extraEntries > 0) {
             LocalStorage.allEntries.slice(-extraEntries);
         }
+    }
+
+    public static getItem(key: string): string | null {
+        if (window.localStorage === null) {
+            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            return null;
+        }
+        return window.localStorage.getItem(key);
+    }
+
+    public static setItem(key: string, value: string): void {
+        if (window.localStorage === null) {
+            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            return;
+        }
+        window.localStorage.setItem(key, value);
+    }
+
+    private static key(index: number): string | null {
+        if (window.localStorage === null) {
+            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            return null;
+        }
+        return window.localStorage.key(index);
+    }
+
+    private static getLength(): number | null {
+        if (window.localStorage === null) {
+            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            return null;
+        }
+        return window.localStorage.length
     }
 }
