@@ -17,6 +17,7 @@ export class Config {
     gameAreaHeight: number;
     gameAreaWidth: number;
     noteSize: number;
+    noteSpacing: number;
     quitKey: number;
     isAccuracyFlashEnabled: boolean;
     isAccuracyParticlesEnabled: boolean;
@@ -38,6 +39,7 @@ export class Config {
                     gameAreaHeight?: number,
                     gameAreaWidth?: number,
                     noteSize?: number,
+                    noteSpacing?: number,
                     quitKey?: number,
                     isAccuracyFlashEnabled?: boolean,
                     isAccuracyParticlesEnabled?: boolean,
@@ -60,6 +62,7 @@ export class Config {
         this.accuracySettings = defaultIfUndefined(args.accuracySettings, DEFAULT_CONFIG.accuracySettings);
         this.pauseAtStartInSeconds = defaultIfUndefined(args.pauseAtStartInSeconds, DEFAULT_CONFIG.pauseAtStartInSeconds);
         this.noteSize = defaultIfUndefined(args.noteSize, DEFAULT_CONFIG.noteSize);
+        this.noteSpacing = defaultIfUndefined(args.noteSpacing, DEFAULT_CONFIG.noteSpacing);
         this.keyBindings = defaultIfUndefined(args.keyBindings, DEFAULT_CONFIG.keyBindings);
         this.quitKey = defaultIfUndefined(args.quitKey, DEFAULT_CONFIG.quitKey);
         this.isAccuracyFlashEnabled = defaultIfUndefined(args.isAccuracyFlashEnabled,

@@ -14,9 +14,9 @@ export class PreviewDisplay {
     private displayManager: DisplayManager;
     private displayConfig: DisplayConfig;
     protected bounds: Rectangle = Rectangle.fromTopLeft(
-        65,
+        45,
         46,
-        200,
+        240,
         400
     );
 
@@ -37,14 +37,12 @@ export class PreviewDisplay {
 
     // We need the display config to update when any changes are made to the Config
     private getDisplayConfig(config: Config, numTracks: number): DisplayConfig {
-        let receptorSizes: number[] = [];
-        for (let i = 0; i < numTracks; i++) {
-            receptorSizes.push(config.noteSize);
-        }
-
         return {
             getNoteSize: () => {
                 return config.noteSize;
+            },
+            getNoteSpacing: () => {
+                return config.noteSpacing;
             },
             getPixelsPerSecond: () => {
                 return config.pixelsPerSecond;
@@ -56,6 +54,10 @@ export class PreviewDisplay {
                 return config.scrollDirection;
             },
             getReceptorSizes: () => {
+                let receptorSizes: number[] = [];
+                for (let i = 0; i < numTracks; i++) {
+                    receptorSizes.push(config.noteSize);
+                }
                 return receptorSizes;
             },
             setReceptorSize: (trackNumber: number, receptorSize: number) => {
