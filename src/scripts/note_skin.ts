@@ -4,9 +4,9 @@ import {NoteType} from "./parsing/parse_sm";
 import {ScrollDirection} from "./scroll_direction";
 
 export class NoteSkin {
-    public note: p5.Image;
-    public connectorTile: p5.Image;
-    public receptor: p5.Image;
+    private readonly note: p5.Image;
+    private readonly connectorTile: p5.Image;
+    private readonly receptor: p5.Image;
 
     /* Requires that the tail be half the height and same width as note image */
     public tail: p5.Image;
@@ -32,7 +32,7 @@ export class NoteSkin {
                 this.drawImageRotated(this.note, trackNumber, numTracks, centerX, centerY, noteSize);
                 break;
             case NoteType.TAIL:
-                this.drawTail(trackNumber, numTracks, centerX, centerY);
+                this.drawTail(trackNumber, numTracks, centerX, centerY, noteSize);
                 break;
             default:
                 return false;
@@ -47,9 +47,9 @@ export class NoteSkin {
     }
 
     // Returns true if able to draw note type, otherwise returns false
-    private drawHoldConnector(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number) {
+    public drawHoldConnector(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number,
+                             noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         let sourceWidth = this.connectorTile.width;
         let sourceHeight = this.connectorTile.height;
         let scaledWidth = noteSize;
@@ -93,20 +93,17 @@ export class NoteSkin {
         return true;
     }
 
-    public drawTail(trackNumber: number, numTracks: number, centerX: number, centerY: number) {
+    public drawTail(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         if (global.config.scrollDirection === ScrollDirection.Up) {
             p.push();
             p.angleMode(p.DEGREES);
             p.translate(centerX, centerY);
             p.rotate(180);
             p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
-            // p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize / 2);
             p.pop();
         } else {
             p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize);
-            // p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize / 2);
         }
     }
 
@@ -141,7 +138,7 @@ export class NoteSkin {
 
     private drawPartialTile(centerX: number, topLeftY: number, scaledWidth: number, scaledHeight: number,
                             sourceWidth: number, sourceHeight: number, heightPercent: number, isDrawnFromBottom: boolean,
-                           isReversed: boolean, p: p5) {
+                            isReversed: boolean, p: p5) {
         if (heightPercent <= 0) {
             return;
         }

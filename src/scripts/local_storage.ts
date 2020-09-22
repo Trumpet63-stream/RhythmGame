@@ -27,9 +27,8 @@ export abstract class LocalStorage {
         replays.push(newReplay);
         let key: string = this.getKeyFromTracks(noteManager.tracks);
         let value: string = this.replaysToString(replays);
-        window.localStorage.setItem(key, value);
-        console.log("replay saved");
-        console.log(key);
+        console.log("saving replay to local storage with key: \n" + key);
+        this.setItem(key, value);
     }
 
     private static replaysToString(replays: Replay[]): string {
@@ -92,7 +91,7 @@ export abstract class LocalStorage {
         return x;
     }
 
-    public static loadPBReplay(identifier: Note[][] | number, scoreProvider: ScoreProvider): Replay | null {
+    public static loadPBReplay(identifier: Note[][] | number | string, scoreProvider: ScoreProvider): Replay | null {
         let replays: Replay[] | null = this.loadReplays(identifier);
         if (replays === null) {
             return null;
@@ -114,9 +113,9 @@ export abstract class LocalStorage {
         return replays[pbIndex];
     }
 
-    public static loadReplays(identifier: Note[][] | number): Replay[] | null {
+    public static loadReplays(identifier: Note[][] | number | string): Replay[] | null {
         let key: string = this.getKeyFromIdentifier(identifier);
-        let replayString: string = window.localStorage.getItem(key);
+        let replayString: string = this.getItem(key);
         if (replayString !== null) {
             console.log("loaded replays");
             return this.stringToReplays(replayString);
@@ -126,18 +125,20 @@ export abstract class LocalStorage {
         return null;
     }
 
-    private static getKeyFromIdentifier(identifier: Note[][] | number) {
+    private static getKeyFromIdentifier(identifier: Note[][] | number | string) {
         if (this.isTracks(identifier)) {
             return this.getKeyFromTracks(<Note[][]>identifier);
+        } else if (typeof identifier === "number") {
+            return this.key(<number>identifier);
         } else {
-            return window.localStorage.key(<number>identifier);
+            return <string>identifier;
         }
     }
 
     private static isTracks(object: any): boolean {
         try {
             let firstNote: Note = object[0][0];
-            return true;
+            return firstNote.trackNumber !== undefined;
         } catch (e) {
             return false;
         }
@@ -185,14 +186,54 @@ export abstract class LocalStorage {
     }
 
     public static async loadAllEntries() {
-        for (let i = 0; i < window.localStorage.length; i++) {
-            let key: string = window.localStorage.key(i);
-            let value: string = window.localStorage.getItem(key);
+        let storageLength: number | null = this.getLength();
+        if (storageLength === null) {
+            return;
+        }
+        for (let i = 0; i < storageLength; i++) {
+            let key: string = this.key(i);
+            let value: string = this.getItem(key);
             LocalStorage.allEntries[i] = {key: key, value: value};
         }
-        let extraEntries = LocalStorage.allEntries.length - window.localStorage.length;
+        let extraEntries = LocalStorage.allEntries.length - storageLength;
         if (extraEntries > 0) {
             LocalStorage.allEntries.slice(-extraEntries);
         }
+    }
+
+    public static getItem(key: string): string | null {
+        if (window.localStorage === null) {
+            this.unableToAccessLocalStorage();
+            return null;
+        }
+        return window.localStorage.getItem(key);
+    }
+
+    public static setItem(key: string, value: string): void {
+        if (window.localStorage === null) {
+            this.unableToAccessLocalStorage();
+            return;
+        }
+        window.localStorage.setItem(key, value);
+    }
+
+    private static key(index: number): string | null {
+        if (window.localStorage === null) {
+            this.unableToAccessLocalStorage();
+            return null;
+        }
+        return window.localStorage.key(index);
+    }
+
+    private static getLength(): number | null {
+        if (window.localStorage === null) {
+            this.unableToAccessLocalStorage();
+            return null;
+        }
+        return window.localStorage.length
+    }
+
+    private static unableToAccessLocalStorage(): void {
+        console.error("Unable to access local storage. Try allowing all cookies for this website.");
     }
 }

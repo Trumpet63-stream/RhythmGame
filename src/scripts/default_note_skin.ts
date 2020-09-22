@@ -66,9 +66,8 @@ export abstract class DefaultNoteSkin {
         p.pop();
     }
 
-    public static drawHoldConnector(centerX: number, startY: number, endY: number) {
+    public static drawHoldConnector(centerX: number, startY: number, endY: number, noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        let noteSize = global.config.noteSize;
         let width = noteSize * 0.5;
         p.push();
         p.fill("black");

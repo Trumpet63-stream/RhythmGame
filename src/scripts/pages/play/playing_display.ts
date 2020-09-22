@@ -67,6 +67,12 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
             this.handleAccuracyEvent.bind(this));
 
+        let scoreProvider = new ScoreProvider(this.config, this.noteManager.getTotalNotes());
+        let replay: Replay | null = LocalStorage.loadPBReplay(tracks, scoreProvider);
+        if (replay !== null) {
+            this.comparisonReplay = replay;
+        }
+
         this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
         this.comboText = new ComboText(new Point2D(this.bounds.center.x, this.bounds.center.y + 18), this.config);
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
@@ -74,10 +80,7 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
 
         if (this.config.isLiveComparisonEnabled) {
-            let scoreProvider = new ScoreProvider(this.config, this.noteManager.getTotalNotes());
-            let replay: Replay | null = LocalStorage.loadPBReplay(tracks, scoreProvider);
             if (replay !== null) {
-                this.comparisonReplay = replay;
                 this.liveComparison = new LiveComparison(replay, scoreProvider);
             }
         }

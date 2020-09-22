@@ -3,14 +3,16 @@ import {ScrollDirection} from "./scroll_direction";
 import {Config} from "./config";
 
 export class PlayingConfig implements DisplayConfig {
-    private noteSize: number;
-    private pixelsPerSecond: number;
-    private receptorYPercent: number;
-    private scrollDirection: ScrollDirection;
-    private receptorSizes: number[];
+    private readonly noteSize: number;
+    private readonly noteSpacing: number;
+    private readonly pixelsPerSecond: number;
+    private readonly receptorYPercent: number;
+    private readonly scrollDirection: ScrollDirection;
+    private readonly receptorSizes: number[];
 
     constructor(config: Config, numTracks: number) {
         this.noteSize = config.noteSize;
+        this.noteSpacing = config.noteSpacing;
         this.pixelsPerSecond = config.pixelsPerSecond;
         this.receptorYPercent = config.receptorYPercent;
         this.scrollDirection = config.scrollDirection;
@@ -22,6 +24,10 @@ export class PlayingConfig implements DisplayConfig {
 
     getNoteSize(): number {
         return this.noteSize;
+    }
+
+    getNoteSpacing(): number {
+        return this.noteSpacing;
     }
 
     getPixelsPerSecond(): number {

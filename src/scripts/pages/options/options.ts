@@ -104,6 +104,28 @@ export abstract class Options {
             },
             scrollDiv.element);
 
+        createUserInput(() => createLabeledInput("Note Size (px)",
+            "noteSizeInput", global.config.noteSize.toString(), Options.OPTIONS_CLASS),
+            this.isValidNoteSize.bind(this),
+            this.showNoteSizeInfo.bind(this),
+            this.showNoteSizeError.bind(this),
+            (input: number | string) => {
+                global.config.noteSize = getFloat(input);
+                global.config.save();
+            },
+            scrollDiv.element);
+
+        createUserInput(() => createLabeledInput("Note Spacing (px)",
+            "noteSpacingInput", global.config.noteSpacing.toString(), Options.OPTIONS_CLASS),
+            this.isValidNoteSpacing.bind(this),
+            this.showNoteSpacingInfo.bind(this),
+            this.showNoteSpacingError.bind(this),
+            (input: number | string) => {
+                global.config.noteSpacing = getFloat(input);
+                global.config.save();
+            },
+            scrollDiv.element);
+
         createUserInput(() => createLabeledInput("Accuracy Offset (ms)",
             "additionalOffsetInput", (global.config.additionalOffsetInSeconds * 1000).toString(),
             Options.OPTIONS_CLASS),
@@ -233,7 +255,7 @@ export abstract class Options {
     }
 
     private static isValidScrollSpeed(value: string | number): boolean {
-        return this.isFloatGreaterThanOrEqualZero(value);
+        return this.isFloatGreaterThanZero(value);
     }
 
     private static showScrollSpeedInfo(): void {
@@ -242,7 +264,7 @@ export abstract class Options {
     }
 
     private static showScrollSpeedError(): void {
-        this.showNumberNotGreaterThanOrEqualZeroError();
+        this.showNumberNotGreaterThanZeroError();
     }
 
     private static isValidScrollDirection(value: string | number): boolean {
@@ -275,6 +297,32 @@ export abstract class Options {
     }
 
     private static showReceptorPositionError(): void {
+        this.showValueNotNumberError();
+    }
+
+    private static isValidNoteSize(value: string | number): boolean {
+        return this.isFloatGreaterThanZero(value);
+    }
+
+    private static showNoteSizeInfo(): void {
+        Ticker.setMessage("Increase this number to make the notes and receptors bigger.",
+            TickerState.INFORMATION);
+    }
+
+    private static showNoteSizeError(): void {
+        this.showNumberNotGreaterThanZeroError();
+    }
+
+    private static isValidNoteSpacing(value: string | number): boolean {
+        return this.isFloat(value);
+    }
+
+    private static showNoteSpacingInfo(): void {
+        Ticker.setMessage("Increase this separate the notes farther apart horizontally.",
+            TickerState.INFORMATION);
+    }
+
+    private static showNoteSpacingError(): void {
         this.showValueNotNumberError();
     }
 
@@ -405,6 +453,16 @@ export abstract class Options {
 
     private static showNumberNotGreaterThanOrEqualZeroError() {
         Ticker.setMessage("Error: must be a number greater than or equal to zero.",
+            TickerState.ERROR);
+    }
+
+    private static isFloatGreaterThanZero(value: string | number) {
+        let numberValue: number = getFloat(value);
+        return !isNaN(numberValue) && numberValue > 0;
+    }
+
+    private static showNumberNotGreaterThanZeroError() {
+        Ticker.setMessage("Error: must be a number greater than zero.",
             TickerState.ERROR);
     }
 

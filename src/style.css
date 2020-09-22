@@ -54,6 +54,32 @@ button:active {
     top: 1px;
 }
 
+.menu-table table {
+    display: block;
+    padding-left: 2px;
+    overflow-y: scroll;
+    background: rgba(0, 0, 0, 0);
+    text-align: left;
+}
+
+.menu-table th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background: rgb(41, 56, 78);
+    padding: 6px 8px 6px 8px;
+}
+
+.menu-table tr {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.menu-table td {
+    background: rgba(41, 56, 78, 0.9);
+    padding: 10px 8px 10px 8px;
+}
+
 div.labeled-input {
     margin-top: 2px;
     margin-bottom: 2px;

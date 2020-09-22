@@ -8,17 +8,15 @@ import {DefaultNoteSkin} from "./default_note_skin";
 import {Rectangle} from "./rectangle";
 
 class NoteDisplay {
-    centerX: number;
-    centerY: number;
-    noteType: NoteType;
-    private sketchInstance: p5;
-    private noteSize: number;
-    private trackNumber: number;
-    private numTracks: number;
+    private readonly centerX: number;
+    private readonly centerY: number;
+    public noteType: NoteType;
+    private readonly noteSize: number;
+    private readonly trackNumber: number;
+    private readonly numTracks: number;
 
-    constructor(centerX: number, centerY: number, noteType: NoteType, sketchInstance: p5, noteSize: number,
-                trackNumber: number, numTracks: number) {
-        this.sketchInstance = sketchInstance;
+    constructor(centerX: number, centerY: number, noteType: NoteType, noteSize: number, trackNumber: number,
+                numTracks: number) {
         this.centerX = centerX;
         this.centerY = centerY;
         this.noteType = noteType;
@@ -38,42 +36,40 @@ class NoteDisplay {
 }
 
 class HoldConnector {
-    centerX: number;
-    startY: number;
-    endY: number;
-    noteStartY: number;
-    noteEndY: number;
-    private sketchInstance: p5;
+    private readonly centerX: number;
+    private readonly drawStartY: number;
+    private readonly drawEndY: number;
+    private readonly noteStartY: number;
+    private readonly noteEndY: number;
+    private readonly noteSize: number;
 
-    constructor(centerX: number, startY: number, endY: number, noteStartY: number, noteEndY: number, sketchInstance: p5) {
-        this.sketchInstance = sketchInstance;
+    constructor(centerX: number, drawStartY: number, drawEndY: number, noteStartY: number, noteEndY: number, noteSize: number) {
         this.centerX = centerX;
-        this.startY = startY;
-        this.endY = endY;
+        this.drawStartY = drawStartY;
+        this.drawEndY = drawEndY;
         this.noteStartY = noteStartY;
         this.noteEndY = noteEndY;
+        this.noteSize = noteSize;
     }
 
     draw() {
-        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.startY, this.endY,
-            this.noteStartY, this.noteEndY);
+        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.drawStartY, this.drawEndY,
+            this.noteStartY, this.noteEndY, this.noteSize);
         if (!isConnectorDrawSuccessful) {
-            DefaultNoteSkin.drawHoldConnector(this.centerX, this.startY, this.endY);
+            DefaultNoteSkin.drawHoldConnector(this.centerX, this.drawStartY, this.drawEndY, this.noteSize);
         }
     }
 }
 
 class Receptor {
-    centerX: number;
-    centerY: number;
-    private sketchInstance: p5;
-    private noteSize: number
-    private trackNumber: number;
-    private numTracks: number;
+    private readonly centerX: number;
+    private readonly centerY: number;
+    private readonly noteSize: number
+    private readonly trackNumber: number;
+    private readonly numTracks: number;
 
-    constructor(centerX: number, centerY: number, sketchInstance: p5, noteSize: number, trackNumber: number,
+    constructor(centerX: number, centerY: number, noteSize: number, trackNumber: number,
                 numTracks: number) {
-        this.sketchInstance = sketchInstance;
         this.centerX = centerX;
         this.centerY = centerY;
         this.noteSize = noteSize;
@@ -93,6 +89,7 @@ class Receptor {
 /* A set of options that intersect with the user Config, but are expected to be changed during play */
 export interface DisplayConfig {
     getNoteSize: () => number;
+    getNoteSpacing: () => number;
     getPixelsPerSecond: () => number;
     getReceptorYPercent: () => number;
     getScrollDirection: () => ScrollDirection;
@@ -104,7 +101,7 @@ export class DisplayManager {
     private displayConfig: DisplayConfig;
     private noteManager: NoteManager;
     private currentTimeInSeconds: number;
-    private sketchInstance: p5;
+    private readonly sketchInstance: p5;
     private bounds: Rectangle;
 
     constructor(noteManager: NoteManager, displayConfig: DisplayConfig, sketchInstance: p5, bounds: Rectangle) {
@@ -120,7 +117,7 @@ export class DisplayManager {
         p.push();
         p.fill("black");
         this.currentTimeInSeconds = currentTimeInSeconds;
-        this.sketchInstance.rect(this.bounds.topLeftX, this.bounds.topLeftY, this.bounds.width, this.bounds.height);
+        p.rect(this.bounds.topLeftX, this.bounds.topLeftY, this.bounds.width, this.bounds.height);
         this.drawNotesAndConnectors();
         this.drawReceptors();
         p.pop();
@@ -153,7 +150,7 @@ export class DisplayManager {
         if (note.state === NoteState.DEFAULT) {
             let x = this.getNoteCenterX(trackNumber, numTracks);
             let y = this.getNoteCenterY(note.timeInSeconds, currentTime);
-            new NoteDisplay(x, y, note.type, this.sketchInstance, this.displayConfig.getNoteSize(), trackNumber, numTracks).draw();
+            new NoteDisplay(x, y, note.type, this.displayConfig.getNoteSize(), trackNumber, numTracks).draw();
         }
     }
 
@@ -168,8 +165,12 @@ export class DisplayManager {
     }
 
     public getNoteCenterX(trackNumber: number, numTracks: number) {
-        let receptorSpacing = this.bounds.width / numTracks - this.displayConfig.getNoteSize();
-        return (2 * trackNumber + 1) / 2 * (this.displayConfig.getNoteSize() + receptorSpacing) + this.bounds.topLeftX;
+        let noteSpacing: number = this.displayConfig.getNoteSpacing();
+        let noteSize: number = this.displayConfig.getNoteSize();
+        let totalSize: number = numTracks * noteSize + (numTracks - 1) * noteSpacing;
+        let width: number = this.bounds.width;
+        let startX: number = this.bounds.topLeftX;
+        return (trackNumber + 0.5) * noteSize + trackNumber * noteSpacing + (width - totalSize) / 2 + startX;
     }
 
     // This essentially defines a conversion from seconds to pixels
@@ -251,7 +252,7 @@ export class DisplayManager {
         let drawEndY = noteEndY
         drawEndY = this.clampValueToRange(drawEndY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
 
-        new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.sketchInstance).draw();
+        new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.displayConfig.getNoteSize()).draw();
     }
 
     private clampValueToRange(value: number, lowerBound: number, upperBound: number): number {
@@ -267,8 +268,10 @@ export class DisplayManager {
     private drawReceptors() {
         let numTracks = this.noteManager.tracks.length;
         for (let i = 0; i < numTracks; i++) {
-            new Receptor(this.getNoteCenterX(i, numTracks), this.getNoteCenterY(this.currentTimeInSeconds, this.currentTimeInSeconds),
-                this.sketchInstance, this.displayConfig.getReceptorSizes()[i], i, numTracks).draw();
+            let noteCenterX: number = this.getNoteCenterX(i, numTracks);
+            let noteCenterY: number = this.getNoteCenterY(this.currentTimeInSeconds, this.currentTimeInSeconds);
+            let noteSize: number = this.displayConfig.getReceptorSizes()[i];
+            new Receptor(noteCenterX, noteCenterY, noteSize, i, numTracks).draw();
         }
     }
 }
