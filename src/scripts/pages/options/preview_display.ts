@@ -8,11 +8,11 @@ import {Rectangle} from "../../rectangle";
 
 export class PreviewDisplay {
     private scene: P5Scene;
-    private config: Config;
-    private noteManager: NoteManager;
+    private readonly config: Config;
+    private readonly noteManager: NoteManager;
     private scrollManager: ScrollManager;
     private displayManager: DisplayManager;
-    private displayConfig: DisplayConfig;
+    private readonly displayConfig: DisplayConfig;
     protected bounds: Rectangle = Rectangle.fromTopLeft(
         45,
         46,

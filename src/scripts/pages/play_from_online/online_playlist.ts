@@ -3,6 +3,7 @@ import {AudioFile} from "../../audio/audio_file";
 import {PlaylistClient} from "../../playlist_client/playlist_client";
 import {Song} from "../../playlist_client/song";
 import {SwfParseResponse} from "../../parsing/parse_swf";
+import {PaginatedList} from "../../paginated_list";
 
 export enum OnlinePlaylistState {
     NO_PLAYLIST,
@@ -13,29 +14,14 @@ export enum OnlinePlaylistState {
     SONG_ERROR,
 }
 
-class DisplayableSong {
-    private song: Song;
-
-    constructor(song: Song) {
-        this.song = song;
-    }
-
-    public toString(): string {
-        return this.song.songDifficulty + " " + this.song.songName;
-    }
-}
-
-export class OnlinePlaylist {
+export class OnlinePlaylist extends PaginatedList {
     public indexUrl: string;
     private playlistClient: PlaylistClient;
-    private static DEFAULT_PAGE_SIZE: number = 50;
     public state: OnlinePlaylistState;
-    public displayedPlaylist: DisplayableSong[];
-    private pageNumber: number;
-    private pageSize: number;
     private loadedSongName: string;
 
     constructor() {
+        super();
         this.state = OnlinePlaylistState.NO_PLAYLIST;
         this.indexUrl = "";
         this.playlistClient = new PlaylistClient();
@@ -50,6 +36,14 @@ export class OnlinePlaylist {
     }
 
     private initializeDisplayedPlaylist() {
+        this.allContents = [];
+        let songs: Song[] = this.playlistClient.getPlaylist();
+        for (let i = 0; i < songs.length; i++) {
+            let song: Song = songs[i];
+            let entryColumns: string[] = this.songToColumns(song);
+            this.allContents.push(entryColumns);
+        }
+
         this.setPage(0);
         this.state = OnlinePlaylistState.PLAYLIST_READY
     }
@@ -57,7 +51,7 @@ export class OnlinePlaylist {
     public kickOffLoadSong(displayedSongIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
         audioFile.reset();
         stepfile.state = StepfileState.NO_STEPFILE;
-        this.loadedSongName = this.displayedPlaylist[displayedSongIndex].toString();
+        this.loadedSongName = this.currentContents[displayedSongIndex];
         this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
             .then((swfParseResponse) =>
                 this.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))
@@ -65,7 +59,7 @@ export class OnlinePlaylist {
     }
 
     private getSongIndex(displayedSongIndex: number) {
-        return displayedSongIndex + this.pageSize * this.pageNumber;
+        return displayedSongIndex + this.pageSize * this.currentPage;
     }
 
     private loadSwfIntoStepfileAndAudioFile(swfParseResponse: SwfParseResponse, stepfile: Stepfile, audioFile: AudioFile) {
@@ -73,55 +67,7 @@ export class OnlinePlaylist {
         audioFile.loadBlob(swfParseResponse.blob);
     }
 
-    public getPage() {
-        return this.pageNumber;
-    }
-
-    public nextPage() {
-        this.setPage(this.pageNumber + 1);
-    }
-
-    public previousPage() {
-        this.setPage(this.pageNumber - 1);
-    }
-
-    private setPage(pageNumber: number, pageSize?: number) {
-        pageSize = OnlinePlaylist.getValidPageSize(pageSize);
-        if (!this.isValidPageNumber(pageNumber, pageSize)) {
-            return;
-        }
-
-        let minIndex = pageNumber * pageSize;
-        let maxIndex = minIndex + pageSize;
-        this.displayedPlaylist = [];
-        for (let i = minIndex; i < maxIndex; i++) {
-            if (i < this.playlistClient.getPlaylist().length) {
-                this.displayedPlaylist.push(this.getDisplayableSong(i));
-            }
-        }
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
-    }
-
-    private isValidPageNumber(pageNumber: number, pageSize: number) {
-        return 0 <= pageNumber && pageNumber <= this.getMaxPageNumber(pageSize);
-    }
-
-    private getDisplayableSong(songIndex: number): DisplayableSong {
-        return new DisplayableSong(this.playlistClient.getPlaylist()[songIndex]);
-    }
-
-    private static getValidPageSize(pageSize: number) {
-        if (pageSize === undefined) {
-            return OnlinePlaylist.DEFAULT_PAGE_SIZE;
-        } else if (pageSize < 1) {
-            return 1;
-        } else if (pageSize > 100) {
-            return 100;
-        }
-    }
-
-    private getMaxPageNumber(pageSize: number) {
-        return Math.floor(this.playlistClient.getPlaylist().length / pageSize);
+    private songToColumns(song: Song): string[] {
+        return [String(song.songDifficulty), song.songName];
     }
 }

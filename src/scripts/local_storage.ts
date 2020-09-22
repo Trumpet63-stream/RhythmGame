@@ -91,7 +91,7 @@ export abstract class LocalStorage {
         return x;
     }
 
-    public static loadPBReplay(identifier: Note[][] | number, scoreProvider: ScoreProvider): Replay | null {
+    public static loadPBReplay(identifier: Note[][] | number | string, scoreProvider: ScoreProvider): Replay | null {
         let replays: Replay[] | null = this.loadReplays(identifier);
         if (replays === null) {
             return null;
@@ -113,7 +113,7 @@ export abstract class LocalStorage {
         return replays[pbIndex];
     }
 
-    public static loadReplays(identifier: Note[][] | number): Replay[] | null {
+    public static loadReplays(identifier: Note[][] | number | string): Replay[] | null {
         let key: string = this.getKeyFromIdentifier(identifier);
         let replayString: string = this.getItem(key);
         if (replayString !== null) {
@@ -125,18 +125,20 @@ export abstract class LocalStorage {
         return null;
     }
 
-    private static getKeyFromIdentifier(identifier: Note[][] | number) {
+    private static getKeyFromIdentifier(identifier: Note[][] | number | string) {
         if (this.isTracks(identifier)) {
             return this.getKeyFromTracks(<Note[][]>identifier);
-        } else {
+        } else if (typeof identifier === "number") {
             return this.key(<number>identifier);
+        } else {
+            return <string>identifier;
         }
     }
 
     private static isTracks(object: any): boolean {
         try {
             let firstNote: Note = object[0][0];
-            return true;
+            return firstNote.trackNumber !== undefined;
         } catch (e) {
             return false;
         }
@@ -201,7 +203,7 @@ export abstract class LocalStorage {
 
     public static getItem(key: string): string | null {
         if (window.localStorage === null) {
-            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            this.unableToAccessLocalStorage();
             return null;
         }
         return window.localStorage.getItem(key);
@@ -209,7 +211,7 @@ export abstract class LocalStorage {
 
     public static setItem(key: string, value: string): void {
         if (window.localStorage === null) {
-            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            this.unableToAccessLocalStorage();
             return;
         }
         window.localStorage.setItem(key, value);
@@ -217,7 +219,7 @@ export abstract class LocalStorage {
 
     private static key(index: number): string | null {
         if (window.localStorage === null) {
-            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            this.unableToAccessLocalStorage();
             return null;
         }
         return window.localStorage.key(index);
@@ -225,9 +227,13 @@ export abstract class LocalStorage {
 
     private static getLength(): number | null {
         if (window.localStorage === null) {
-            console.error("Unable to access local storage. Try allowing all cookies for this website.");
+            this.unableToAccessLocalStorage();
             return null;
         }
         return window.localStorage.length
+    }
+
+    private static unableToAccessLocalStorage(): void {
+        console.error("Unable to access local storage. Try allowing all cookies for this website.");
     }
 }

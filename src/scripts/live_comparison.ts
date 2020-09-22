@@ -68,7 +68,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
             } else {
                 console.error("@" +
                     accuracyEvent.timeInSeconds.toFixed(3) +
-                    "s No matching entry found: track " +
+                    "s No matching replay entry found: track " +
                     accuracyEvent.trackNumber);
             }
         }

@@ -1,6 +1,7 @@
 import {LocalStorage} from "../../local_storage";
 import {Score, ScoreProvider} from "../../score_provider";
 import {Config} from "../../config";
+import {PaginatedList} from "../../paginated_list";
 
 export enum StorageListState {
     NO_STORAGE,
@@ -9,16 +10,13 @@ export enum StorageListState {
     STORAGE_ERROR,
 }
 
-export class StorageList {
-    public displayedList: string[];
-    private static DEFAULT_PAGE_SIZE: number = 50;
+export class StorageList extends PaginatedList {
     public state: StorageListState;
-    private pageNumber: number;
-    private pageSize: number;
     private storageClient: typeof LocalStorage;
     private readonly config: Config
 
     constructor(config: Config) {
+        super();
         this.config = config;
         this.state = StorageListState.NO_STORAGE;
         this.storageClient = LocalStorage;
@@ -32,78 +30,38 @@ export class StorageList {
     }
 
     public initializeDisplayedList() {
-        this.setPage(0)
-        this.state = StorageListState.STORAGE_READY
-    }
-
-    public getPage() {
-        return this.pageNumber;
-    }
-
-    public nextPage() {
-        this.setPage(this.pageNumber + 1);
-    }
-
-    public previousPage() {
-        this.setPage(this.pageNumber - 1);
-    }
-
-    private setPage(pageNumber: number, pageSize?: number) {
-        pageSize = this.getValidPageSize(pageSize);
-        if (!this.isValidPageNumber(pageNumber, pageSize)) {
-            return;
+        this.allContents = [];
+        let storageEntries: { key: string, value: string }[] = this.storageClient.getEntries();
+        for (let i = 0; i < storageEntries.length; i++) {
+            let entry: { key: string, value: string } = storageEntries[i];
+            let entryColumns: string[] = this.storageEntryToColumns(entry);
+            this.allContents.push(entryColumns);
         }
 
-        let minIndex = pageNumber * pageSize;
-        let maxIndex = minIndex + pageSize;
-        this.displayedList = [];
-        for (let i = minIndex; i < maxIndex; i++) {
-            if (i < this.storageClient.getNumEntries()) {
-                this.displayedList.push(this.getDisplayableEntry(i));
-            }
-        }
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
+        this.setPage(0);
+        this.state = StorageListState.STORAGE_READY;
     }
 
-    private isValidPageNumber(pageNumber: number, pageSize: number) {
-        return 0 <= pageNumber && pageNumber <= this.getMaxPageNumber(pageSize);
-    }
-
-    private getDisplayableEntry(index: number): string {
-        let entry = this.storageClient.getEntries()[index];
+    private storageEntryToColumns(entry: { key: string, value: string }): string[] {
         if (entry.key.length > 120) {
-            let replays = this.storageClient.loadReplays(index);
+            let replays = this.storageClient.loadReplays(entry.key);
             let scoreProvider = new ScoreProvider(this.config, replays[0].numNotes);
             let bestReplay = this.storageClient.getBestReplay(replays, scoreProvider);
             let bestScore: Score = scoreProvider.score(bestReplay.entries);
             let storedSizeKb: number = JSON.stringify(replays).length / 1000;
-            return bestReplay.songTitle +
-                ", " +
-                bestScore.percentScore.toFixed(2) +
-                "%, " +
-                replays.length +
-                " " +
-                (replays.length > 1 ? "plays" : "play") +
-                ", " +
-                storedSizeKb.toFixed(1) +
-                "KB";
+
+            let songTitle: string = bestReplay.songTitle;
+            let bestScoreString: string = bestScore.percentScore.toFixed(2) + "%";
+            let numReplays: string = String(replays.length);
+            let storedSize: string = storedSizeKb.toFixed(1) + " KB";
+
+            return [songTitle, bestScoreString, numReplays, storedSize];
         } else {
-            return entry.key;
-        }
-    }
+            let item: string = this.storageClient.getItem(entry.key);
+            let storedSizeKb: number = JSON.stringify(item).length / 1000;
 
-    private getValidPageSize(pageSize: number) {
-        if (pageSize === undefined) {
-            return StorageList.DEFAULT_PAGE_SIZE;
-        } else if (pageSize < 1) {
-            return 1;
-        } else if (pageSize > 100) {
-            return 100;
+            let storedSize: string = storedSizeKb.toFixed(1) + " KB";
+            return [entry.key, "", "", storedSize];
         }
-    }
-
-    private getMaxPageNumber(pageSize: number) {
-        return Math.floor(this.storageClient.getNumEntries() / pageSize);
     }
 }

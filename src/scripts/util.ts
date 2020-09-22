@@ -76,16 +76,6 @@ export function getKeyString(p: p5) {
     return p.key.length === 1 ? p.key.toUpperCase() : p.key;
 }
 
-export function getModeOptionsForDisplay(modesAsStrings: Map<string, string>[]): Mode[] {
-    let modeOptions: Mode[] = [];
-    for (let i = 0; i < modesAsStrings.length; i++) {
-        let mode: Map<string, string> = modesAsStrings[i];
-        modeOptions.push({type: mode.get("type"), difficulty: mode.get("difficulty"), meter: mode.get("meter"), id: i});
-    }
-    modeOptions.sort(compareModeOptions);
-    return modeOptions;
-}
-
 export function compareModeOptions(a: Mode, b: Mode) {
     let typeA = a.type.toUpperCase();
     let typeB = b.type.toUpperCase();

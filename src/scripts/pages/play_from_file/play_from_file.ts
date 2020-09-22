@@ -1,24 +1,20 @@
 import * as p5 from "p5";
-import {
-    createFileInput,
-    drawHeading,
-    encloseEachInputLabelPairIntoASubDiv,
-    fixRadioDivElement,
-    setElementCenterPositionRelative,
-    styleRadioOptions
-} from "../../ui_util";
+import {createFileInput, drawHeading, setElementCenterPositionRelative} from "../../ui_util";
 import {global} from "../../index";
 import {Stepfile, StepfileState} from "../../stepfile";
 import {AudioFile, AudioFileState} from "../../audio/audio_file";
-import {getModeOptionsForDisplay, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
+import {compareModeOptions, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Mode} from "../../parsing/parse_sm";
 import {PageManager, Pages} from "../../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 import {FileDropZone} from "./file_drop_zone";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
+import {RadioTable} from "../../radio_table";
 
 const playFromFileStepfile: Stepfile = new Stepfile();
 const playFromFileAudioFile: AudioFile = new HtmlAudioElementHelper();
+let stepfileModeOptions: Mode[];
+let modesAsStrings: string[][];
 
 export abstract class PlayFromFile {
     public static PLAY_FROM_FILE_CLASS: string = "play-from-file";
@@ -42,7 +38,14 @@ export abstract class PlayFromFile {
         let playButtonId = "playButton";
         let syncButtonId = "syncButton";
         if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
-            let modeRadio = drawModeSelect(p, PlayFromFile.MODE_RADIO_ID);
+            if (stepfileModeOptions === undefined) {
+                stepfileModeOptions = PlayFromFile.getOrderedModes(playFromFileStepfile.partialParse.modes);
+                modesAsStrings = PlayFromFile.getModesAsStrings(stepfileModeOptions);
+            }
+            let modeRadio = RadioTable.create(PlayFromFile.MODE_RADIO_ID, 500, 120, [54, 30, 16],
+                ["Type", "Difficulty", "Meter"], modesAsStrings).element;
+            setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 500, 120);
+
             if (modeRadio.value() !== "") { // if user has selected a mode
                 let playButton = DOMWrapper.create(() => {
                     return p.createButton("Play");
@@ -93,8 +96,32 @@ export abstract class PlayFromFile {
     }
 
     public static resetModeOptions() {
-        global.stepfileModeOptions = undefined;
+        stepfileModeOptions = undefined;
         DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
+    }
+
+    private static getOrderedModes(modesMap: Map<string, string>[]): Mode[] {
+        let modeOptions: Mode[] = [];
+        for (let i = 0; i < modesMap.length; i++) {
+            let mode: Map<string, string> = modesMap[i];
+            modeOptions.push({
+                type: mode.get("type"),
+                difficulty: mode.get("difficulty"),
+                meter: mode.get("meter"),
+                id: i
+            });
+        }
+        modeOptions.sort(compareModeOptions);
+        return modeOptions;
+    }
+
+    private static getModesAsStrings(modes: Mode[]): string[][] {
+        let modeStrings: string[][] = [];
+        for (let i = 0; i < modes.length; i++) {
+            let mode: Mode = modes[i];
+            modeStrings.push([mode.type, mode.difficulty, mode.meter]);
+        }
+        return modeStrings;
     }
 }
 
@@ -107,46 +134,8 @@ function loadAudioFile(file: p5.File) {
     playFromFileAudioFile.loadFile.call(playFromFileAudioFile, file.file);
 }
 
-function drawModeSelect(p: p5, uniqueId: string): p5.Element {
-    p.push();
-    if (global.stepfileModeOptions === undefined) {
-        global.stepfileModeOptions = getModeOptionsForDisplay(playFromFileStepfile.partialParse.modes);
-    }
-
-    let modeRadioClass = "mode-radio"
-    let modeRadioOptionClass = "mode-radio-option";
-    let modeRadioCreateResult = DOMWrapper.create(() => {
-        return p.createRadio();
-    }, uniqueId);
-    let modeRadio = modeRadioCreateResult.element;
-    if (!modeRadioCreateResult.alreadyExists) {
-        modeRadio.id("radio-div");
-        for (let i = 0; i < global.stepfileModeOptions.length; i++) {
-            let mode = global.stepfileModeOptions[i];
-            let radioLabel = mode.type + ", " + mode.difficulty + ", " + mode.meter;
-            // @ts-ignore
-            let radioOption = modeRadio.option(radioLabel);
-
-            // setting the value this way because the two-argument .option method wasn't working
-            // setting the value is necessary so we can access the selected mode
-            radioOption.value = i;
-        }
-
-        // This style is being set on the div containing the radio elements to make it a scrollable box
-        modeRadio.addClass(modeRadioClass);
-        modeRadio.addClass(global.globalClass);
-
-        encloseEachInputLabelPairIntoASubDiv(p, modeRadio);
-        fixRadioDivElement(modeRadio);
-        styleRadioOptions(p, modeRadio, [modeRadioOptionClass, global.globalClass]);
-    }
-    setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 302, 120);
-    p.pop();
-    return modeRadio;
-}
-
 function getSelectedMode(modeRadio: p5.Element) {
-    return global.stepfileModeOptions[modeRadio.value()];
+    return stepfileModeOptions[Number(modeRadio.value())];
 }
 
 function getStepfileInputLabel() {
