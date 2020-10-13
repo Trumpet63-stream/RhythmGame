@@ -8,7 +8,7 @@ import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
 import {SyncGameDisplay} from "./pages/sync/sync_game_display";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
-import {PageDescription} from "./page_manager";
+import {PageDescription} from "./pages/page_manager";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;

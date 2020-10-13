@@ -2,13 +2,15 @@ import {global} from "../../index";
 import * as p5 from "p5";
 import {createLabeledInput, drawHeading, setElementCenterPositionRelative} from "../../ui_util";
 import {DOMWrapper} from "../../dom_wrapper";
-import {PageManager, Pages} from "../../page_manager";
+import {PageManager, Pages} from "../page_manager";
 import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
 import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Stepfile} from "../../stepfile";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {RadioTable} from "../../radio_table";
 import {PageControls} from "../../page_controls";
+import {StorageUtil} from "../../storage_util";
+import {Leaderboard} from "../leaderboard/leaderboard";
 
 const playFromOnlineStepfile = new Stepfile();
 const playFromOnlineAudioFile = new HtmlAudioElementHelper();
@@ -63,12 +65,21 @@ export abstract class PlayFromOnline {
 
             let loadAndPlayButtonId = "loadAndPlayButton";
             let loadAndSyncButtonId = "loadAndSyncButton";
+            let leaderboardButtonId = "leaderboardButton";
             if (playlistMenu.value() !== "") {
+                let leaderboardButton = DOMWrapper.create(() => {
+                    return p.createButton("Leaderboard");
+                }, leaderboardButtonId);
+                setElementCenterPositionRelative(leaderboardButton.element, 0.2, 0.90, 80, 34);
+                if (!leaderboardButton.alreadyExists) {
+                    leaderboardButton.element.addClass(global.globalClass);
+                    this.setLeaderboardButtonBehavior(leaderboardButton.element, playlistMenu, onlinePlaylist);
+                }
+
                 let loadAndPlayButton = DOMWrapper.create(() => {
                     return p.createButton("Load And Play");
                 }, loadAndPlayButtonId);
                 setElementCenterPositionRelative(loadAndPlayButton.element, 0.5, 0.90, 118, 34);
-
                 if (!loadAndPlayButton.alreadyExists) {
                     loadAndPlayButton.element.addClass(global.globalClass);
                     this.setLoadAndPlayButtonBehavior(loadAndPlayButton.element, playlistMenu, onlinePlaylist);
@@ -100,6 +111,17 @@ export abstract class PlayFromOnline {
         } else {
             DOMWrapper.removeElementById(playlistMenuId);
         }
+    }
+
+    private static setLeaderboardButtonBehavior(leaderboardButton: p5.Element, playlistMenu: p5.Element,
+                                                onlinePlaylist: OnlinePlaylist) {
+        leaderboardButton.mouseClicked(
+            PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, leaderboardButton, playlistMenu, onlinePlaylist,
+                () => {
+                    let songhash: string = StorageUtil.getKeyFromTracks(playFromOnlineStepfile.fullParse.tracks);
+                    Leaderboard.initialize(songhash);
+                    PageManager.setCurrentPage(Pages.LEADERBOARD);
+                }));
     }
 
     private static setLoadAndPlayButtonBehavior(loadAndPlayButton: p5.Element, playlistMenu: p5.Element,

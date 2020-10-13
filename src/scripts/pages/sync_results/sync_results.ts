@@ -1,7 +1,7 @@
 import {global} from "../../index";
 import {setElementCenterPositionRelative} from "../../ui_util";
 import * as p5 from "p5";
-import {PageManager, Pages} from "../../page_manager";
+import {PageManager, Pages} from "../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 
 export abstract class SyncResults {

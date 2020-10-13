@@ -1,7 +1,7 @@
 import * as p5 from "p5";
 import {KeyboardEventManager} from "./keyboard_event_manager";
 import {PreviewDisplay} from "./pages/options/preview_display";
-import {PageManager} from "./page_manager";
+import {PageManager} from "./pages/page_manager";
 import {global} from "./index";
 import {generatePreviewNotes} from "./util";
 import {NoteSkin} from "./note_skin";

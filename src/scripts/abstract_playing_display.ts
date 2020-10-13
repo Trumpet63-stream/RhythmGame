@@ -14,7 +14,7 @@ import {AccuracyFeedbackParticles} from "./accuracy_feedback_particles";
 import {HoldParticles} from "./hold_particles";
 import {HoldGlow} from "./hold_glow";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
-import {PageDescription} from "./page_manager";
+import {PageDescription} from "./pages/page_manager";
 import {Rectangle} from "./rectangle";
 import {Note} from "./parsing/parse_sm";
 import {global} from "./index";

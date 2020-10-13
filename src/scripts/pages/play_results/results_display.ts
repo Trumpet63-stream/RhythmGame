@@ -4,7 +4,7 @@ import {Config} from "../../config";
 import {NoteManager} from "../../note_manager";
 import {AccuracyRecording, AccuracyRecordingEntry, Replay} from "../../accuracy_recording";
 import {AccuracyUtil} from "../../accuracy_util";
-import {PageDescription} from "../../page_manager";
+import {PageDescription} from "../page_manager";
 import {Rectangle} from "../../rectangle";
 import {Score, ScoreProvider} from "../../score_provider";
 import {LocalStorage} from "../../local_storage";
@@ -13,7 +13,7 @@ export class ResultsDisplay {
     private config: Config;
     private noteManager: NoteManager;
     private currentRecording: AccuracyRecording;
-    private currentScore: Score;
+    public currentScore: Score;
     private comparisonRecording: AccuracyRecording;
     private comparisonScore: Score;
     private p: p5;

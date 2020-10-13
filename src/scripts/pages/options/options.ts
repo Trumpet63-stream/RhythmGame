@@ -18,6 +18,7 @@ import {Config} from "../../config";
 import {KeyBindingsUi} from "./key_bindings_ui";
 import {Ticker, TickerState} from "./ticker";
 import {getEnum, getFloat} from "../../util";
+import {PageManager, Pages} from "../page_manager";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -46,7 +47,7 @@ export abstract class Options {
         }, "resetConfigButton");
         if (!resetConfigButton.alreadyExists) {
             resetConfigButton.element.addClass(Options.OPTIONS_CLASS);
-            resetConfigButton.element.addClass("reset-config");
+            resetConfigButton.element.addClass("full-width-button");
             resetConfigButton.element.addClass(global.globalClass);
 
             resetConfigButton.element.mousePressed(() => {
@@ -232,6 +233,21 @@ export abstract class Options {
                 global.config.save();
             },
             scrollDiv.element);
+
+        let loginButton = DOMWrapper.create(() => {
+            return p.createButton("Set Username/Password");
+        }, "loginButton");
+        if (!loginButton.alreadyExists) {
+            loginButton.element.addClass(Options.OPTIONS_CLASS);
+            loginButton.element.addClass("full-width-button");
+            loginButton.element.addClass(global.globalClass);
+
+            loginButton.element.mousePressed(() => {
+                PageManager.setCurrentPage(Pages.LOGIN);
+            });
+
+            scrollDiv.element.child(loginButton.element);
+        }
 
         KeyBindingsUi.create(scrollDiv.element, Options.OPTIONS_CLASS);
 

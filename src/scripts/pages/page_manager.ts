@@ -1,12 +1,14 @@
-import {PlayFromFile} from "./pages/play_from_file/play_from_file";
-import {Options} from "./pages/options/options";
-import {Play} from "./pages/play/play";
-import {PlayResults} from "./pages/play_results/play_results";
-import {DOMWrapper} from "./dom_wrapper";
-import {PlayFromOnline} from "./pages/play_from_online/play_from_online";
-import {Sync} from "./pages/sync/sync";
-import {SyncResults} from "./pages/sync_results/sync_results";
-import {Storage} from "./pages/storage/storage";
+import {PlayFromFile} from "./play_from_file/play_from_file";
+import {Options} from "./options/options";
+import {Play} from "./play/play";
+import {PlayResults} from "./play_results/play_results";
+import {DOMWrapper} from "../dom_wrapper";
+import {PlayFromOnline} from "./play_from_online/play_from_online";
+import {Sync} from "./sync/sync";
+import {SyncResults} from "./sync_results/sync_results";
+import {Storage} from "./storage/storage";
+import {Leaderboard} from "./leaderboard/leaderboard";
+import {Login} from "./login/login";
 
 export class PageDescription {
     public name: string;
@@ -42,6 +44,12 @@ export abstract class Pages {
 
     public static readonly STORAGE: PageDescription =
         new PageDescription("Storage", Storage.draw.bind(Storage));
+
+    public static readonly LEADERBOARD: PageDescription =
+        new PageDescription("Leaderboard", Leaderboard.draw.bind(Leaderboard));
+
+    public static readonly LOGIN: PageDescription =
+        new PageDescription("Login", Login.draw.bind(Login));
 }
 
 export abstract class PageManager {
