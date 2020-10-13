@@ -1,6 +1,6 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {PageManager, Pages} from "./page_manager";
+import {PageManager, Pages} from "./pages/page_manager";
 import {enumToString, enumToStringArray, getFirstElementByTagName,} from "./util";
 import {DOMWrapper} from "./dom_wrapper";
 import {Options} from "./pages/options/options";

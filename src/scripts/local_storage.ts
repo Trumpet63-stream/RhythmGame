@@ -1,14 +1,8 @@
 import {AccuracyRecording, AccuracyRecordingEntry, Replay} from "./accuracy_recording";
-import {Note, NoteType} from "./parsing/parse_sm";
-import {SHA3} from "sha3";
+import {Note} from "./parsing/parse_sm";
 import {NoteManager} from "./note_manager";
 import {ScoreProvider} from "./score_provider";
-
-interface LocalStorageNote {
-    noteType: NoteType;
-    timeInSeconds: number;
-    trackNumber: number;
-}
+import {StorageUtil} from "./storage_util";
 
 export abstract class LocalStorage {
     private static allEntries: { key: string, value: string }[] = [];
@@ -25,7 +19,7 @@ export abstract class LocalStorage {
             entries: recording.linearRecording
         };
         replays.push(newReplay);
-        let key: string = this.getKeyFromTracks(noteManager.tracks);
+        let key: string = StorageUtil.getKeyFromTracks(noteManager.tracks);
         let value: string = this.replaysToString(replays);
         console.log("saving replay to local storage with key: \n" + key);
         this.setItem(key, value);
@@ -99,7 +93,6 @@ export abstract class LocalStorage {
         return this.getBestReplay(replays, scoreProvider);
     }
 
-    //TODO: move this method out of this class
     public static getBestReplay(replays: Replay[], scoreProvider: ScoreProvider) {
         let bestScore: number = Number.NEGATIVE_INFINITY;
         let pbIndex: number = -1;
@@ -127,7 +120,7 @@ export abstract class LocalStorage {
 
     private static getKeyFromIdentifier(identifier: Note[][] | number | string) {
         if (this.isTracks(identifier)) {
-            return this.getKeyFromTracks(<Note[][]>identifier);
+            return StorageUtil.getKeyFromTracks(<Note[][]>identifier);
         } else if (typeof identifier === "number") {
             return this.key(<number>identifier);
         } else {
@@ -151,30 +144,6 @@ export abstract class LocalStorage {
             replay.entries = this.uncensor(replay.entries);
         }
         return replays;
-    }
-
-    private static getKeyFromTracks(tracks: Note[][]) {
-        let hash: SHA3 = new SHA3(512);
-        let convertedNotes: LocalStorageNote[][] = this.convertNotes(tracks);
-        let notesString: string = JSON.stringify(convertedNotes);
-        hash.update(notesString);
-        return hash.digest("hex");
-    }
-
-    private static convertNotes(tracks: Note[][]): LocalStorageNote[][] {
-        let convertedNotes: LocalStorageNote[][] = [];
-        for (let i = 0; i < tracks.length; i++) {
-            convertedNotes.push([]);
-            for (let j = 0; j < tracks[i].length; j++) {
-                let note: Note = tracks[i][j];
-                convertedNotes[i].push({
-                    noteType: note.type,
-                    timeInSeconds: note.timeInSeconds,
-                    trackNumber: note.trackNumber
-                });
-            }
-        }
-        return convertedNotes;
     }
 
     public static getNumEntries(): number {

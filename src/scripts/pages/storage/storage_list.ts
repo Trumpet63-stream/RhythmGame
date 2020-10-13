@@ -13,7 +13,7 @@ export enum StorageListState {
 export class StorageList extends PaginatedList {
     public state: StorageListState;
     private storageClient: typeof LocalStorage;
-    private readonly config: Config
+    private readonly config: Config;
 
     constructor(config: Config) {
         super();

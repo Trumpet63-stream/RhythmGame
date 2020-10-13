@@ -7,6 +7,7 @@ module.exports = {
     externals: {
         p5: 'p5',
         pako: 'pako',
+        'aws-sdk': 'AWS'
     },
     module: {
         rules: [

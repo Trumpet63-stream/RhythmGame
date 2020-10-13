@@ -55,7 +55,7 @@ export abstract class KeyBindingsUi {
         if (!keyBindingsQuickstartButton.alreadyExists) {
             let keyBindingsQuickstartId = "keybindings-quickstart";
             keyBindingsQuickstartButton.element.addClass(pageStyleClass);
-            keyBindingsQuickstartButton.element.addClass("keybindings-quickstart");
+            keyBindingsQuickstartButton.element.addClass("full-width-button");
             keyBindingsQuickstartButton.element.addClass(global.globalClass);
             keyBindingsQuickstartButton.element.id(keyBindingsQuickstartId);
 

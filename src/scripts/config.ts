@@ -7,26 +7,28 @@ import {LocalStorage} from "./local_storage";
 
 /* Stores user settings. Expected not to change during play */
 export class Config {
-    pixelsPerSecond: number;
-    receptorYPercent: number;
-    scrollDirection: ScrollDirection;
-    additionalOffsetInSeconds: number;
-    accuracySettings: Accuracy[];
-    pauseAtStartInSeconds: number;
-    keyBindings: Map<number, KeyBinding[]>;
-    gameAreaHeight: number;
-    gameAreaWidth: number;
-    noteSize: number;
-    noteSpacing: number;
-    quitKey: number;
-    isAccuracyFlashEnabled: boolean;
-    isAccuracyParticlesEnabled: boolean;
-    isAccuracyTextEnabled: boolean;
-    isHoldParticlesEnabled: boolean;
-    isHoldGlowEnabled: boolean;
-    isComboTextEnabled: boolean;
-    isLiveComparisonEnabled: boolean;
     public static STORAGE_KEY = "config";
+    public pixelsPerSecond: number;
+    public receptorYPercent: number;
+    public scrollDirection: ScrollDirection;
+    public additionalOffsetInSeconds: number;
+    public accuracySettings: Accuracy[];
+    public pauseAtStartInSeconds: number;
+    public keyBindings: Map<number, KeyBinding[]>;
+    public gameAreaHeight: number;
+    public gameAreaWidth: number;
+    public noteSize: number;
+    public noteSpacing: number;
+    public quitKey: number;
+    public username: string;
+    public password: string;
+    public isAccuracyFlashEnabled: boolean;
+    public isAccuracyParticlesEnabled: boolean;
+    public isAccuracyTextEnabled: boolean;
+    public isHoldParticlesEnabled: boolean;
+    public isHoldGlowEnabled: boolean;
+    public isComboTextEnabled: boolean;
+    public isLiveComparisonEnabled: boolean;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -41,6 +43,8 @@ export class Config {
                     noteSize?: number,
                     noteSpacing?: number,
                     quitKey?: number,
+                    username?: string,
+                    password?: string,
                     isAccuracyFlashEnabled?: boolean,
                     isAccuracyParticlesEnabled?: boolean,
                     isAccuracyTextEnabled?: boolean,
@@ -65,6 +69,8 @@ export class Config {
         this.noteSpacing = defaultIfUndefined(args.noteSpacing, DEFAULT_CONFIG.noteSpacing);
         this.keyBindings = defaultIfUndefined(args.keyBindings, DEFAULT_CONFIG.keyBindings);
         this.quitKey = defaultIfUndefined(args.quitKey, DEFAULT_CONFIG.quitKey);
+        this.username = defaultIfUndefined(args.username, undefined);
+        this.password = defaultIfUndefined(args.password, undefined);
         this.isAccuracyFlashEnabled = defaultIfUndefined(args.isAccuracyFlashEnabled,
             DEFAULT_CONFIG.isAccuracyFlashEnabled);
         this.isAccuracyParticlesEnabled = defaultIfUndefined(args.isAccuracyParticlesEnabled,

@@ -51,7 +51,7 @@ export class OnlinePlaylist extends PaginatedList {
     public kickOffLoadSong(displayedSongIndex: number, stepfile: Stepfile, audioFile: AudioFile) {
         audioFile.reset();
         stepfile.state = StepfileState.NO_STEPFILE;
-        this.loadedSongName = this.currentContents[displayedSongIndex];
+        this.loadedSongName = this.currentContents[displayedSongIndex][1];
         this.playlistClient.getSwf(this.getSongIndex(displayedSongIndex))
             .then((swfParseResponse) =>
                 this.loadSwfIntoStepfileAndAudioFile(swfParseResponse, stepfile, audioFile))

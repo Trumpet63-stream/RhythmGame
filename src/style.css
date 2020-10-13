@@ -108,6 +108,10 @@ div.play-from-online {
     width: 600px;
 }
 
+div.login {
+    width: 500px;
+}
+
 label.labeled-input {
     margin-right: 50px;
     display: inline-block;
@@ -156,6 +160,10 @@ input.play-from-online {
     width: 260px;
 }
 
+input.login {
+    width: 260px;
+}
+
 select.labeled-select {
     color: white;
     border: none;
@@ -180,11 +188,7 @@ button.keybinding-input {
     margin-left: 32px;
 }
 
-button.keybindings-quickstart {
-    width: 100%;
-}
-
-button.reset-config {
+.full-width-button {
     width: 100%;
 }
 

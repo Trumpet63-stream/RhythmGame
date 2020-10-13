@@ -5,11 +5,13 @@ import {Stepfile, StepfileState} from "../../stepfile";
 import {AudioFile, AudioFileState} from "../../audio/audio_file";
 import {compareModeOptions, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Mode} from "../../parsing/parse_sm";
-import {PageManager, Pages} from "../../page_manager";
+import {PageManager, Pages} from "../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 import {FileDropZone} from "./file_drop_zone";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {RadioTable} from "../../radio_table";
+import {StorageUtil} from "../../storage_util";
+import {Leaderboard} from "../leaderboard/leaderboard";
 
 const playFromFileStepfile: Stepfile = new Stepfile();
 const playFromFileAudioFile: AudioFile = new HtmlAudioElementHelper();
@@ -37,6 +39,7 @@ export abstract class PlayFromFile {
 
         let playButtonId = "playButton";
         let syncButtonId = "syncButton";
+        let leaderboardButtonId = "leaderboardButton";
         if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
             if (stepfileModeOptions === undefined) {
                 stepfileModeOptions = PlayFromFile.getOrderedModes(playFromFileStepfile.partialParse.modes);
@@ -46,7 +49,16 @@ export abstract class PlayFromFile {
                 ["Type", "Difficulty", "Meter"], modesAsStrings).element;
             setElementCenterPositionRelative(modeRadio, 0.5, 0.7, 500, 120);
 
-            if (modeRadio.value() !== "") { // if user has selected a mode
+            if (this.modeIsSelected(modeRadio)) {
+                let leaderboardButton = DOMWrapper.create(() => {
+                    return p.createButton("Leaderboard");
+                }, leaderboardButtonId);
+                setElementCenterPositionRelative(leaderboardButton.element, 0.2, 0.88, 80, 34);
+                if (!leaderboardButton.alreadyExists) {
+                    leaderboardButton.element.addClass(global.globalClass);
+                    this.setLeaderboardButtonBehavior(leaderboardButton.element, modeRadio);
+                }
+
                 let playButton = DOMWrapper.create(() => {
                     return p.createButton("Play");
                 }, playButtonId);
@@ -73,6 +85,20 @@ export abstract class PlayFromFile {
             DOMWrapper.removeElementById(playButtonId);
             DOMWrapper.removeElementById(syncButtonId);
         }
+    }
+
+    private static setLeaderboardButtonBehavior(leaderboardButton: p5.Element, modeRadio: p5.Element) {
+        leaderboardButton.mouseClicked(() => {
+            let selectedMode: Mode = getSelectedMode(modeRadio);
+            playFromFileStepfile.finishParsing(selectedMode.id);
+            let songhash: string = StorageUtil.getKeyFromTracks(playFromFileStepfile.fullParse.tracks);
+            Leaderboard.initialize(songhash);
+            PageManager.setCurrentPage(Pages.LEADERBOARD);
+        });
+    }
+
+    private static modeIsSelected(modeRadio: p5.Element) {
+        return modeRadio.value() !== "";
     }
 
     private static setSyncButtonBehavior(syncButton: p5.Element, modeRadio: p5.Element) {

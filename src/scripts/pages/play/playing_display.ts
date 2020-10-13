@@ -10,7 +10,7 @@ import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
 import {global} from "../../index";
-import {PageDescription, PageManager, Pages} from "../../page_manager";
+import {PageDescription, PageManager, Pages} from "../page_manager";
 import {AccuracyRecording, Replay} from "../../accuracy_recording";
 import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
 import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
@@ -27,6 +27,9 @@ import {Point2D} from "../../point_2d";
 import {LiveComparison} from "../../live_comparison";
 import {LocalStorage} from "../../local_storage";
 import {ScoreProvider} from "../../score_provider";
+import {StorageUtil} from "../../storage_util";
+import {DatabaseClient} from "../../database_client/database_client";
+import {PutRequest} from "../../database_client/put_request";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     private comparisonReplay: Replay;
@@ -117,5 +120,17 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         PageManager.setCurrentPage(Pages.PLAY_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
+        this.submitScore();
+    }
+
+    private submitScore() {
+        let songhash: string = StorageUtil.getKeyFromTracks(this.noteManager.tracks);
+        let client: DatabaseClient = new DatabaseClient(global.config.username, global.config.password);
+        let putRequest: PutRequest = {
+            songhash: songhash,
+            songname: this.songTitle,
+            score: global.resultsDisplay.currentScore.percentScore
+        };
+        client.putIfBetterScore(putRequest);
     }
 }

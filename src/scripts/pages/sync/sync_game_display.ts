@@ -9,7 +9,7 @@ import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
 import {global} from "../../index";
-import {PageDescription, PageManager, Pages} from "../../page_manager";
+import {PageDescription, PageManager, Pages} from "../page_manager";
 import {AccuracyRecording} from "../../accuracy_recording";
 import {AccuracyFeedbackText} from "../../accuracy_feedback_text";
 import {ReceptorShrinkReaction} from "../../receptor_shrink_reaction";
