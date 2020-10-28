@@ -5,7 +5,7 @@ import {Username} from "./username";
 import {QueryRequest} from "./query_request";
 import {QueryResponse} from "./query_response";
 import {PutRequest} from "./put_request";
-import {PutResponse} from "./put_response";
+import {PutResponse, PutResponseCode} from "./put_response";
 import {QueryResponseEntry} from "./query_response_entry";
 import AttributeMap = DocumentClient.AttributeMap;
 
@@ -92,12 +92,12 @@ export class DatabaseClient {
         return this.documentClient.put(params).promise()
             .then((result) => {
                 console.log("score submitted");
-                return <PutResponse>{}
+                return <PutResponse>{code: PutResponseCode.SUCCESS, message: "Score submitted"};
             })
             .catch(reason => {
                 if (reason.code === "ConditionalCheckFailedException") {
                     console.log("Score submission skipped: new score is lower than saved score");
-                    return <PutResponse>{};
+                    return <PutResponse>{code: PutResponseCode.SCORE_TOO_LOW, message: "Old score was better"};
                 }
                 throw new Error(reason);
             });

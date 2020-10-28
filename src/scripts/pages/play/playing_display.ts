@@ -30,6 +30,7 @@ import {ScoreProvider} from "../../score_provider";
 import {StorageUtil} from "../../storage_util";
 import {DatabaseClient} from "../../database_client/database_client";
 import {PutRequest} from "../../database_client/put_request";
+import {PutResponse} from "../../database_client/put_response";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     private comparisonReplay: Replay;
@@ -120,10 +121,10 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         PageManager.setCurrentPage(Pages.PLAY_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
-        this.submitScore();
+        global.submitLastPlayScore = this.submitScore.bind(this);
     }
 
-    private submitScore() {
+    private async submitScore(): Promise<PutResponse> {
         let songhash: string = StorageUtil.getKeyFromTracks(this.noteManager.tracks);
         let client: DatabaseClient = new DatabaseClient(global.config.username, global.config.password);
         let putRequest: PutRequest = {
@@ -131,6 +132,6 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
             songname: this.songTitle,
             score: global.resultsDisplay.currentScore.percentScore
         };
-        client.putIfBetterScore(putRequest);
+        return client.putIfBetterScore(putRequest);
     }
 }
