@@ -1,10 +1,63 @@
 import * as p5 from "p5";
 import {global} from "./index";
-import {NoteType} from "./parsing/parse_sm";
 import {ScrollDirection} from "./scroll_direction";
+import {NoteType} from "./stepfile";
+import {Point2D} from "./point_2d";
+
+export interface NoteDraw {
+    trackNumber: number,
+    numTracks: number,
+    center: Point2D
+    noteType: NoteType,
+    noteSize: number,
+    beatFraction: number
+}
+
+export class NoteColors {
+    public readonly BLUE: p5.Image;
+    public readonly CYAN: p5.Image;
+    public readonly GREEN: p5.Image;
+    public readonly GREY: p5.Image;
+    public readonly MAROON: p5.Image;
+    public readonly OLIVE: p5.Image;
+    public readonly ORANGE: p5.Image;
+    public readonly PINK: p5.Image;
+    public readonly PURPLE: p5.Image;
+    public readonly RED: p5.Image;
+    public readonly WHITE: p5.Image;
+    public readonly YELLOW: p5.Image;
+
+    public constructor(noteColors: {
+        BLUE: p5.Image,
+        CYAN: p5.Image,
+        GREEN: p5.Image,
+        GREY: p5.Image,
+        MAROON: p5.Image,
+        OLIVE: p5.Image,
+        ORANGE: p5.Image,
+        PINK: p5.Image,
+        PURPLE: p5.Image,
+        RED: p5.Image,
+        WHITE: p5.Image,
+        YELLOW: p5.Image
+    }) {
+        this.BLUE = noteColors.BLUE;
+        this.CYAN = noteColors.CYAN;
+        this.GREEN = noteColors.GREEN;
+        this.GREY = noteColors.GREY;
+        this.MAROON = noteColors.MAROON;
+        this.OLIVE = noteColors.OLIVE;
+        this.ORANGE = noteColors.ORANGE;
+        this.PINK = noteColors.PINK;
+        this.PURPLE = noteColors.PURPLE;
+        this.RED = noteColors.RED;
+        this.WHITE = noteColors.WHITE;
+        this.YELLOW = noteColors.YELLOW;
+    }
+}
 
 export class NoteSkin {
-    private readonly note: p5.Image;
+    private readonly noteColors: NoteColors;
     private readonly connectorTile: p5.Image;
     private readonly receptor: p5.Image;
 
@@ -16,23 +69,61 @@ export class NoteSkin {
         [6, [270, 315, 180, 0, 45, 90]]
     ]);
 
-    constructor(note: p5.Image, connector: p5.Image, tail: p5.Image, receptor: p5.Image) {
-        this.note = note;
+    constructor(noteColors: NoteColors, connector: p5.Image, tail: p5.Image, receptor: p5.Image) {
+        this.noteColors = noteColors;
         this.connectorTile = connector;
         this.tail = tail;
         this.receptor = receptor;
     }
 
+    private getNoteImage(beatFraction: number): p5.Image {
+        if (beatFraction < 4) {
+            beatFraction = 4;
+        } else if (beatFraction > 192) {
+            beatFraction = 192;
+        }
+        switch (beatFraction) {
+            case 4:
+                return this.noteColors.RED;
+            case 8:
+                return this.noteColors.BLUE;
+            case 12:
+                return this.noteColors.MAROON;
+            case 16:
+                return this.noteColors.YELLOW;
+            case 20:
+                return this.noteColors.GREY;
+            case 24:
+                return this.noteColors.PINK;
+            case 32:
+                return this.noteColors.ORANGE;
+            case 48:
+                return this.noteColors.PURPLE;
+            case 64:
+                return this.noteColors.GREEN;
+            case 96:
+                return this.noteColors.WHITE;
+            case 128:
+                return this.noteColors.CYAN;
+            case 192:
+                return this.noteColors.OLIVE;
+            default:
+                return this.noteColors.OLIVE;
+        }
+    }
+
     // Returns true if able to draw note type, otherwise returns false
-    public drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType,
-                    noteSize: number): boolean {
-        switch (noteType) {
+    public drawNote(noteDraw: NoteDraw): boolean {
+        switch (noteDraw.noteType) {
             case NoteType.NORMAL:
             case NoteType.HOLD_HEAD:
-                this.drawImageRotated(this.note, trackNumber, numTracks, centerX, centerY, noteSize);
+                let noteImage: p5.Image = this.getNoteImage(noteDraw.beatFraction);
+                this.drawImageRotated(noteImage, noteDraw.trackNumber, noteDraw.numTracks, noteDraw.center.x,
+                    noteDraw.center.y, noteDraw.noteSize);
                 break;
             case NoteType.TAIL:
-                this.drawTail(trackNumber, numTracks, centerX, centerY, noteSize);
+                this.drawTail(this.tail, noteDraw.trackNumber, noteDraw.numTracks, noteDraw.center.x,
+                    noteDraw.center.y, noteDraw.noteSize);
                 break;
             default:
                 return false;
@@ -93,17 +184,17 @@ export class NoteSkin {
         return true;
     }
 
-    public drawTail(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
+    public drawTail(image: p5.Image, trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
         if (global.config.scrollDirection === ScrollDirection.Up) {
             p.push();
             p.angleMode(p.DEGREES);
             p.translate(centerX, centerY);
             p.rotate(180);
-            p.image(this.tail, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
+            p.image(image, -noteSize / 2, -noteSize / 2, noteSize, noteSize);
             p.pop();
         } else {
-            p.image(this.tail, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize);
+            p.image(image, centerX - noteSize / 2, centerY - noteSize / 2, noteSize, noteSize);
         }
     }
 

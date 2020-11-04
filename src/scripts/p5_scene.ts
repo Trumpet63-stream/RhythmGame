@@ -4,7 +4,7 @@ import {PreviewDisplay} from "./pages/options/preview_display";
 import {PageManager} from "./pages/page_manager";
 import {global} from "./index";
 import {generatePreviewNotes} from "./util";
-import {NoteSkin} from "./note_skin";
+import {NoteColors, NoteSkin} from "./note_skin";
 
 let width = 720;
 let height = 480;
@@ -21,8 +21,22 @@ export class P5Scene {
             }
 
             p.preload = function () {
+                let noteColors: NoteColors = new NoteColors({
+                    BLUE: p.loadImage("../assets/arrow_blue.png"),
+                    CYAN: p.loadImage("../assets/arrow_cyan.png"),
+                    GREEN: p.loadImage("../assets/arrow_green.png"),
+                    GREY: p.loadImage("../assets/arrow_grey.png"),
+                    MAROON: p.loadImage("../assets/arrow_maroon.png"),
+                    OLIVE: p.loadImage("../assets/arrow_olive.png"),
+                    ORANGE: p.loadImage("../assets/arrow_orange.png"),
+                    PINK: p.loadImage("../assets/arrow_pink.png"),
+                    PURPLE: p.loadImage("../assets/arrow_purple.png"),
+                    RED: p.loadImage("../assets/arrow_red.png"),
+                    WHITE: p.loadImage("../assets/arrow_white.png"),
+                    YELLOW: p.loadImage("../assets/arrow_yellow.png")
+                });
                 global.noteSkin = new NoteSkin(
-                    p.loadImage("../assets/arrow_blue_v3.png"),
+                    noteColors,
                     p.loadImage("../assets/connector_tile_resize.png"),
                     p.loadImage("../assets/tail_square.png"),
                     p.loadImage("../assets/arrow_receptor.png")

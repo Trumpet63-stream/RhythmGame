@@ -2,10 +2,12 @@ import * as p5 from "p5";
 
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
-import {Note, NoteState, NoteType} from "./parsing/parse_sm";
+import {Note, NoteState, NoteType} from "./stepfile";
 import {global} from "./index";
 import {DefaultNoteSkin} from "./default_note_skin";
 import {Rectangle} from "./rectangle";
+import {NoteSkin} from "./note_skin";
+import {Point2D} from "./point_2d";
 
 class NoteDisplay {
     private readonly centerX: number;
@@ -14,20 +16,28 @@ class NoteDisplay {
     private readonly noteSize: number;
     private readonly trackNumber: number;
     private readonly numTracks: number;
+    private readonly beatFraction: number;
 
     constructor(centerX: number, centerY: number, noteType: NoteType, noteSize: number, trackNumber: number,
-                numTracks: number) {
+                numTracks: number, beatFraction: number) {
         this.centerX = centerX;
         this.centerY = centerY;
         this.noteType = noteType;
         this.noteSize = noteSize;
         this.trackNumber = trackNumber;
         this.numTracks = numTracks;
+        this.beatFraction = beatFraction;
     }
 
     draw() {
-        let isNoteDrawSuccessful = global.noteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX,
-            this.centerY, this.noteType, this.noteSize);
+        let isNoteDrawSuccessful = (<NoteSkin>global.noteSkin).drawNote({
+            trackNumber: this.trackNumber,
+            numTracks: this.numTracks,
+            center: new Point2D(this.centerX, this.centerY),
+            noteType: this.noteType,
+            noteSize: this.noteSize,
+            beatFraction: this.beatFraction
+        });
         if (!isNoteDrawSuccessful) {
             DefaultNoteSkin.drawNote(this.trackNumber, this.numTracks, this.centerX, this.centerY, this.noteType,
                 this.noteSize);
@@ -53,7 +63,7 @@ class HoldConnector {
     }
 
     draw() {
-        let isConnectorDrawSuccessful = global.noteSkin.drawHoldConnector(this.centerX, this.drawStartY, this.drawEndY,
+        let isConnectorDrawSuccessful = (<NoteSkin>global.noteSkin).drawHoldConnector(this.centerX, this.drawStartY, this.drawEndY,
             this.noteStartY, this.noteEndY, this.noteSize);
         if (!isConnectorDrawSuccessful) {
             DefaultNoteSkin.drawHoldConnector(this.centerX, this.drawStartY, this.drawEndY, this.noteSize);
@@ -78,7 +88,7 @@ class Receptor {
     }
 
     draw() {
-        let isReceptorDrawSuccessful = global.noteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX,
+        let isReceptorDrawSuccessful = (<NoteSkin>global.noteSkin).drawReceptor(this.trackNumber, this.numTracks, this.centerX,
             this.centerY, this.noteSize);
         if (!isReceptorDrawSuccessful) {
             DefaultNoteSkin.drawReceptor(this.trackNumber, this.numTracks, this.centerX, this.centerY, this.noteSize);
@@ -150,7 +160,7 @@ export class DisplayManager {
         if (note.state === NoteState.DEFAULT) {
             let x = this.getNoteCenterX(trackNumber, numTracks);
             let y = this.getNoteCenterY(note.timeInSeconds, currentTime);
-            new NoteDisplay(x, y, note.type, this.displayConfig.getNoteSize(), trackNumber, numTracks).draw();
+            new NoteDisplay(x, y, note.type, this.displayConfig.getNoteSize(), trackNumber, numTracks, note.beatFraction).draw();
         }
     }
 

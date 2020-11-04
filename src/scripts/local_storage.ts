@@ -1,5 +1,5 @@
 import {AccuracyRecording, AccuracyRecordingEntry, Replay} from "./accuracy_recording";
-import {Note} from "./parsing/parse_sm";
+import {Note} from "./stepfile";
 import {NoteManager} from "./note_manager";
 import {ScoreProvider} from "./score_provider";
 import {StorageUtil} from "./storage_util";

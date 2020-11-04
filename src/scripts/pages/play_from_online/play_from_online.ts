@@ -118,7 +118,7 @@ export abstract class PlayFromOnline {
         leaderboardButton.mouseClicked(
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, leaderboardButton, playlistMenu, onlinePlaylist,
                 () => {
-                    let songhash: string = StorageUtil.getKeyFromTracks(playFromOnlineStepfile.fullParse.tracks);
+                    let songhash: string = StorageUtil.getKeyFromTracks(playFromOnlineStepfile.tracks);
                     Leaderboard.initialize(songhash);
                     PageManager.setCurrentPage(Pages.LEADERBOARD);
                 }));
@@ -129,7 +129,7 @@ export abstract class PlayFromOnline {
         loadAndPlayButton.mouseClicked(
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndPlayButton, playlistMenu, onlinePlaylist,
                 () => {
-                    initPlayingDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
+                    initPlayingDisplay(playFromOnlineStepfile.tracks, playFromOnlineAudioFile,
                         Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle);
                     PageManager.setCurrentPage(Pages.PLAY);
                 }));
@@ -140,7 +140,7 @@ export abstract class PlayFromOnline {
         loadAndSyncButton.mouseClicked(
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndSyncButton, playlistMenu, onlinePlaylist,
                 () => {
-                    initSyncGameDisplay(playFromOnlineStepfile.fullParse.tracks, playFromOnlineAudioFile,
+                    initSyncGameDisplay(playFromOnlineStepfile.tracks, playFromOnlineAudioFile,
                         Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle);
                     PageManager.setCurrentPage(Pages.SYNC);
                 }));

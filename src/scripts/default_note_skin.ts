@@ -1,4 +1,4 @@
-import {NoteType} from "./parsing/parse_sm";
+import {NoteType} from "./stepfile";
 import {global} from "./index";
 import * as p5 from "p5";
 

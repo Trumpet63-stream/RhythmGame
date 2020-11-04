@@ -1,4 +1,4 @@
-import {Note, NoteState, NoteType} from "./parsing/parse_sm";
+import {Note, NoteState, NoteType} from "./stepfile";
 
 export class NoteManager {
     public tracks: Note[][];

@@ -1,4 +1,4 @@
-import {NoteType} from "./parsing/parse_sm";
+import {NoteType} from "./stepfile";
 import {AccuracyEvent} from "./accuracy_event";
 
 export enum AccuracyRecordingState {

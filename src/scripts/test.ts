@@ -1,7 +1,8 @@
 import {compareModeOptions} from "./util";
-import {Mode} from "./parsing/parse_sm";
 import {Username} from "./database_client/username";
 import {Password} from "./database_client/password";
+import {Mode} from "./stepfile";
+import {RhythmClassifier} from "./rhythm_classifier";
 
 // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
 export function modeTest() {
@@ -106,4 +107,13 @@ export function arraysEqual(a1: any[], a2: any[]): boolean {
         }
     }
     return true;
+}
+
+export function testRhythmClassifier() {
+    let classifications: number[] = [];
+    for (let i = 0; i < 192; i++) {
+        classifications.push(RhythmClassifier.getBeatFraction(192, i));
+    }
+    let success: boolean = arraysEqual(classifications, [1, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 12, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 6, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 4, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 3, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 12, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 2, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 12, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 3, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 4, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 6, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 12, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192]);
+    console.log("rhythm classifier test success = " + success);
 }

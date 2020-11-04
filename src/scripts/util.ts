@@ -1,9 +1,8 @@
-import {Mode, Note, NoteState, NoteType} from "./parsing/parse_sm";
 import {Config} from "./config";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import * as p5 from "p5";
-import {Stepfile, StepfileState} from "./stepfile";
+import {Mode, Note, NoteState, NoteType, Stepfile, StepfileState} from "./stepfile";
 import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
 import {SyncGameDisplay} from "./pages/sync/sync_game_display";
@@ -152,25 +151,25 @@ export function generatePreviewNotes(numTracks: number): Note[][] {
         if (isHold) {
             track.push({
                 type: NoteType.HOLD_HEAD,
-                typeString: "Don't Care",
                 timeInSeconds: currentTime,
                 state: NoteState.DEFAULT,
-                trackNumber: i
+                trackNumber: i,
+                beatFraction: 8
             });
             track.push({
                 type: NoteType.TAIL,
-                typeString: "Don't Care",
                 timeInSeconds: currentTime + 0.25,
                 state: NoteState.DEFAULT,
-                trackNumber: i
+                trackNumber: i,
+                beatFraction: 8
             });
         } else {
             track.push({
                 type: NoteType.NORMAL,
-                typeString: "Don't Care",
                 timeInSeconds: currentTime,
                 state: NoteState.DEFAULT,
-                trackNumber: i
+                trackNumber: i,
+                beatFraction: 8
             });
         }
         notes.push(track);
@@ -244,4 +243,12 @@ export function getTextWidth(text: string, textSize: number): number {
     let textWidth: number = p.textWidth(text);
     p.pop();
     return textWidth;
+}
+
+export function getEmpty2dArray(numRows: number): any[][] {
+    let array: any[][] = [];
+    for (let i = 0; i < numRows; i++) {
+        array.push([]);
+    }
+    return array;
 }

@@ -1,10 +1,9 @@
 import * as p5 from "p5";
 import {createFileInput, drawHeading, setElementCenterPositionRelative} from "../../ui_util";
 import {global} from "../../index";
-import {Stepfile, StepfileState} from "../../stepfile";
+import {Mode, Stepfile, StepfileState} from "../../stepfile";
 import {AudioFile, AudioFileState} from "../../audio/audio_file";
-import {compareModeOptions, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
-import {Mode} from "../../parsing/parse_sm";
+import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {PageManager, Pages} from "../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
 import {FileDropZone} from "./file_drop_zone";
@@ -15,7 +14,6 @@ import {Leaderboard} from "../leaderboard/leaderboard";
 
 const playFromFileStepfile: Stepfile = new Stepfile();
 const playFromFileAudioFile: AudioFile = new HtmlAudioElementHelper();
-let stepfileModeOptions: Mode[];
 let modesAsStrings: string[][];
 
 export abstract class PlayFromFile {
@@ -41,9 +39,8 @@ export abstract class PlayFromFile {
         let syncButtonId = "syncButton";
         let leaderboardButtonId = "leaderboardButton";
         if (isFilesReady(playFromFileStepfile, playFromFileAudioFile)) {
-            if (stepfileModeOptions === undefined) {
-                stepfileModeOptions = PlayFromFile.getOrderedModes(playFromFileStepfile.partialParse.modes);
-                modesAsStrings = PlayFromFile.getModesAsStrings(stepfileModeOptions);
+            if (modesAsStrings === undefined) {
+                modesAsStrings = PlayFromFile.getModesAsStrings(playFromFileStepfile.modes);
             }
             let modeRadio = RadioTable.create(PlayFromFile.MODE_RADIO_ID, 500, 120, [54, 30, 16],
                 ["Type", "Difficulty", "Meter"], modesAsStrings).element;
@@ -91,7 +88,7 @@ export abstract class PlayFromFile {
         leaderboardButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            let songhash: string = StorageUtil.getKeyFromTracks(playFromFileStepfile.fullParse.tracks);
+            let songhash: string = StorageUtil.getKeyFromTracks(playFromFileStepfile.tracks);
             Leaderboard.initialize(songhash);
             PageManager.setCurrentPage(Pages.LEADERBOARD);
         });
@@ -105,7 +102,7 @@ export abstract class PlayFromFile {
         syncButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initSyncGameDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
+            initSyncGameDisplay(playFromFileStepfile.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
                 playFromFileStepfile.songTitle);
             PageManager.setCurrentPage(Pages.SYNC);
         });
@@ -115,30 +112,15 @@ export abstract class PlayFromFile {
         playButton.mouseClicked(() => {
             let selectedMode: Mode = getSelectedMode(modeRadio);
             playFromFileStepfile.finishParsing(selectedMode.id);
-            initPlayingDisplay(playFromFileStepfile.fullParse.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
+            initPlayingDisplay(playFromFileStepfile.tracks, playFromFileAudioFile, Pages.PLAY_FROM_FILE,
                 playFromFileStepfile.songTitle);
             PageManager.setCurrentPage(Pages.PLAY);
         });
     }
 
     public static resetModeOptions() {
-        stepfileModeOptions = undefined;
+        modesAsStrings = undefined;
         DOMWrapper.removeElementById(PlayFromFile.MODE_RADIO_ID);
-    }
-
-    private static getOrderedModes(modesMap: Map<string, string>[]): Mode[] {
-        let modeOptions: Mode[] = [];
-        for (let i = 0; i < modesMap.length; i++) {
-            let mode: Map<string, string> = modesMap[i];
-            modeOptions.push({
-                type: mode.get("type"),
-                difficulty: mode.get("difficulty"),
-                meter: mode.get("meter"),
-                id: i
-            });
-        }
-        modeOptions.sort(compareModeOptions);
-        return modeOptions;
     }
 
     private static getModesAsStrings(modes: Mode[]): string[][] {
@@ -161,7 +143,7 @@ function loadAudioFile(file: p5.File) {
 }
 
 function getSelectedMode(modeRadio: p5.Element) {
-    return stepfileModeOptions[Number(modeRadio.value())];
+    return playFromFileStepfile.modes[Number(modeRadio.value())];
 }
 
 function getStepfileInputLabel() {

@@ -1,71 +1,60 @@
+import {getEmpty2dArray} from "../util";
+import {RhythmClassifier} from "../rhythm_classifier";
+
 export class PartialParse {
-    metaData: Map<string, string>;
-    modes: Map<string, string>[];
+    public metaData: Map<string, string>;
+    public modes: Map<string, string>[];
 }
 
-export enum NoteType {
-    NONE = "0",
-    NORMAL = "1",
-    HOLD_HEAD = "2",
-    TAIL = "3",
-    ROLL_HEAD = "4",
-    MINE = "M",
-    UNKNOWN = "???",
+export interface Measure {
+    position: number,
+    divisions: number,
+    fraction: number
 }
 
-function stringToNoteType(string: string): NoteType {
-    switch (string) {
-        case "0":
-            return NoteType.NONE;
-        case "1":
-            return NoteType.NORMAL;
-        case "2":
-            return NoteType.HOLD_HEAD;
-        case "3":
-            return NoteType.TAIL;
-        case "4":
-            return NoteType.ROLL_HEAD;
-        case "M":
-            return NoteType.MINE;
-        default:
-            return NoteType.UNKNOWN;
-    }
+interface BeatAndLine {
+    endBeat: number,
+    lineInfo: string,
+    measure: Measure
 }
 
-export enum NoteState {
-    DEFAULT,
-    HIT,
-    MISSED,
-    HELD,
+interface TimeBeatAndLine {
+    endBeat: number,
+    lineInfo: string,
+    measure: Measure,
+    timeInSeconds: number
 }
 
-export interface Note {
-    type: NoteType;
-    typeString: string; // the string representation of the type BEFORE it's interpreted as a NoteType
-    timeInSeconds: number;
-    trackNumber: number;
-    state?: NoteState;
-}
-
-export class Mode {
-    public type: string;
-    public difficulty: string;
-    public meter: string;
-    public id: number;
+export interface ParsedNoteInfo {
+    endBeat: number,
+    measure: Measure,
+    timeInSeconds: number,
+    trackNumber: number,
+    type: string
 }
 
 export class FullParse {
-    metaData: Map<string, string>;
-    modes: Map<string, string>[];
-    offset: number;
-    bpms: [number, number][];
-    stops: [number, number][];
-    tracks: Note[][];
+    public metaData: Map<string, string>;
+    public modes: Map<string, string>[];
+    public offset: number;
+    public bpms: BpmEntry[];
+    public stops: StopEntry[];
+    public tracks: ParsedNoteInfo[][];
 
-    constructor(partialParse: PartialParse) {
+    public constructor(partialParse: PartialParse) {
         this.metaData = partialParse.metaData;
         this.modes = partialParse.modes;
     }
+}
+
+interface BpmEntry {
+    beat: number;
+    bpm: number
+}
+
+interface StopEntry {
+    beat: number;
+    stopDuration: number
 }
 
 /* Step One Of Parsing */
@@ -114,21 +103,21 @@ function cleanMetaDataString(string: string): string {
 /* Step Two Of Parsing */
 export function getFullParse(modeIndex: number, partialParse: PartialParse): FullParse {
     let fullParse = new FullParse(partialParse);
-    let cleanedBeatsAndLines = getCleanedBeatsAndLines(partialParse, modeIndex);
-    let offset: number = parseFloat(partialParse.metaData.get("OFFSET"));
-    let bpms: { beat: number; bpm: number }[] = parseBPMS(partialParse.metaData.get("BPMS"));
-    let stops: { stopDuration: number; beat: number }[] = parseStops(partialParse.metaData.get("STOPS"));
-    let timesBeatsAndLines: { time: number; beat: number; lineInfo: string }[] =
-        getTimeInfoByLine(cleanedBeatsAndLines, offset, bpms, stops);
+    let cleanedBeatsAndLines: BeatAndLine[] = getCleanedBeatsAndLines(partialParse, modeIndex);
+    fullParse.offset = parseFloat(partialParse.metaData.get("OFFSET"));
+    fullParse.bpms = parseBPMS(partialParse.metaData.get("BPMS"));
+    fullParse.stops = parseStops(partialParse.metaData.get("STOPS"));
+    let timesBeatsAndLines: TimeBeatAndLine[] =
+        getTimeInfoByLine(cleanedBeatsAndLines, fullParse.offset, fullParse.bpms, fullParse.stops);
     fullParse.tracks = getTracksFromLines(timesBeatsAndLines);
     return fullParse;
 }
 
-function getCleanedBeatsAndLines(partialParse: PartialParse, modeIndex: number) {
+function getCleanedBeatsAndLines(partialParse: PartialParse, modeIndex: number): BeatAndLine[] {
     let unparsedNotes: string = partialParse.modes[modeIndex].get("notes");
     let unparsedArray: string[] = unparsedNotes.split("\n");
     let measures: string[][] = getMeasures(unparsedArray);
-    let beatsAndLines: { beat: number, lineInfo: string }[] = getBeatInfoByLine(measures);
+    let beatsAndLines: BeatAndLine[] = getBeatInfoByLine(measures);
     return removeBlankLines(beatsAndLines);
 }
 
@@ -166,22 +155,34 @@ function getMeasures(unparsedArray: string[]) {
     return measures;
 }
 
-// assumes 4/4 time signature
-function getBeatInfoByLine(measures: string[][]) {
-    let beatsAndLines = [];
+// assumes 4/4 time signature (4 beats per measure)
+function getBeatInfoByLine(measures: string[][]): BeatAndLine[] {
+    let beatsAndLines: BeatAndLine[] = [];
     let currentBeat = 0;
     for (let i = 0; i < measures.length; i++) {
         let measure = measures[i];
         for (let j = 0; j < measure.length; j++) {
-            beatsAndLines.push({beat: currentBeat, lineInfo: measure[j]});
+            beatsAndLines.push({
+                endBeat: currentBeat,
+                lineInfo: measure[j],
+                measure: getMeasureDescription(measure.length, j)
+            });
             currentBeat += 4 / measure.length;
         }
     }
     return beatsAndLines;
 }
 
-function removeBlankLines(beatsAndLines: { beat: number, lineInfo: string }[]) {
-    let cleanedBeatsAndLines = [];
+function getMeasureDescription(measureDivisions: number, measurePosition: number): Measure {
+    return {
+        divisions: measureDivisions,
+        position: measurePosition,
+        fraction: RhythmClassifier.getBeatFraction(measureDivisions, measurePosition)
+    };
+}
+
+function removeBlankLines(beatsAndLines: BeatAndLine[]): BeatAndLine[] {
+    let cleanedBeatsAndLines: BeatAndLine[] = [];
     for (let i = 0; i < beatsAndLines.length; i++) {
         let line = beatsAndLines[i];
         if (!isAllZeros(line.lineInfo)) {
@@ -200,23 +201,30 @@ function isAllZeros(string: string) {
     return true;
 }
 
-function getTimeInfoByLine(infoByLine: { beat: number, lineInfo: string }[], offset: number,
-                           bpms: { beat: number, bpm: number }[], stops: { beat: number, stopDuration: number }[]
-): { time: number, beat: number, lineInfo: string }[] {
-    let infoByLineWithTime: { time: number, beat: number, lineInfo: string }[] = [];
-    let currentTime = -offset + getElapsedTime(0, infoByLine[0].beat, bpms, stops);
-    infoByLineWithTime.push({time: currentTime, beat: infoByLine[0].beat, lineInfo: infoByLine[0].lineInfo});
+function getTimeInfoByLine(infoByLine: BeatAndLine[], offset: number,
+                           bpms: BpmEntry[], stops: StopEntry[]): TimeBeatAndLine[] {
+    let infoByLineWithTime: TimeBeatAndLine[] = [];
+    let currentTime = -offset + getElapsedTime(0, infoByLine[0].endBeat, bpms, stops);
+    infoByLineWithTime.push(addTimeProperty(infoByLine[0], currentTime));
     for (let i = 1; i < infoByLine.length; i++) {
-        let startBeat = infoByLine[i - 1].beat;
-        let endBeat = infoByLine[i].beat;
+        let startBeat = infoByLine[i - 1].endBeat;
+        let endBeat = infoByLine[i].endBeat;
         currentTime += getElapsedTime(startBeat, endBeat, bpms, stops);
-        infoByLineWithTime.push({time: currentTime, beat: infoByLine[i].beat, lineInfo: infoByLine[i].lineInfo});
+        infoByLineWithTime.push(addTimeProperty(infoByLine[i], currentTime));
     }
     return infoByLineWithTime;
 }
 
-function getElapsedTime(startBeat: number, endBeat: number, bpms: { beat: number, bpm: number }[],
-                        stops: { beat: number, stopDuration: number }[]) {
+function addTimeProperty(b: BeatAndLine, time: number): TimeBeatAndLine {
+    return {
+        timeInSeconds: time,
+        endBeat: b.endBeat,
+        lineInfo: b.lineInfo,
+        measure: b.measure
+    };
+}
+
+function getElapsedTime(startBeat: number, endBeat: number, bpms: BpmEntry[], stops: StopEntry[]) {
     let currentBPMIndex: number = getStartBPMIndex(startBeat, bpms);
     let earliestBeat: number = startBeat;
     let elapsedTime: number = stops === null ? 0 : stoppedTime(startBeat, endBeat, stops);
@@ -230,7 +238,7 @@ function getElapsedTime(startBeat: number, endBeat: number, bpms: { beat: number
     return elapsedTime;
 }
 
-function getStartBPMIndex(startBeat: number, bpms: { beat: number, bpm: number }[]) {
+function getStartBPMIndex(startBeat: number, bpms: BpmEntry[]) {
     let startBPMIndex = 0;
     for (let i = 1; i < bpms.length; i++) {
         if (bpms[i].beat < startBeat) {
@@ -241,7 +249,7 @@ function getStartBPMIndex(startBeat: number, bpms: { beat: number, bpm: number }
 }
 
 // does NOT snap to nearest 1/192nd of beat
-function stoppedTime(startBeat: number, endBeat: number, stops: { beat: number, stopDuration: number }[]) {
+function stoppedTime(startBeat: number, endBeat: number, stops: StopEntry[]): number {
     let time = 0;
     for (let i = 0; i < stops.length; i++) {
         let stopBeat = stops[i].beat;
@@ -252,50 +260,58 @@ function stoppedTime(startBeat: number, endBeat: number, stops: { beat: number, 
     return time;
 }
 
-function getNextBPMChange(currentBPMIndex: number, bpms: { beat: number, bpm: number }[]) {
+function getNextBPMChange(currentBPMIndex: number, bpms: BpmEntry[]): number {
     if (currentBPMIndex + 1 < bpms.length) {
         return bpms[currentBPMIndex + 1].beat;
     }
     return Number.POSITIVE_INFINITY;
 }
 
-function getTracksFromLines(timesBeatsAndLines: { time: number; beat: number; lineInfo: string; }[]) {
+const EMPTY_NOTE: string = "0";
+
+function getTracksFromLines(timesBeatsAndLines: TimeBeatAndLine[]): ParsedNoteInfo[][] {
     let numTracks: number = timesBeatsAndLines[0].lineInfo.length;
-    let tracks: Note[][] = [];
-    for (let i = 0; i < numTracks; i++) {
-        tracks.push([]);
-    }
+    let tracks: ParsedNoteInfo[][] = getEmpty2dArray(numTracks);
     for (let i = 0; i < timesBeatsAndLines.length; i++) {
-        let line: { time: number; beat: number; lineInfo: string } = timesBeatsAndLines[i];
+        let line: TimeBeatAndLine = timesBeatsAndLines[i];
         for (let j = 0; j < line.lineInfo.length; j++) {
-            let typeString = line.lineInfo.charAt(j);
-            let noteType: NoteType = stringToNoteType(typeString);
-            if (noteType !== NoteType.NONE) {
-                tracks[j].push({type: noteType, typeString: typeString, timeInSeconds: line.time, trackNumber: j});
+            let noteType = line.lineInfo.charAt(j);
+            if (noteType !== EMPTY_NOTE) {
+                tracks[j].push(addNoteTypeAndTrack(noteType, j, line));
             }
         }
     }
     return tracks;
 }
 
-function parseBPMS(bpmString: string) {
+function addNoteTypeAndTrack(noteType: string, trackNumber: number, line: TimeBeatAndLine): ParsedNoteInfo {
+    return {
+        measure: line.measure,
+        timeInSeconds: line.timeInSeconds,
+        endBeat: line.endBeat,
+        type: noteType,
+        trackNumber: trackNumber
+    }
+}
+
+function parseBPMS(bpmString: string): BpmEntry[] {
     if (bpmString === undefined) {
         return [];
     }
     let bpmArray: [number, number][] = parseFloatEqualsFloatPattern(bpmString);
-    let bpms: { beat: number, bpm: number }[] = [];
+    let bpms: BpmEntry[] = [];
     for (let i = 0; i < bpmArray.length; i++) {
         bpms.push({beat: bpmArray[i][0], bpm: bpmArray[i][1]});
     }
     return bpms;
 }
 
-function parseStops(stopsString: string) {
+function parseStops(stopsString: string): StopEntry[] {
     if (stopsString === undefined) {
         return [];
     }
     let stopsArray: [number, number][] = parseFloatEqualsFloatPattern(stopsString);
-    let stops: { beat: number, stopDuration: number }[] = [];
+    let stops: StopEntry[] = [];
     for (let i = 0; i < stopsArray.length; i++) {
         stops.push({beat: stopsArray[i][0], stopDuration: stopsArray[i][1]});
     }

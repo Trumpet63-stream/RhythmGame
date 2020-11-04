@@ -1,4 +1,4 @@
-import {NoteType} from "./parsing/parse_sm";
+import {NoteType} from "./stepfile";
 
 export interface AccuracyEvent {
     accuracyName: string,

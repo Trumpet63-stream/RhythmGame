@@ -1,10 +1,11 @@
-import {Note, NoteState, NoteType} from "../parsing/parse_sm";
+import {Note, NoteState, NoteType} from "../stepfile";
 
 export abstract class ParsingHelper {
     public static beatmapToTrackArray(beatmap: [number, string, string][]) {
         let tracks: Note[][] = [[], [], [], []];
         for (let i = 0; i < beatmap.length; i++) {
             let beatmapRow = beatmap[i];
+            console.log(beatmapRow[2]);
             let trackNumber = this.trackNumberFromDirection(beatmapRow[1]);
             let note = this.noteFromBeatmapRow(beatmapRow, trackNumber);
             tracks[trackNumber].push(note);
@@ -19,9 +20,34 @@ export abstract class ParsingHelper {
             timeInSeconds: timeInSeconds,
             type: NoteType.NORMAL,
             state: NoteState.DEFAULT,
-            typeString: "N/A",
-            trackNumber: trackNumber
+            trackNumber: trackNumber,
+            beatFraction: this.colorToBeatFraction(row[2])
         };
+    }
+
+    private static colorToBeatFraction(color: string): number {
+        switch (color) {
+            case "red":
+                return 4;
+            case "blue":
+                return 8;
+            case "purple":
+                return 12;
+            case "yellow":
+                return 16;
+            case "pink":
+                return 24;
+            case "orange":
+                return 32;
+            case "turquoise":
+                return 48;
+            case "green":
+                return 64;
+            case "white":
+                return 192;
+            default:
+                return 192;
+        }
     }
 
     private static trackNumberFromDirection(direction: string): number {

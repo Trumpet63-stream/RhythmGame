@@ -5,7 +5,7 @@ import {MissManager} from "../../miss_manager";
 import {AccuracyManager} from "../../accuracy_manager";
 import {ScrollManager} from "../../scroll_manager";
 import {ResultsDisplay} from "../play_results/results_display";
-import {Note} from "../../parsing/parse_sm";
+import {Note} from "../../stepfile";
 import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";

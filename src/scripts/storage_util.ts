@@ -1,4 +1,4 @@
-import {Note, NoteType} from "./parsing/parse_sm";
+import {Note, NoteType} from "./stepfile";
 import {SHA3} from "sha3";
 
 export interface ConvertedNote {

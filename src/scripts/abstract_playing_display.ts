@@ -16,7 +16,7 @@ import {HoldGlow} from "./hold_glow";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
 import {PageDescription} from "./pages/page_manager";
 import {Rectangle} from "./rectangle";
-import {Note} from "./parsing/parse_sm";
+import {Note} from "./stepfile";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import {KeyState, PlayerKeyAction} from "./player_key_action";

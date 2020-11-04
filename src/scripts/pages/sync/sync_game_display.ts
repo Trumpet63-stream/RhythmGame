@@ -4,7 +4,7 @@ import {NoteManager} from "../../note_manager";
 import {MissManager} from "../../miss_manager";
 import {AccuracyManager} from "../../accuracy_manager";
 import {ScrollManager, ScrollManagerConfig} from "../../scroll_manager";
-import {Note} from "../../parsing/parse_sm";
+import {Note} from "../../stepfile";
 import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
