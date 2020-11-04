@@ -5,7 +5,6 @@ export abstract class ParsingHelper {
         let tracks: Note[][] = [[], [], [], []];
         for (let i = 0; i < beatmap.length; i++) {
             let beatmapRow = beatmap[i];
-            console.log(beatmapRow[2]);
             let trackNumber = this.trackNumberFromDirection(beatmapRow[1]);
             let note = this.noteFromBeatmapRow(beatmapRow, trackNumber);
             tracks[trackNumber].push(note);
