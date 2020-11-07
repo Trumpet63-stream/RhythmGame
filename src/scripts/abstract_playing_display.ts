@@ -23,6 +23,7 @@ import {KeyState, PlayerKeyAction} from "./player_key_action";
 import {AccuracyEvent} from "./accuracy_event";
 import {ComboText} from "./combo_text";
 import {LiveComparison} from "./live_comparison";
+import {ErrorBar} from "./error_bar";
 
 export abstract class AbstractPlayingDisplay {
     protected scene: P5Scene;
@@ -51,6 +52,7 @@ export abstract class AbstractPlayingDisplay {
     protected comboText: ComboText;
     protected songTitle: string;
     protected liveComparison: LiveComparison;
+    protected errorBar: ErrorBar;
 
     public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
                        returnPage: PageDescription, songTitle: string) {
@@ -76,6 +78,7 @@ export abstract class AbstractPlayingDisplay {
         if (this.liveComparison !== undefined) {
             this.liveComparison.update(accuracyEvent);
         }
+        this.errorBar.update(accuracyEvent);
     }
 
     public draw() {
@@ -107,6 +110,9 @@ export abstract class AbstractPlayingDisplay {
         }
         if (this.liveComparison !== undefined && this.config.isLiveComparisonEnabled) {
             this.liveComparison.draw(currentTimeInSeconds);
+        }
+        if (this.config.isErrorBarEnabled) {
+            this.errorBar.draw(currentTimeInSeconds);
         }
     }
 

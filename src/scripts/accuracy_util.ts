@@ -29,7 +29,7 @@ export abstract class AccuracyUtil {
     }
 
     // Returns a rank where 1 is the best
-    public static getAccuracyRank(accuracyEvent: AccuracyEvent, config: Config) {
+    public static getAccuracyRank(accuracyEvent: AccuracyEvent | { accuracyMillis: number }, config: Config) {
         let accuracies: Accuracy[] = config.accuracySettings;
         if (accuracyEvent.accuracyMillis < 0) {
             accuracies = this.getReversed(accuracies);
@@ -92,5 +92,21 @@ export abstract class AccuracyUtil {
             }
         }
         return numRanks
+    }
+
+    public static isBounded(accuracy: Accuracy) {
+        return accuracy.lowerBound !== null && accuracy.upperBound !== null;
+    }
+
+    public static getEarliestMillis(config: Config): number {
+        if (this.isConfiguredForBoos(config)) {
+            return config.accuracySettings[config.accuracySettings.length - 1].lowerBound;
+        } else {
+            return config.accuracySettings[config.accuracySettings.length - 1].upperBound;
+        }
+    }
+
+    public static getLatestMillis(config: Config): number {
+        return config.accuracySettings[0].upperBound;
     }
 }

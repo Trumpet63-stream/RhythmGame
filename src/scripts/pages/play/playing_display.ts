@@ -31,6 +31,7 @@ import {StorageUtil} from "../../storage_util";
 import {DatabaseClient} from "../../database_client/database_client";
 import {PutRequest} from "../../database_client/put_request";
 import {PutResponse} from "../../database_client/put_response";
+import {ErrorBar} from "../../error_bar";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     private comparisonReplay: Replay;
@@ -82,6 +83,7 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
         this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
+        this.errorBar = new ErrorBar(this.config);
 
         if (this.config.isLiveComparisonEnabled) {
             if (replay !== null) {

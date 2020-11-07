@@ -29,6 +29,7 @@ export class Config {
     public isHoldGlowEnabled: boolean;
     public isComboTextEnabled: boolean;
     public isLiveComparisonEnabled: boolean;
+    public isErrorBarEnabled: boolean;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -52,6 +53,7 @@ export class Config {
                     isHoldGlowEnabled?: boolean,
                     isComboTextEnabled?: boolean,
                     isLiveComparisonEnabled?: boolean,
+                    isErrorBarEnabled?: boolean,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
@@ -81,7 +83,8 @@ export class Config {
             DEFAULT_CONFIG.isHoldParticlesEnabled);
         this.isHoldGlowEnabled = defaultIfUndefined(args.isHoldGlowEnabled, DEFAULT_CONFIG.isHoldGlowEnabled);
         this.isComboTextEnabled = defaultIfUndefined(args.isComboTextEnabled, DEFAULT_CONFIG.isComboTextEnabled);
-        this.isLiveComparisonEnabled = defaultIfUndefined(args.isLiveComparisonEnabled, DEFAULT_CONFIG.isLiveComparisonEnabled)
+        this.isLiveComparisonEnabled = defaultIfUndefined(args.isLiveComparisonEnabled, DEFAULT_CONFIG.isLiveComparisonEnabled);
+        this.isErrorBarEnabled = defaultIfUndefined(args.isErrorBarEnabled, DEFAULT_CONFIG.isErrorBarEnabled);
     }
 
     public save() {

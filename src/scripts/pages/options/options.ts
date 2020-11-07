@@ -234,6 +234,18 @@ export abstract class Options {
             },
             scrollDiv.element);
 
+        createUserInput(() => createLabeledSelect("Error Bar",
+            "errorBarEnabledSelect", YesNo, booleanToYesNo(global.config.isErrorBarEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidErrorBar.bind(this),
+            this.showErrorBarInfo.bind(this),
+            this.showErrorBarError.bind(this),
+            (input: number | string) => {
+                global.config.isErrorBarEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.save();
+            },
+            scrollDiv.element);
+
         let loginButton = DOMWrapper.create(() => {
             return p.createButton("Set Username/Password");
         }, "loginButton");
@@ -454,11 +466,25 @@ export abstract class Options {
 
     private static showLiveComparisonInfo(): void {
         Ticker.setMessage(
-            "A colored gauge that indicates how well you're doing compared to your personal best.",
+            "A colored vertical gauge that indicates how well you're doing compared to your personal best.",
             TickerState.INFORMATION);
     }
 
     private static showLiveComparisonError(): void {
+        this.showSelectError();
+    }
+
+    private static isValidErrorBar(value: string | number): boolean {
+        return this.isValidYesNo(value);
+    }
+
+    private static showErrorBarInfo(): void {
+        Ticker.setMessage(
+            "A colored horizontal bar that displays the accuracy of your recent hits.",
+            TickerState.INFORMATION);
+    }
+
+    private static showErrorBarError(): void {
         this.showSelectError();
     }
 

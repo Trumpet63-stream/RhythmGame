@@ -32,4 +32,5 @@ export let DEFAULT_CONFIG = {
     isHoldGlowEnabled: true,
     isComboTextEnabled: true,
     isLiveComparisonEnabled: true,
+    isErrorBarEnabled: true,
 };

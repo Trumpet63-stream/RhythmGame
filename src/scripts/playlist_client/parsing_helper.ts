@@ -38,7 +38,7 @@ export abstract class ParsingHelper {
                 return 24;
             case "orange":
                 return 32;
-            case "turquoise":
+            case "cyan":
                 return 48;
             case "green":
                 return 64;

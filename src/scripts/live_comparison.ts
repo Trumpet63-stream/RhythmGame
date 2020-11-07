@@ -8,17 +8,12 @@ import * as p5 from "p5";
 import {global} from "./index";
 import {Rectangle} from "./rectangle";
 
-export interface LiveComparisonEvent {
-    isPositive: boolean;
-    timeInSeconds: number;
-}
-
 /* The live comparison waits for an accuracy event from the user before deciding whether they are behind or ahead of
  the compared score, with exception to boos */
 export class LiveComparison implements AccuracyObserver, Drawable {
     private readonly personalBest: AccuracyRecording;
-    private currentPBScore: Score;
-    private currentScore: Score;
+    private readonly currentPBScore: Score;
+    private readonly currentScore: Score;
     private readonly maxTotalScore: number;
     private readonly scoreProvider: ScoreProvider;
     private actualScoreDifference: Score;
@@ -73,7 +68,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
             }
         }
         this.updateCurrentScore(accuracyEvent);
-        this.updateActualScoreDifference(accuracyEvent.timeInSeconds);
+        this.updateActualScoreDifference();
     }
 
     private removeMatchingPBEntry(accuracyEvent: AccuracyEvent) {
@@ -224,7 +219,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
             if (mostRecentEntry.timeInSeconds < currentTimeInSeconds) {
                 if (this.entryIsABoo(mostRecentEntry)) {
                     this.updatePBScore(mostRecentEntry);
-                    this.updateActualScoreDifference(currentTimeInSeconds);
+                    this.updateActualScoreDifference();
                     trackRecording.splice(noteIndex, 1);
                     noteIndex--;
                 }
@@ -254,7 +249,7 @@ export class LiveComparison implements AccuracyObserver, Drawable {
         score.percentScore -= percentScoreChange;
     }
 
-    private updateActualScoreDifference(currentTimeInSeconds: number) {
+    private updateActualScoreDifference() {
         this.actualScoreDifference.totalScore = this.currentPBScore.totalScore - this.currentScore.totalScore;
         this.actualScoreDifference.percentScore = this.currentPBScore.percentScore - this.currentScore.percentScore;
     }
