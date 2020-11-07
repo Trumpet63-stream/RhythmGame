@@ -30,6 +30,7 @@ export class Config {
     public isComboTextEnabled: boolean;
     public isLiveComparisonEnabled: boolean;
     public isErrorBarEnabled: boolean;
+    public isErrorBarBackgroundEnabled: boolean;
 
     constructor(args: {
                     pixelsPerSecond?: number,
@@ -54,6 +55,7 @@ export class Config {
                     isComboTextEnabled?: boolean,
                     isLiveComparisonEnabled?: boolean,
                     isErrorBarEnabled?: boolean,
+                    isErrorBarBackgroundEnabled?: boolean,
                 }
     ) {
         this.gameAreaHeight = defaultIfUndefined(args.gameAreaHeight, DEFAULT_CONFIG.gameAreaHeight);
@@ -85,6 +87,8 @@ export class Config {
         this.isComboTextEnabled = defaultIfUndefined(args.isComboTextEnabled, DEFAULT_CONFIG.isComboTextEnabled);
         this.isLiveComparisonEnabled = defaultIfUndefined(args.isLiveComparisonEnabled, DEFAULT_CONFIG.isLiveComparisonEnabled);
         this.isErrorBarEnabled = defaultIfUndefined(args.isErrorBarEnabled, DEFAULT_CONFIG.isErrorBarEnabled);
+        this.isErrorBarBackgroundEnabled = defaultIfUndefined(args.isErrorBarBackgroundEnabled,
+            DEFAULT_CONFIG.isErrorBarBackgroundEnabled);
     }
 
     public save() {

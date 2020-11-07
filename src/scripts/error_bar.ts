@@ -74,7 +74,9 @@ export class ErrorBar implements AccuracyObserver, Drawable {
     }
 
     public draw(currentTimeInSeconds: number): void {
-        this.drawBarBackground();
+        if (this.config.isErrorBarBackgroundEnabled) {
+            this.drawBarBackground();
+        }
         for (let i = 0; i < this.eventHistory.length; i++) {
             this.drawEventTick(i, this.eventHistory[i]);
         }
@@ -124,11 +126,22 @@ export class ErrorBar implements AccuracyObserver, Drawable {
 
     private drawEventTick(eventIndex: number, accuracyEvent: AccuracyEvent): void {
         let x: number = this.getAccuracyX(accuracyEvent.accuracyMillis);
+        let width: number = this.getWidth(eventIndex);
         let opacity: number = this.getOpacity(eventIndex);
-        this.drawTick(x, opacity);
+        this.drawTick(x, width, opacity);
+    }
+
+    private getWidth(eventIndex: number): number {
+        if (eventIndex === this.eventHistory.length - 1) {
+            return 3;
+        }
+        return 1;
     }
 
     private getOpacity(eventIndex: number): number {
+        if (eventIndex === this.eventHistory.length - 1) {
+            return 0.7;
+        }
         let opacityRatio: number = (this.maxEventHistory - eventIndex - 1) / (this.maxEventHistory - 1);
         return lerp(0.2, 0.6, opacityRatio);
     }
@@ -140,11 +153,12 @@ export class ErrorBar implements AccuracyObserver, Drawable {
         return lerp(this.bounds.topLeftX, this.bounds.topLeftX + this.bounds.width, accuracyRatio);
     }
 
-    private drawTick(x: number, opacity: number): void {
+    private drawTick(centerX: number, width: number, opacity: number): void {
         let p: p5 = global.p5Scene.sketchInstance;
         p.push();
-        p.stroke(p.color(255, opacity * 255));
-        p.line(x, this.bounds.topLeftY, x, this.bounds.topLeftY + this.bounds.height);
+        p.fill(p.color(255, opacity * 255));
+        p.noStroke();
+        p.rect(centerX - width / 2, this.bounds.topLeftY, width, this.bounds.height);
         p.pop();
     }
 

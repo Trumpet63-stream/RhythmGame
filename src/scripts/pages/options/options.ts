@@ -246,6 +246,18 @@ export abstract class Options {
             },
             scrollDiv.element);
 
+        createUserInput(() => createLabeledSelect("Error Bar Background",
+            "errorBarBackgroundEnabledSelect", YesNo, booleanToYesNo(global.config.isErrorBarBackgroundEnabled),
+            Options.OPTIONS_CLASS),
+            this.isValidErrorBarBackground.bind(this),
+            this.showErrorBarBackgroundInfo.bind(this),
+            this.showErrorBarBackgroundError.bind(this),
+            (input: number | string) => {
+                global.config.isErrorBarBackgroundEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.save();
+            },
+            scrollDiv.element);
+
         let loginButton = DOMWrapper.create(() => {
             return p.createButton("Set Username/Password");
         }, "loginButton");
@@ -485,6 +497,20 @@ export abstract class Options {
     }
 
     private static showErrorBarError(): void {
+        this.showSelectError();
+    }
+
+    private static isValidErrorBarBackground(value: string | number): boolean {
+        return this.isValidYesNo(value);
+    }
+
+    private static showErrorBarBackgroundInfo(): void {
+        Ticker.setMessage(
+            "Displays a colored bar in the background of the accuracy tick marks on the error bar.",
+            TickerState.INFORMATION);
+    }
+
+    private static showErrorBarBackgroundError(): void {
         this.showSelectError();
     }
 

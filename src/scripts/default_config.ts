@@ -33,4 +33,5 @@ export let DEFAULT_CONFIG = {
     isComboTextEnabled: true,
     isLiveComparisonEnabled: true,
     isErrorBarEnabled: true,
+    isErrorBarBackgroundEnabled: true,
 };
