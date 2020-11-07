@@ -183,7 +183,38 @@ export abstract class LocalStorage {
             this.unableToAccessLocalStorage();
             return;
         }
-        window.localStorage.setItem(key, value);
+        try {
+            window.localStorage.setItem(key, value);
+        } catch (e) {
+            if (this.isQuotaExceeded(e)) {
+                console.error("Out of space. Could not save to local storage.")
+            }
+        }
+    }
+
+    // Thank you to CrocoDillon, see below
+    // https://github.com/CrocoDillon/crocodillon.com/blob/6f7491f1bce36630b1f554778b8bfd38c08285f3/data/articles/2014-12-23-always-catch-localstorage-security-and-quota-exceeded-errors.md
+    private static isQuotaExceeded(e: any) {
+        let quotaExceeded = false;
+        if (e) {
+            if (e.code) {
+                switch (e.code) {
+                    case 22:
+                        quotaExceeded = true;
+                        break;
+                    case 1014:
+                        // Firefox
+                        if (e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                            quotaExceeded = true;
+                        }
+                        break;
+                }
+            } else if (e.number === -2147024882) {
+                // Internet Explorer 8
+                quotaExceeded = true;
+            }
+        }
+        return quotaExceeded;
     }
 
     private static key(index: number): string | null {
