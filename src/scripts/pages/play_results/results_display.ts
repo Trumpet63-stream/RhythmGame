@@ -7,7 +7,6 @@ import {AccuracyUtil} from "../../accuracy_util";
 import {PageDescription} from "../page_manager";
 import {Rectangle} from "../../rectangle";
 import {Score, ScoreProvider} from "../../score_provider";
-import {LocalStorage} from "../../local_storage";
 
 export class ResultsDisplay {
     private config: Config;
@@ -31,7 +30,7 @@ export class ResultsDisplay {
         this.songTitle = songTitle;
         this.returnPage = returnPage;
         this.totalNotes = this.noteManager.getTotalNotes();
-        LocalStorage.saveReplay(currentRecording, noteManager, songTitle);
+        // OfflineStorageClient.saveReplay(currentRecording, noteManager, songTitle);
         let scoreProvider: ScoreProvider = new ScoreProvider(this.config, this.totalNotes);
         this.currentScore = scoreProvider.score(this.currentRecording.linearRecording);
 

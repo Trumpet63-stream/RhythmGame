@@ -1,4 +1,4 @@
-import {Note, NoteState, NoteType} from "../stepfile";
+import {Note, NoteState, NoteType} from "../note";
 
 export abstract class ParsingHelper {
     public static beatmapToTrackArray(beatmap: [number, string, string][]) {

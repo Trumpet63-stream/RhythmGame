@@ -16,14 +16,15 @@ import {HoldGlow} from "./hold_glow";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
 import {PageDescription} from "./pages/page_manager";
 import {Rectangle} from "./rectangle";
-import {Note} from "./stepfile";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
-import {KeyState, PlayerKeyAction} from "./player_key_action";
+import {KeyState, PlayerKeyEvent} from "./player_key_action";
 import {AccuracyEvent} from "./accuracy_event";
 import {ComboText} from "./combo_text";
 import {LiveComparison} from "./live_comparison";
 import {ErrorBar} from "./error_bar";
+import {Note, NoteState, NoteType} from "./note";
+import {AccuracyUtil} from "./accuracy_util";
 
 export abstract class AbstractPlayingDisplay {
     protected scene: P5Scene;
@@ -63,11 +64,7 @@ export abstract class AbstractPlayingDisplay {
             480
         )
         this.songTitle = songTitle;
-        this.initialize(tracks, audioFile, config, scene, returnPage);
     }
-
-    protected abstract initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
-                                  returnPage: PageDescription): void;
 
     protected handleAccuracyEvent(accuracyEvent: AccuracyEvent) {
         this.accuracyRecording.update(accuracyEvent);
@@ -79,6 +76,7 @@ export abstract class AbstractPlayingDisplay {
             this.liveComparison.update(accuracyEvent);
         }
         this.errorBar.update(accuracyEvent);
+        this.handleMiss(accuracyEvent);
     }
 
     public draw() {
@@ -120,10 +118,6 @@ export abstract class AbstractPlayingDisplay {
 
     protected abstract endSong(): void;
 
-    public replay() {
-        this.initialize(this.noteManager.tracks, this.audioFile, this.config, this.scene, this.returnPage);
-    }
-
     protected bindKeyBindingsToActions() {
         let keyBindings = global.config.keyBindings.get(this.noteManager.tracks.length);
         let isSpacebarBound: boolean = false;
@@ -134,12 +128,12 @@ export abstract class AbstractPlayingDisplay {
                 isSpacebarBound = true;
             }
             global.keyboardEventManager.bindKeyToAction(keyBinding.keyCode,
-                () => {
-                    this.keyDownActionForTrack(keyBinding.trackNumber)
-                },
-                () => {
-                    this.keyUpActionForTrack(keyBinding.trackNumber)
-                })
+                () => this.handlePlayerKeyEvent(
+                    new PlayerKeyEvent(this.timeManager.getCurrentTimeInSeconds(performance.now())
+                        , keyBinding.trackNumber, KeyState.DOWN)),
+                () => this.handlePlayerKeyEvent(
+                    new PlayerKeyEvent(this.timeManager.getCurrentTimeInSeconds(performance.now()),
+                        keyBinding.trackNumber, KeyState.UP)))
         }
 
         global.keyboardEventManager.bindKeyToAction(global.config.quitKey, () => {
@@ -153,18 +147,9 @@ export abstract class AbstractPlayingDisplay {
         }
     }
 
-    private keyDownActionForTrack(trackNumber: number) {
-        this.receptorShrinkReaction.holdTrack(trackNumber);
-        let playerKeyAction: PlayerKeyAction =
-            new PlayerKeyAction(this.timeManager.getCurrentTimeInSeconds(performance.now()), trackNumber, KeyState.DOWN);
-        this.accuracyManager.handlePlayerAction(playerKeyAction);
-    }
-
-    private keyUpActionForTrack(trackNumber: number) {
-        this.receptorShrinkReaction.releaseTrack(trackNumber);
-        let playerKeyAction: PlayerKeyAction =
-            new PlayerKeyAction(this.timeManager.getCurrentTimeInSeconds(performance.now()), trackNumber, KeyState.UP);
-        this.accuracyManager.handlePlayerAction(playerKeyAction);
+    private handlePlayerKeyEvent(playerKeyEvent: PlayerKeyEvent) {
+        this.receptorShrinkReaction.update(playerKeyEvent);
+        this.accuracyManager.handlePlayerKeyEvent(playerKeyEvent);
     }
 
     protected onTrackHold(trackNumber: number, currentTimeInSeconds: number) {
@@ -191,6 +176,28 @@ export abstract class AbstractPlayingDisplay {
         for (let i = 0; i < keyBindings.length; i++) {
             let keyBinding: KeyBinding = keyBindings[i];
             global.keyboardEventManager.unbindKey(keyBinding.keyCode);
+        }
+    }
+
+    private handleMiss(accuracyEvent: AccuracyEvent) {
+        if (!AccuracyUtil.eventIsAMiss(accuracyEvent, this.config)) {
+            return;
+        }
+        let track = this.noteManager.tracks[accuracyEvent.trackNumber];
+        let missedNote = track[accuracyEvent.noteIndex];
+        missedNote.state = NoteState.MISSED;
+        if (missedNote.type === NoteType.TAIL) {
+            if (this.holdManager.isTrackHeld(accuracyEvent.trackNumber)) {
+                // Force a hold release upon missing the tail
+                this.holdManager.unholdTrack(accuracyEvent.trackNumber, accuracyEvent.timeInSeconds)
+            }
+        } else if (missedNote.type === NoteType.HOLD_HEAD) {
+            let nextNote = track[accuracyEvent.noteIndex + 1];
+            if (nextNote !== undefined) {
+                if (nextNote.type === NoteType.TAIL) {
+                    nextNote.state = NoteState.MISSED; // Miss the tail when you miss the head
+                }
+            }
         }
     }
 }

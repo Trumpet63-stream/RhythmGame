@@ -1,10 +1,11 @@
 import {NoteManager} from "./note_manager";
 import {Config} from "./config";
 import {getMissBoundaryInSeconds} from "./util";
-import {Note, NoteState, NoteType} from "./stepfile";
 import {HoldManager} from "./hold_manager";
 import {AccuracyRecording} from "./accuracy_recording";
 import {AccuracyEvent} from "./accuracy_event";
+import {AccuracyUtil} from "./accuracy_util";
+import {Note, NoteState} from "./note";
 
 export class MissManager {
     private config: Config;
@@ -14,8 +15,8 @@ export class MissManager {
     private holdManager: HoldManager;
     private handleAccuracyEvent: (accuracyEvent: AccuracyEvent) => void;
 
-    constructor(config: Config, noteManager: NoteManager, accuracyRecording: AccuracyRecording,
-                holdManager: HoldManager, handleAccuracyEvent: (accuracyEvent: AccuracyEvent) => void) {
+    public constructor(config: Config, noteManager: NoteManager, accuracyRecording: AccuracyRecording,
+                       holdManager: HoldManager, handleAccuracyEvent: (accuracyEvent: AccuracyEvent) => void) {
         this.config = config;
         this.noteManager = noteManager;
         this.lastCheckedNoteIndices = [];
@@ -27,17 +28,17 @@ export class MissManager {
         this.handleAccuracyEvent = handleAccuracyEvent;
     }
 
-    update(currentTime: number) {
+    public update(currentTimeInSeconds: number) {
         if (this.config.accuracySettings[0].lowerBound !== null) {
             return; // A lowerBound for misses is incompatible with this way of doing misses
         }
         let numTracks = this.noteManager.tracks.length;
         for (let trackNumber = 0; trackNumber < numTracks; trackNumber++) {
-            this.handleAllMissedNotesForTrack(trackNumber, currentTime);
+            this.handleAllMissedNotesForTrack(trackNumber, currentTimeInSeconds);
         }
     }
 
-    private handleAllMissedNotesForTrack(trackNumber: number, currentTime: number) {
+    private handleAllMissedNotesForTrack(trackNumber: number, currentTimeInSeconds: number) {
         let indexOfLastCheckedNote = this.lastCheckedNoteIndices[trackNumber];
         let track: Note[] = this.noteManager.tracks[trackNumber];
         while (true) {
@@ -45,12 +46,13 @@ export class MissManager {
                 break;
             }
             let currentNote = track[indexOfLastCheckedNote];
-            if (this.isNotMissable(currentNote)) {
+            if (!this.isMissable(currentNote)) {
                 indexOfLastCheckedNote++;
                 continue;
             }
-            if (this.isNoteMissedAndNotHandled(currentNote, currentTime)) {
-                this.handleMissedNote(trackNumber, indexOfLastCheckedNote, currentTime);
+            if (this.isNoteMissedAndNotHandled(currentNote, currentTimeInSeconds)) {
+                // TODO: current time should be the earliest possible miss time, not just when the miss was detected
+                this.handleMissedNote(trackNumber, indexOfLastCheckedNote, currentTimeInSeconds);
                 indexOfLastCheckedNote++;
             } else {
                 break;
@@ -60,12 +62,12 @@ export class MissManager {
     }
 
     // For example: notes that have already been hit are not missable
-    private isNotMissable(note: Note) {
-        return note.state !== NoteState.DEFAULT;
+    private isMissable(note: Note) {
+        return note.state === NoteState.DEFAULT;
     }
 
-    private isNoteMissedAndNotHandled(note: Note, currentTime: number): boolean {
-        let missBoundary = getMissBoundaryInSeconds(currentTime, this.config);
+    private isNoteMissedAndNotHandled(note: Note, currentTimeInSeconds: number): boolean {
+        let missBoundary = getMissBoundaryInSeconds(currentTimeInSeconds, this.config);
         return note.timeInSeconds < missBoundary && note.state === NoteState.DEFAULT;
     }
 
@@ -75,22 +77,10 @@ export class MissManager {
         this.handleAccuracyEvent({
             accuracyName: this.config.accuracySettings[0].name,
             trackNumber: trackNumber,
-            accuracyMillis: -Infinity,
+            noteIndex: indexOfMissedNote,
+            accuracyMillis: AccuracyUtil.MISS_ACCURACY_FLAG,
             timeInSeconds: currentTimeInSeconds,
             noteType: missedNote.type
         });
-        missedNote.state = NoteState.MISSED;
-        if (missedNote.type === NoteType.TAIL) {
-            if (this.holdManager.isTrackHeld(trackNumber)) {
-                this.holdManager.unholdTrack(trackNumber, currentTimeInSeconds) // Force a hold release upon missing the tail
-            }
-        } else if (missedNote.type === NoteType.HOLD_HEAD) {
-            let nextNote = track[indexOfMissedNote + 1];
-            if (nextNote !== undefined) {
-                if (nextNote.type === NoteType.TAIL) {
-                    nextNote.state = NoteState.MISSED; // Miss the tail when you miss the head
-                }
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 import {Config} from "./config";
 import {DisplayConfig} from "./display_manager";
+import {KeyState, PlayerKeyEvent} from "./player_key_action";
 
 export class ReceptorShrinkReaction {
     private trackHoldStates: boolean[];
@@ -17,12 +18,8 @@ export class ReceptorShrinkReaction {
         }
     }
 
-    public holdTrack(trackNumber: number) {
-        this.trackHoldStates[trackNumber] = true;
-    }
-
-    public releaseTrack(trackNumber: number) {
-        this.trackHoldStates[trackNumber] = false;
+    public update(playerKeyEvent: PlayerKeyEvent) {
+        this.trackHoldStates[playerKeyEvent.track] = playerKeyEvent.keyState === KeyState.DOWN;
     }
 
     public draw() {

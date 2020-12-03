@@ -4,6 +4,10 @@ import {AccuracyEvent} from "./accuracy_event";
 import {AccuracyRecordingEntry} from "./accuracy_recording";
 
 export abstract class AccuracyUtil {
+    public static BOO_NOTE_INDEX_FLAG = -1;
+    public static BOO_ACCURACY_FLAG = Infinity;
+    public static MISS_ACCURACY_FLAG = -Infinity;
+
     public static isConfiguredForBoos(config: Config): boolean {
         return config.accuracySettings[config.accuracySettings.length - 1].upperBound === null;
     }

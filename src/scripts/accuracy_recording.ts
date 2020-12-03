@@ -1,5 +1,5 @@
-import {NoteType} from "./stepfile";
 import {AccuracyEvent} from "./accuracy_event";
+import {NoteType} from "./note";
 
 export enum AccuracyRecordingState {
     INCOMPLETE,
@@ -8,6 +8,7 @@ export enum AccuracyRecordingState {
 
 export interface AccuracyRecordingEntry {
     trackNumber: number,
+    noteIndex: number,
     timeInSeconds: number,
     accuracyMillis: number,
     noteType: NoteType
@@ -17,7 +18,16 @@ export interface Replay {
     songTitle: string
     numTracks: number,
     numNotes: number,
+    timestamp: string,
     entries: AccuracyRecordingEntry[]
+}
+
+export interface CompressedReplay {
+    songTitle: string
+    numTracks: number,
+    numNotes: number,
+    timestamp: string,
+    compressedEntries: string
 }
 
 export class AccuracyRecording {
@@ -37,6 +47,7 @@ export class AccuracyRecording {
     public update(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry) {
         let entry = {
             trackNumber: accuracyEvent.trackNumber,
+            noteIndex: accuracyEvent.noteIndex,
             timeInSeconds: accuracyEvent.timeInSeconds,
             accuracyMillis: accuracyEvent.accuracyMillis,
             noteType: accuracyEvent.noteType

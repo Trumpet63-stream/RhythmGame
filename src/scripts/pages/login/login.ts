@@ -4,6 +4,7 @@ import {createLabeledInput, drawHeading, setElementCenterPositionRelative} from 
 import {DOMWrapper} from "../../dom_wrapper";
 import {Config} from "../../config";
 import {PageManager, Pages} from "../page_manager";
+import {OfflineStorageClient} from "../../offline_storage_client/offline_storage_client";
 
 export abstract class Login {
     private static LOGIN_CLASS: string = "login";
@@ -41,8 +42,8 @@ export abstract class Login {
                     if (!this.isObfuscated(<string>password)) {
                         config.password = <string>password;
                     }
-                    config.save();
-                    PageManager.setCurrentPage(Pages.OPTIONS);
+                    OfflineStorageClient.saveConfig(config)
+                        .then(() => PageManager.setCurrentPage(Pages.OPTIONS));
                 }
             });
         }

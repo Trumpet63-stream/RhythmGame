@@ -8,14 +8,10 @@ import {Options} from "./pages/options/options";
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
     let headingClass = "navigation-heading";
-    let y: number = 0;
-    let x: number = 50;
-    let spacing: number = 52.8;
 
     let playFromFileButton = DOMWrapper.create(() => {
         return p.createButton("Play From File");
     }, "playFromFileButton");
-    setElementPosition(playFromFileButton.element, x, y);
     playFromFileButton.element.mousePressed(() => {
         PageManager.setCurrentPage(Pages.PLAY_FROM_FILE);
     });
@@ -23,12 +19,10 @@ export function drawHeading() {
         playFromFileButton.element.addClass(headingClass);
         playFromFileButton.element.addClass(global.globalClass);
     }
-    x += spacing + 130;
 
     let playFromOnlineButton = DOMWrapper.create(() => {
         return p.createButton("Play From Online");
     }, "playFromOnlineButton");
-    setElementPosition(playFromOnlineButton.element, x, y);
     playFromOnlineButton.element.mousePressed(() => {
         PageManager.setCurrentPage(Pages.PLAY_FROM_ONLINE);
     });
@@ -36,13 +30,10 @@ export function drawHeading() {
         playFromOnlineButton.element.addClass(headingClass);
         playFromOnlineButton.element.addClass(global.globalClass);
     }
-    x += spacing + 146;
-
 
     let optionsButton = DOMWrapper.create(() => {
         return p.createButton("Options");
     }, "optionsButton");
-    setElementPosition(optionsButton.element, x, y);
     optionsButton.element.mousePressed(() => {
         PageManager.setCurrentPage(Pages.OPTIONS);
     });
@@ -50,19 +41,28 @@ export function drawHeading() {
         optionsButton.element.addClass(headingClass);
         optionsButton.element.addClass(global.globalClass);
     }
-    x += spacing + 90;
-
 
     let storageButton = DOMWrapper.create(() => {
         return p.createButton("Storage");
     }, "storageButton");
-    setElementPosition(storageButton.element, x, y);
     storageButton.element.mousePressed(() => {
         PageManager.setCurrentPage(Pages.STORAGE);
     });
     if (!storageButton.alreadyExists) {
         storageButton.element.addClass(headingClass);
         storageButton.element.addClass(global.globalClass);
+    }
+
+    spaceElementsHorizontally(
+        [playFromFileButton.element, playFromOnlineButton.element, optionsButton.element, storageButton.element],
+        [130, 146, 90, 90], 50, 0, 52.8);
+}
+
+export function spaceElementsHorizontally(elements: p5.Element[], widths: number[], initialX: number, y: number, hSpacing: number) {
+    let x: number = initialX;
+    for (let i = 0; i < elements.length; i++) {
+        setElementPosition(elements[i], x, y);
+        x += hSpacing + widths[i];
     }
 }
 

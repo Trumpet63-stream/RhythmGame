@@ -2,9 +2,9 @@ import {DisplayConfig, DisplayManager} from "../../display_manager";
 import {NoteManager} from "../../note_manager";
 import {P5Scene} from "../../p5_scene";
 import {ScrollManager} from "../../scroll_manager";
-import {Note} from "../../stepfile";
 import {Config} from "../../config";
 import {Rectangle} from "../../rectangle";
+import {Note} from "../../note";
 
 export class PreviewDisplay {
     private scene: P5Scene;

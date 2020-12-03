@@ -9,6 +9,8 @@ import {SyncResults} from "./sync_results/sync_results";
 import {Storage} from "./storage/storage";
 import {Leaderboard} from "./leaderboard/leaderboard";
 import {Login} from "./login/login";
+import {Replays} from "./storage/replays";
+import {Replay} from "./replay/replay";
 
 export class PageDescription {
     public name: string;
@@ -45,11 +47,17 @@ export abstract class Pages {
     public static readonly STORAGE: PageDescription =
         new PageDescription("Storage", Storage.draw.bind(Storage));
 
+    public static readonly REPLAYS: PageDescription =
+        new PageDescription("Replays", Replays.draw.bind(Replays));
+
     public static readonly LEADERBOARD: PageDescription =
         new PageDescription("Leaderboard", Leaderboard.draw.bind(Leaderboard));
 
     public static readonly LOGIN: PageDescription =
         new PageDescription("Login", Login.draw.bind(Login));
+
+    public static readonly REPLAY: PageDescription =
+        new PageDescription("Replay", Replay.draw.bind(Replay));
 }
 
 export abstract class PageManager {

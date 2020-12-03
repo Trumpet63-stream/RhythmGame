@@ -2,12 +2,12 @@ import * as p5 from "p5";
 
 import {NoteManager} from "./note_manager";
 import {ScrollDirection} from "./scroll_direction";
-import {Note, NoteState, NoteType} from "./stepfile";
 import {global} from "./index";
 import {DefaultNoteSkin} from "./default_note_skin";
 import {Rectangle} from "./rectangle";
 import {NoteSkin} from "./note_skin";
 import {Point2D} from "./point_2d";
+import {Note, NoteState, NoteType} from "./note";
 
 class NoteDisplay {
     private readonly centerX: number;

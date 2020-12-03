@@ -1,4 +1,4 @@
-import {Note, NoteState, NoteType} from "./stepfile";
+import {Note, NoteState, NoteType} from "./note";
 
 export class NoteManager {
     public tracks: Note[][];
@@ -32,7 +32,7 @@ export class NoteManager {
         }
     }
 
-    getNotesByTimeRange(leastTime: number, greatestTime: number, trackNumber: number): { startIndex: number, endIndexNotInclusive: number } {
+    public getNotesByTimeRange(leastTime: number, greatestTime: number, trackNumber: number): { startIndex: number, endIndexNotInclusive: number } {
         let track = this.tracks[trackNumber];
         let firstFindResult = this.findIndexOfFirstNoteAfterTime(leastTime, track);
         if (firstFindResult < 0) {
@@ -53,7 +53,7 @@ export class NoteManager {
     }
 
     // This function assumes that no two notes will have the same time in the same track
-    findIndexOfFirstNoteAfterTime(keyTime: number, track: Note[], searchStart = 0) {
+    public findIndexOfFirstNoteAfterTime(keyTime: number, track: Note[], searchStart = 0) {
         for (let i = searchStart; i < track.length; i++) {
             if (track[i].timeInSeconds > keyTime) {
                 return i;
@@ -62,7 +62,7 @@ export class NoteManager {
         return -1;
     }
 
-    getEarliestNote(): Note {
+    public getEarliestNote(): Note {
         let earliestNote: Note;
         for (let i = 0; i < this.tracks.length; i++) {
             if (this.tracks[i].length > 0) {
@@ -77,7 +77,7 @@ export class NoteManager {
         return earliestNote;
     }
 
-    getLatestNote(): Note {
+    public getLatestNote(): Note {
         let latestNote: Note;
         for (let i = 0; i < this.tracks.length; i++) {
             if (this.tracks[i].length > 0) {

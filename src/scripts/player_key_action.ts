@@ -1,4 +1,4 @@
-export class PlayerKeyAction {
+export class PlayerKeyEvent {
     gameTime: number;
     track: number;
     keyState: KeyState;

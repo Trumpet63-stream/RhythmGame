@@ -1,8 +1,8 @@
 import * as p5 from "p5";
 import {global} from "./index";
 import {ScrollDirection} from "./scroll_direction";
-import {NoteType} from "./stepfile";
 import {Point2D} from "./point_2d";
+import {NoteType} from "./note";
 
 export interface NoteDraw {
     trackNumber: number,

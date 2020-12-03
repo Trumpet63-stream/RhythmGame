@@ -1,6 +1,6 @@
-import {NoteType} from "./stepfile";
 import {global} from "./index";
 import * as p5 from "p5";
+import {NoteType} from "./note";
 
 export abstract class DefaultNoteSkin {
     public static drawNote(trackNumber: number, numTracks: number, centerX: number, centerY: number, noteType: NoteType,

@@ -5,7 +5,6 @@ import {MissManager} from "../../miss_manager";
 import {AccuracyManager} from "../../accuracy_manager";
 import {ScrollManager} from "../../scroll_manager";
 import {ResultsDisplay} from "../play_results/results_display";
-import {Note} from "../../stepfile";
 import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
@@ -25,30 +24,23 @@ import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {ComboText} from "../../combo_text";
 import {Point2D} from "../../point_2d";
 import {LiveComparison} from "../../live_comparison";
-import {LocalStorage} from "../../local_storage";
 import {ScoreProvider} from "../../score_provider";
-import {StorageUtil} from "../../storage_util";
-import {DatabaseClient} from "../../database_client/database_client";
-import {PutRequest} from "../../database_client/put_request";
-import {PutResponse} from "../../database_client/put_response";
 import {ErrorBar} from "../../error_bar";
+import {Note} from "../../note";
+import {PlayResults} from "../play_results/play_results";
 
 export class PlayingDisplay extends AbstractPlayingDisplay {
     private comparisonReplay: Replay;
 
-    protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
-                         returnPage: PageDescription) {
+    public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
+                       returnPage: PageDescription, songTitle: string, replay?: Replay, scoreProvider?: ScoreProvider) {
+        super(tracks, audioFile, config, scene, returnPage, songTitle);
+
         this.showResultsScreen = false;
         this.audioFile = audioFile;
         this.config = config;
         this.scene = scene;
         this.returnPage = returnPage;
-
-        // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
-        if (!this.isDebugMode) {
-            this.timeManager = new GameTimeManager(this.config);
-            this.audioFile.play(config.pauseAtStartInSeconds);
-        }
 
         this.noteManager = new NoteManager(tracks);
         let numTracks: number = this.noteManager.tracks.length;
@@ -62,21 +54,11 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.holdGlow = new HoldGlow(this.config, numTracks, this.displayManager);
         this.holdManager = new HoldManager(numTracks, this.onTrackHold.bind(this), this.onTrackUnhold.bind(this));
 
-        if (this.isDebugMode) {
-            this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
-        }
-
         this.gameEndTime = this.calculateGameEnd();
         this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.holdManager,
             this.handleAccuracyEvent.bind(this));
         this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
             this.handleAccuracyEvent.bind(this));
-
-        let scoreProvider = new ScoreProvider(this.config, this.noteManager.getTotalNotes());
-        let replay: Replay | null = LocalStorage.loadPBReplay(tracks, scoreProvider);
-        if (replay !== null) {
-            this.comparisonReplay = replay;
-        }
 
         this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
         this.comboText = new ComboText(new Point2D(this.bounds.center.x, this.bounds.center.y + 18), this.config);
@@ -85,16 +67,28 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
         this.errorBar = new ErrorBar(this.config);
 
-        if (this.config.isLiveComparisonEnabled) {
-            if (replay !== null) {
-                this.liveComparison = new LiveComparison(replay, scoreProvider);
-            }
+        if (replay !== undefined) {
+            this.comparisonReplay = replay;
+        }
+
+        if (this.config.isLiveComparisonEnabled && replay !== undefined && scoreProvider !== undefined) {
+            this.liveComparison = new LiveComparison(replay, scoreProvider);
         }
 
         if (!isKeyBindingsDefined(numTracks)) {
             initializeKeyBindings(numTracks);
         }
         this.bindKeyBindingsToActions();
+
+        // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
+        if (!this.isDebugMode) {
+            this.timeManager = new GameTimeManager(this.config);
+            this.audioFile.play(config.pauseAtStartInSeconds);
+        }
+
+        if (this.isDebugMode) {
+            this.timeManager = new ScrollManager(this.config, this.scene.sketchInstance);
+        }
     }
 
     protected getNotesEndTime() {
@@ -120,20 +114,15 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
         this.audioFile.stop();
         global.resultsDisplay = new ResultsDisplay(this.config, this.noteManager, this.scene.sketchInstance,
             this.accuracyRecording, this.comparisonReplay, this.songTitle, this.returnPage);
-        PageManager.setCurrentPage(Pages.PLAY_RESULTS);
         this.unbindKeys();
         clearInterval(this.timeDiffInterval);
-        global.submitLastPlayScore = this.submitScore.bind(this);
-    }
-
-    private async submitScore(): Promise<PutResponse> {
-        let songhash: string = StorageUtil.getKeyFromTracks(this.noteManager.tracks);
-        let client: DatabaseClient = new DatabaseClient(global.config.username, global.config.password);
-        let putRequest: PutRequest = {
-            songhash: songhash,
-            songname: this.songTitle,
-            score: global.resultsDisplay.currentScore.percentScore
-        };
-        return client.putIfBetterScore(putRequest);
+        PlayResults.messageFromLastPlay = {
+            accuracyRecording: this.accuracyRecording,
+            noteManager: this.noteManager,
+            returnPage: this.returnPage,
+            songTitle: this.songTitle,
+            isReplay: false
+        }
+        PageManager.setCurrentPage(Pages.PLAY_RESULTS);
     }
 }

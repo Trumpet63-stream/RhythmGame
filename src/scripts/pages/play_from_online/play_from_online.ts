@@ -1,16 +1,22 @@
 import {global} from "../../index";
 import * as p5 from "p5";
-import {createLabeledInput, drawHeading, setElementCenterPositionRelative} from "../../ui_util";
+import {
+    createLabeledInput,
+    drawHeading,
+    setElementCenterPositionRelative,
+    spaceElementsHorizontally
+} from "../../ui_util";
 import {DOMWrapper} from "../../dom_wrapper";
 import {PageManager, Pages} from "../page_manager";
 import {OnlinePlaylist, OnlinePlaylistState} from "./online_playlist";
-import {initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
+import {disableButton, enableButton, initPlayingDisplay, initSyncGameDisplay, isFilesReady} from "../../util";
 import {Stepfile} from "../../stepfile";
 import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {RadioTable} from "../../radio_table";
 import {PageControls} from "../../page_controls";
 import {StorageUtil} from "../../storage_util";
 import {Leaderboard} from "../leaderboard/leaderboard";
+import {Replays} from "../storage/replays";
 
 const playFromOnlineStepfile = new Stepfile();
 const playFromOnlineAudioFile = new HtmlAudioElementHelper();
@@ -44,13 +50,13 @@ export abstract class PlayFromOnline {
             loadPlaylistButton.element.mouseClicked(() => {
                 let value: string | number = urlInput.element.value();
                 if (typeof value === "string") {
-                    loadPlaylistButton.element.attribute('disabled', '');
+                    disableButton(loadPlaylistButton.element);
                     onlinePlaylist.kickOffLoadPlaylist(value);
                 }
             });
         }
         if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_PLAYLIST) {
-            loadPlaylistButton.element.removeAttribute('disabled');
+            enableButton(loadPlaylistButton.element);
         }
 
         let playlistMenuId = "playlistMenu"
@@ -66,20 +72,27 @@ export abstract class PlayFromOnline {
             let loadAndPlayButtonId = "loadAndPlayButton";
             let loadAndSyncButtonId = "loadAndSyncButton";
             let leaderboardButtonId = "leaderboardButton";
+            let replaysButtonId = "replaysButton";
             if (playlistMenu.value() !== "") {
                 let leaderboardButton = DOMWrapper.create(() => {
                     return p.createButton("Leaderboard");
                 }, leaderboardButtonId);
-                setElementCenterPositionRelative(leaderboardButton.element, 0.2, 0.90, 80, 34);
                 if (!leaderboardButton.alreadyExists) {
                     leaderboardButton.element.addClass(global.globalClass);
                     this.setLeaderboardButtonBehavior(leaderboardButton.element, playlistMenu, onlinePlaylist);
                 }
 
+                let replaysButton = DOMWrapper.create(() => {
+                    return p.createButton("Replays");
+                }, replaysButtonId);
+                if (!replaysButton.alreadyExists) {
+                    replaysButton.element.addClass(global.globalClass);
+                    this.setReplaysButtonBehavior(replaysButton.element, playlistMenu, onlinePlaylist);
+                }
+
                 let loadAndPlayButton = DOMWrapper.create(() => {
                     return p.createButton("Load And Play");
                 }, loadAndPlayButtonId);
-                setElementCenterPositionRelative(loadAndPlayButton.element, 0.5, 0.90, 118, 34);
                 if (!loadAndPlayButton.alreadyExists) {
                     loadAndPlayButton.element.addClass(global.globalClass);
                     this.setLoadAndPlayButtonBehavior(loadAndPlayButton.element, playlistMenu, onlinePlaylist);
@@ -88,20 +101,22 @@ export abstract class PlayFromOnline {
                 let loadAndSyncButton = DOMWrapper.create(() => {
                     return p.createButton("Load Audio Sync Wizard");
                 }, loadAndSyncButtonId);
-                setElementCenterPositionRelative(loadAndSyncButton.element, 0.8, 0.90, 177, 34);
                 if (!loadAndSyncButton.alreadyExists) {
                     loadAndSyncButton.element.addClass(global.globalClass);
                     this.setSyncButtonBehavior(loadAndSyncButton.element, playlistMenu, onlinePlaylist);
                 }
 
+                spaceElementsHorizontally(
+                    [leaderboardButton.element, replaysButton.element, loadAndPlayButton.element, loadAndSyncButton.element],
+                    [109, 79, 118, 176], 46, 420, 50);
+
                 if (onlinePlaylist.state !== OnlinePlaylistState.LOADING_SONG) {
-                    loadAndPlayButton.element.removeAttribute('disabled');
+                    enableButton(loadAndPlayButton.element);
                 }
 
                 if (isFilesReady(playFromOnlineStepfile, playFromOnlineAudioFile) && isSwfLoadStarted) {
                     this.onSongLoaded();
                 }
-
             } else {
                 DOMWrapper.removeElementById(loadAndPlayButtonId);
                 DOMWrapper.removeElementById(loadAndSyncButtonId);
@@ -124,15 +139,24 @@ export abstract class PlayFromOnline {
                 }));
     }
 
+    private static setReplaysButtonBehavior(replayButton: p5.Element, playlistMenu: p5.Element,
+                                            onlinePlaylist: OnlinePlaylist) {
+        replayButton.mouseClicked(
+            PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, replayButton, playlistMenu, onlinePlaylist,
+                () => {
+                    Replays.initialize(playFromOnlineStepfile, <HtmlAudioElementHelper>playFromOnlineAudioFile, Pages.PLAY_FROM_ONLINE);
+                    PageManager.setCurrentPage(Pages.REPLAYS);
+                }));
+    }
+
     private static setLoadAndPlayButtonBehavior(loadAndPlayButton: p5.Element, playlistMenu: p5.Element,
                                                 onlinePlaylist: OnlinePlaylist) {
         loadAndPlayButton.mouseClicked(
             PlayFromOnline.loadSelectedSongAndDisableButton.bind(this, loadAndPlayButton, playlistMenu, onlinePlaylist,
-                () => {
+                () =>
                     initPlayingDisplay(playFromOnlineStepfile.tracks, playFromOnlineAudioFile,
-                        Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle);
-                    PageManager.setCurrentPage(Pages.PLAY);
-                }));
+                        Pages.PLAY_FROM_ONLINE, playFromOnlineStepfile.songTitle)
+                        .then(() => PageManager.setCurrentPage(Pages.PLAY))));
     }
 
     private static setSyncButtonBehavior(loadAndSyncButton: p5.Element, playlistMenu: p5.Element,
@@ -154,7 +178,7 @@ export abstract class PlayFromOnline {
             value = parseInt(value);
         }
         if (Number.isInteger(value)) {
-            button.attribute('disabled', '');
+            disableButton(button);
             onlinePlaylist.kickOffLoadSong(value, playFromOnlineStepfile, playFromOnlineAudioFile);
             isSwfLoadStarted = true;
         }

@@ -19,6 +19,7 @@ import {KeyBindingsUi} from "./key_bindings_ui";
 import {Ticker, TickerState} from "./ticker";
 import {getEnum, getFloat} from "../../util";
 import {PageManager, Pages} from "../page_manager";
+import {OfflineStorageClient} from "../../offline_storage_client/offline_storage_client";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -52,7 +53,7 @@ export abstract class Options {
 
             resetConfigButton.element.mousePressed(() => {
                 global.config = new Config({});
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
                 KeyBindingsUi.resetNumTracks();
                 KeyBindingsUi.regeneratePreview();
                 DOMWrapper.clearRegistry();
@@ -68,7 +69,7 @@ export abstract class Options {
             this.showPauseAtStartError.bind(this),
             (input: number | string) => {
                 global.config.pauseAtStartInSeconds = getFloat(input);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -79,7 +80,7 @@ export abstract class Options {
             this.showScrollSpeedError.bind(this),
             (input: number | string) => {
                 global.config.pixelsPerSecond = getFloat(input);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -90,7 +91,7 @@ export abstract class Options {
             this.showScrollDirectionError.bind(this),
             (input: number | string) => {
                 global.config.scrollDirection = getEnum(input, ScrollDirection);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -101,7 +102,7 @@ export abstract class Options {
             this.showReceptorPositionError.bind(this),
             (input: number | string) => {
                 global.config.receptorYPercent = getFloat(input);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -112,7 +113,7 @@ export abstract class Options {
             this.showNoteSizeError.bind(this),
             (input: number | string) => {
                 global.config.noteSize = getFloat(input);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -123,7 +124,7 @@ export abstract class Options {
             this.showNoteSpacingError.bind(this),
             (input: number | string) => {
                 global.config.noteSpacing = getFloat(input);
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -135,7 +136,7 @@ export abstract class Options {
             this.showAdditionalOffsetError.bind(this),
             (input: number | string) => {
                 global.config.additionalOffsetInSeconds = getFloat(input) / 1000;
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -147,7 +148,7 @@ export abstract class Options {
             this.showAccuracySettingsError.bind(this),
             (input: number | string) => {
                 global.config.accuracySettings = parseAccuracySettingsJson(String(input));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -159,7 +160,7 @@ export abstract class Options {
             this.showAccuracyFlashError.bind(this),
             (input: number | string) => {
                 global.config.isAccuracyFlashEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -171,7 +172,7 @@ export abstract class Options {
             this.showAccuracyParticlesError.bind(this),
             (input: number | string) => {
                 global.config.isAccuracyParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -183,7 +184,7 @@ export abstract class Options {
             this.showAccuracyTextError.bind(this),
             (input: number | string) => {
                 global.config.isAccuracyTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -195,7 +196,7 @@ export abstract class Options {
             this.showHoldParticlesError.bind(this),
             (input: number | string) => {
                 global.config.isHoldParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -206,7 +207,7 @@ export abstract class Options {
             this.showHoldGlowError.bind(this),
             (input: number | string) => {
                 global.config.isHoldGlowEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -218,7 +219,7 @@ export abstract class Options {
             this.showComboTextError.bind(this),
             (input: number | string) => {
                 global.config.isComboTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -230,7 +231,7 @@ export abstract class Options {
             this.showLiveComparisonError.bind(this),
             (input: number | string) => {
                 global.config.isLiveComparisonEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -242,7 +243,7 @@ export abstract class Options {
             this.showErrorBarError.bind(this),
             (input: number | string) => {
                 global.config.isErrorBarEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 
@@ -254,7 +255,7 @@ export abstract class Options {
             this.showErrorBarBackgroundError.bind(this),
             (input: number | string) => {
                 global.config.isErrorBarBackgroundEnabled = yesNoToBoolean(getEnum(input, YesNo));
-                global.config.save();
+                OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
 

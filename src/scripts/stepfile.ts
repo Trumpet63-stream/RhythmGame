@@ -1,6 +1,7 @@
 import {FullParse, getFullParse, getPartialParse, ParsedNoteInfo, PartialParse} from "./parsing/parse_sm";
 import {ParsingHelper} from "./playlist_client/parsing_helper";
 import {compareModeOptions, getEmpty2dArray} from "./util";
+import {Note, NoteState, NoteType} from "./note";
 
 export enum StepfileState {
     NO_STEPFILE,
@@ -8,16 +9,6 @@ export enum StepfileState {
     PARTIALLY_PARSED,
     FULLY_PARSED,
     ERROR,
-}
-
-export enum NoteType {
-    NONE,
-    NORMAL,
-    HOLD_HEAD,
-    TAIL,
-    ROLL_HEAD,
-    MINE,
-    UNKNOWN,
 }
 
 function stringToNoteType(string: string): NoteType {
@@ -35,21 +26,6 @@ function stringToNoteType(string: string): NoteType {
         default:
             return NoteType.UNKNOWN;
     }
-}
-
-export enum NoteState {
-    DEFAULT,
-    HIT,
-    MISSED,
-    HELD,
-}
-
-export interface Note {
-    type: NoteType,
-    timeInSeconds: number,
-    trackNumber: number,
-    state: NoteState,
-    beatFraction: number
 }
 
 export interface Mode {

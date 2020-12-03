@@ -4,7 +4,6 @@ import {NoteManager} from "../../note_manager";
 import {MissManager} from "../../miss_manager";
 import {AccuracyManager} from "../../accuracy_manager";
 import {ScrollManager, ScrollManagerConfig} from "../../scroll_manager";
-import {Note} from "../../stepfile";
 import {HoldManager} from "../../hold_manager";
 import {Config} from "../../config";
 import {initializeKeyBindings, isKeyBindingsDefined} from "../../util";
@@ -24,8 +23,21 @@ import {HtmlAudioElementHelper} from "../../audio/html_audio_element_helper";
 import {AbstractPlayingDisplay} from "../../abstract_playing_display";
 import {ComboText} from "../../combo_text";
 import {Point2D} from "../../point_2d";
+import {Note} from "../../note";
+import {ErrorBar} from "../../error_bar";
 
 export class SyncGameDisplay extends AbstractPlayingDisplay {
+
+    public constructor(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
+                       returnPage: PageDescription, songTitle: string) {
+        super(tracks, audioFile, config, scene, returnPage, songTitle);
+        this.initialize(tracks, audioFile, config, scene, returnPage);
+    }
+
+    public replay() {
+        this.initialize(this.noteManager.tracks, this.audioFile, this.config, this.scene, this.returnPage);
+    }
+
     protected initialize(tracks: Note[][], audioFile: HtmlAudioElementHelper, config: Config, scene: P5Scene,
                          returnPage: PageDescription) {
         this.showResultsScreen = false;
@@ -45,6 +57,35 @@ export class SyncGameDisplay extends AbstractPlayingDisplay {
 
         this.noteManager.hideAllNotesAfterIndex(19);
 
+        let numTracks: number = this.noteManager.tracks.length;
+        this.accuracyRecording = new AccuracyRecording(numTracks);
+
+        this.displayConfig = new PlayingConfig(this.config, numTracks);
+        this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
+            this.bounds);
+
+        this.holdParticles = new HoldParticles(this.config, numTracks, this.displayManager);
+        this.holdGlow = new HoldGlow(this.config, numTracks, this.displayManager);
+        this.holdManager = new HoldManager(numTracks, this.onTrackHold.bind(this), this.onTrackUnhold.bind(this));
+
+        this.gameEndTime = this.calculateGameEnd();
+        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.holdManager,
+            this.handleAccuracyEvent.bind(this));
+        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
+            this.handleAccuracyEvent.bind(this));
+
+        this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
+        this.comboText = new ComboText(new Point2D(this.bounds.center.x, this.bounds.center.y + 18), this.config);
+        this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
+        this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
+        this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
+        this.errorBar = new ErrorBar(this.config);
+
+        if (!isKeyBindingsDefined(numTracks)) {
+            initializeKeyBindings(numTracks);
+        }
+        this.bindKeyBindingsToActions();
+
         // initialize the time manager and play the audio as close together as possible to synchronize the audio with the game
         if (!this.isDebugMode) {
             this.timeManager = new GameTimeManager(partialConfig);
@@ -61,37 +102,9 @@ export class SyncGameDisplay extends AbstractPlayingDisplay {
             }, 5000);
         }
 
-        let numTracks: number = this.noteManager.tracks.length;
-        this.accuracyRecording = new AccuracyRecording(numTracks);
-
-        this.displayConfig = new PlayingConfig(this.config, numTracks);
-        this.displayManager = new DisplayManager(this.noteManager, this.displayConfig, this.scene.sketchInstance,
-            this.bounds);
-
-        this.holdParticles = new HoldParticles(this.config, numTracks, this.displayManager);
-        this.holdGlow = new HoldGlow(this.config, numTracks, this.displayManager);
-        this.holdManager = new HoldManager(numTracks, this.onTrackHold.bind(this), this.onTrackUnhold.bind(this));
-
         if (this.isDebugMode) {
             this.timeManager = new ScrollManager(partialConfig, this.scene.sketchInstance);
         }
-
-        this.gameEndTime = this.calculateGameEnd();
-        this.accuracyManager = new AccuracyManager(this.noteManager, this.config, this.holdManager,
-            this.handleAccuracyEvent.bind(this));
-        this.missManager = new MissManager(this.config, this.noteManager, this.accuracyRecording, this.holdManager,
-            this.handleAccuracyEvent.bind(this));
-
-        this.accuracyFeedbackText = new AccuracyFeedbackText(this.bounds.center, this.config);
-        this.comboText = new ComboText(new Point2D(this.bounds.center.x, this.bounds.center.y + 18), this.config);
-        this.accuracyFeedbackFlash = new AccuracyFeedbackFlash(this.config, this.displayManager, numTracks);
-        this.receptorShrinkReaction = new ReceptorShrinkReaction(this.config, this.displayConfig, numTracks);
-        this.accuracyFeedbackParticles = new AccuracyFeedbackParticles(this.config, this.displayManager, numTracks);
-
-        if (!isKeyBindingsDefined(numTracks)) {
-            initializeKeyBindings(numTracks);
-        }
-        this.bindKeyBindingsToActions();
     }
 
     private getNotesEndTime() {

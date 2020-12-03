@@ -3,6 +3,8 @@ import {setElementCenterPositionRelative} from "../../ui_util";
 import * as p5 from "p5";
 import {PageManager, Pages} from "../page_manager";
 import {DOMWrapper} from "../../dom_wrapper";
+import {SyncGameDisplay} from "../sync/sync_game_display";
+import {SyncResultsDisplay} from "./sync_results_display";
 
 export abstract class SyncResults {
     public static draw() {
@@ -18,8 +20,8 @@ export abstract class SyncResults {
         if (!applyButton.alreadyExists) {
             applyButton.element.addClass(global.globalClass);
             applyButton.element.mouseClicked(() => {
-                global.syncResultsDisplay.applyRecommendedChange();
-                global.syncGameDisplay.replay();
+                (<SyncResultsDisplay>global.syncResultsDisplay).applyRecommendedChange();
+                (<SyncGameDisplay>global.syncGameDisplay).replay();
                 PageManager.setCurrentPage(Pages.SYNC);
             })
         }

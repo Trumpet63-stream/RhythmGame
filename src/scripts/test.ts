@@ -117,3 +117,14 @@ export function testRhythmClassifier() {
     let success: boolean = arraysEqual(classifications, [1, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 12, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 6, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 4, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 3, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 12, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 2, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 12, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 3, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192, 4, 192, 96, 64, 48, 192, 32, 192, 24, 64, 96, 192, 16, 192, 96, 64, 6, 192, 32, 192, 48, 64, 96, 192, 8, 192, 96, 64, 48, 192, 32, 192, 12, 64, 96, 192, 16, 192, 96, 64, 24, 192, 32, 192, 48, 64, 96, 192]);
     console.log("rhythm classifier test success = " + success);
 }
+
+export function checkEndian(): string {
+    let arrayBuffer = new ArrayBuffer(2);
+    let uint8Array = new Uint8Array(arrayBuffer);
+    let uint16array = new Uint16Array(arrayBuffer);
+    uint8Array[0] = 0xAA; // set first byte
+    uint8Array[1] = 0xBB; // set second byte
+    if (uint16array[0] === 0xBBAA) return "little endian";
+    if (uint16array[0] === 0xAABB) return "big endian";
+    else throw new Error("Something crazy just happened");
+}

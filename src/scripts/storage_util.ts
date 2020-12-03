@@ -1,5 +1,5 @@
-import {Note, NoteType} from "./stepfile";
 import {SHA3} from "sha3";
+import {Note, NoteType} from "./note";
 
 export interface ConvertedNote {
     noteType: NoteType;

@@ -2,12 +2,16 @@ import {Config} from "./config";
 import {global} from "./index";
 import {KeyBinding} from "./key_binding_helper";
 import * as p5 from "p5";
-import {Mode, Note, NoteState, NoteType, Stepfile, StepfileState} from "./stepfile";
+import {Mode, Stepfile, StepfileState} from "./stepfile";
 import {AudioFile, AudioFileState} from "./audio/audio_file";
 import {PlayingDisplay} from "./pages/play/playing_display";
 import {SyncGameDisplay} from "./pages/sync/sync_game_display";
 import {HtmlAudioElementHelper} from "./audio/html_audio_element_helper";
 import {PageDescription} from "./pages/page_manager";
+import {Note, NoteState, NoteType} from "./note";
+import {OfflineStorageClient} from "./offline_storage_client/offline_storage_client";
+import {ScoreProvider} from "./score_provider";
+import {Replay} from "./accuracy_recording";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -46,13 +50,13 @@ export function initializeKeyBindings(numTracks: number) {
     }
 
     global.config.keyBindings.set(numTracks, mapping);
-    global.config.save();
+    OfflineStorageClient.saveConfig(<Config>global.config);
 }
 
 export function setConfigKeyBinding(trackNumber: number, numTracks: number, keyBinding: KeyBinding) {
     let bindingIndex = getIndexOfTrackNumberBinding(trackNumber, global.config.keyBindings.get(numTracks));
     global.config.keyBindings.get(numTracks)[bindingIndex] = keyBinding;
-    global.config.save();
+    OfflineStorageClient.saveConfig(<Config>global.config);
 }
 
 // Expects e to be an enum
@@ -186,9 +190,18 @@ export function isFilesReady(stepfile: Stepfile, audioFile: AudioFile) {
     return stepfileReady && audioFileReady;
 }
 
-export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PageDescription, songTitle: string) {
-    global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config,
-        global.p5Scene, returnPage, songTitle);
+export function initPlayingDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PageDescription, songTitle: string): Promise<void> {
+    let scoreProvider = new ScoreProvider(global.config, countItemsIn2dArray(tracks));
+    return OfflineStorageClient.loadPBReplay(tracks, scoreProvider)
+        .then((replay: Replay | null) => {
+            if (replay !== null) {
+                global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config,
+                    global.p5Scene, returnPage, songTitle, replay, scoreProvider);
+            } else {
+                global.playingDisplay = new PlayingDisplay(tracks, <HtmlAudioElementHelper>audioFile, global.config,
+                    global.p5Scene, returnPage, songTitle);
+            }
+        });
 }
 
 export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile, returnPage: PageDescription, songTitle: string) {
@@ -251,4 +264,20 @@ export function getEmpty2dArray(numRows: number): any[][] {
         array.push([]);
     }
     return array;
+}
+
+function countItemsIn2dArray(array2d: any[][]) {
+    return array2d.reduce((sum, array) => sum + array.length, 0);
+}
+
+export function disableButton(button: p5.Element) {
+    button.attribute("disabled", "");
+}
+
+export function enableButton(button: p5.Element) {
+    button.removeAttribute("disabled");
+}
+
+export function getNowTimestamp(): string {
+    return new Date().toISOString();
 }

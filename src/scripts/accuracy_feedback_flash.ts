@@ -92,7 +92,6 @@ export class AccuracyFeedbackFlash implements AccuracyObserver, Drawable {
         p.push();
         p.translate(centerX, centerY);
         p.fill(color);
-        // p.fill(255, 255, 255, 150);
         p.noStroke();
         this.drawStar(p, 0, 0, flashSize, flashSize * 0.4, 4);
         p.pop();

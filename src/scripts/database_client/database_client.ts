@@ -7,6 +7,7 @@ import {QueryResponse} from "./query_response";
 import {PutRequest} from "./put_request";
 import {PutResponse, PutResponseCode} from "./put_response";
 import {QueryResponseEntry} from "./query_response_entry";
+import {getNowTimestamp} from "../util";
 import AttributeMap = DocumentClient.AttributeMap;
 
 export class DatabaseClient {
@@ -81,7 +82,7 @@ export class DatabaseClient {
                 "songhash": request.songhash,
                 "songname": request.songname,
                 "score": request.score,
-                "timestamp": this.getNowTimestamp()
+                "timestamp": getNowTimestamp()
             },
             ConditionExpression: "attribute_not_exists(user_songhash) OR score < :newScore",
             ExpressionAttributeValues: {
@@ -101,9 +102,5 @@ export class DatabaseClient {
                 }
                 throw new Error(reason);
             });
-    }
-
-    private getNowTimestamp(): string {
-        return new Date().toISOString();
     }
 }
