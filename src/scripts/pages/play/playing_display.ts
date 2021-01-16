@@ -121,7 +121,7 @@ export class PlayingDisplay extends AbstractPlayingDisplay {
             noteManager: this.noteManager,
             returnPage: this.returnPage,
             songTitle: this.songTitle,
-            isReplay: false
+            saveEnabled: true
         }
         PageManager.setCurrentPage(Pages.PLAY_RESULTS);
     }

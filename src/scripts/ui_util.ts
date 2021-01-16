@@ -53,9 +53,20 @@ export function drawHeading() {
         storageButton.element.addClass(global.globalClass);
     }
 
+    let experimentalButton = DOMWrapper.create(() => {
+        return p.createButton("Experimental");
+    }, "experimentalButton");
+    experimentalButton.element.mousePressed(() => {
+        PageManager.setCurrentPage(Pages.EXPERIMENT_CONFIG);
+    });
+    if (!experimentalButton.alreadyExists) {
+        experimentalButton.element.addClass(headingClass);
+        experimentalButton.element.addClass(global.globalClass);
+    }
+
     spaceElementsHorizontally(
-        [playFromFileButton.element, playFromOnlineButton.element, optionsButton.element, storageButton.element],
-        [130, 146, 90, 90], 50, 0, 52.8);
+        [playFromFileButton.element, playFromOnlineButton.element, optionsButton.element, storageButton.element, experimentalButton.element],
+        [130, 146, 90, 90, 123], 23.5, 0, 23.5);
 }
 
 export function spaceElementsHorizontally(elements: p5.Element[], widths: number[], initialX: number, y: number, hSpacing: number) {

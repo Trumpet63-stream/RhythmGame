@@ -18,7 +18,7 @@ export interface ResultsMessage {
     noteManager: NoteManager,
     returnPage: PageDescription,
     songTitle: string,
-    isReplay: boolean
+    saveEnabled: boolean
 }
 
 export abstract class PlayResults {
@@ -41,7 +41,7 @@ export abstract class PlayResults {
             })
         }
 
-        if (!this.messageFromLastPlay.isReplay) {
+        if (this.messageFromLastPlay.saveEnabled) {
             let saveReplayOfflineButton = DOMWrapper.create(() => {
                 return p.createButton("Save Replay");
             }, "saveReplayOfflineButton");

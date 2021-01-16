@@ -18,7 +18,7 @@ export class NoteManager {
                 let note: Note = track[noteNumber];
                 if (!supportedNoteTypes.includes(note.type)) {
                     track.splice(noteNumber, 1);
-                    noteNumber--; // decrement note number so next iteration it starts at the right note
+                    noteNumber--;
                 }
             }
         }

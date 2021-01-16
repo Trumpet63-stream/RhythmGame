@@ -12,6 +12,7 @@ import {Note, NoteState, NoteType} from "./note";
 import {OfflineStorageClient} from "./offline_storage_client/offline_storage_client";
 import {ScoreProvider} from "./score_provider";
 import {Replay} from "./accuracy_recording";
+import {ExperimentDisplay} from "./pages/experiment/experiment_display";
 
 export function defaultIfUndefined(value: any, defaultValue: any): any {
     return isUndefined(value) ? defaultValue : value;
@@ -209,6 +210,11 @@ export function initSyncGameDisplay(tracks: Note[][], audioFile: AudioFile, retu
         global.p5Scene, returnPage, songTitle);
 }
 
+export function initExperimentDisplay(numTracks: number, returnPage: PageDescription, songTitle: string) {
+    let tracks = getEmpty2dArray(numTracks);
+    global.experimentDisplay = new ExperimentDisplay(tracks, global.config, global.p5Scene, returnPage, songTitle);
+}
+
 export function enumToString(TheEnum: any, value: any) {
     return TheEnum[value as keyof typeof TheEnum].toString();
 }
@@ -249,6 +255,16 @@ export function lerp(startValue: number, endValue: number, ratio: number) {
     }
 }
 
+export function mapLinear(fromStart: number, fromEnd: number, toStart: number, toEnd: number, fromValue: number) {
+    if (fromValue < fromStart) {
+        return toStart;
+    } else if (fromValue > fromEnd) {
+        return toEnd;
+    } else {
+        return fromValue / (fromEnd - fromStart) * (toEnd - toStart) + toStart;
+    }
+}
+
 export function getTextWidth(text: string, textSize: number): number {
     let p: p5 = this.p;
     p.push();
@@ -280,4 +296,11 @@ export function enableButton(button: p5.Element) {
 
 export function getNowTimestamp(): string {
     return new Date().toISOString();
+}
+
+// The maximum is inclusive and the minimum is inclusive
+export function getRandomIntInclusive(min: number, max: number): number {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }

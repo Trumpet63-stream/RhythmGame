@@ -30,7 +30,6 @@ export class ResultsDisplay {
         this.songTitle = songTitle;
         this.returnPage = returnPage;
         this.totalNotes = this.noteManager.getTotalNotes();
-        // OfflineStorageClient.saveReplay(currentRecording, noteManager, songTitle);
         let scoreProvider: ScoreProvider = new ScoreProvider(this.config, this.totalNotes);
         this.currentScore = scoreProvider.score(this.currentRecording.linearRecording);
 

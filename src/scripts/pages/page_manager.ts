@@ -11,6 +11,8 @@ import {Leaderboard} from "./leaderboard/leaderboard";
 import {Login} from "./login/login";
 import {Replays} from "./storage/replays";
 import {Replay} from "./replay/replay";
+import {Experiment} from "./experiment/experiment";
+import {ExperimentConfig} from "./experiment_start/experiment_config";
 
 export class PageDescription {
     public name: string;
@@ -58,6 +60,12 @@ export abstract class Pages {
 
     public static readonly REPLAY: PageDescription =
         new PageDescription("Replay", Replay.draw.bind(Replay));
+
+    public static readonly EXPERIMENT: PageDescription =
+        new PageDescription("Experiment", Experiment.draw.bind(Experiment));
+
+    public static readonly EXPERIMENT_CONFIG: PageDescription =
+        new PageDescription("Experiment Config", ExperimentConfig.draw.bind(ExperimentConfig));
 }
 
 export abstract class PageManager {
