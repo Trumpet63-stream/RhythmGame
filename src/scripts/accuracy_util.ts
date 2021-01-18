@@ -1,7 +1,6 @@
 import {Config} from "./config";
 import {Accuracy} from "./accuracy_manager";
 import {AccuracyEvent} from "./accuracy_event";
-import {AccuracyRecordingEntry} from "./accuracy_recording";
 
 export abstract class AccuracyUtil {
     public static BOO_NOTE_INDEX_FLAG = -1;
@@ -67,18 +66,18 @@ export abstract class AccuracyUtil {
         return null;
     }
 
-    public static eventIsAHit(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
+    public static eventIsAHit(accuracyEvent: { accuracyMillis: number }, config: Config) {
         return !this.eventIsABoo(accuracyEvent, config) &&
             !this.eventIsAMiss(accuracyEvent, config);
     }
 
-    public static eventIsABoo(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
+    public static eventIsABoo(accuracyEvent: { accuracyMillis: number }, config: Config) {
         let accuracies = config.accuracySettings;
         return accuracies[accuracies.length - 1].upperBound === null &&
             accuracyEvent.accuracyMillis >= accuracies[accuracies.length - 1].lowerBound;
     }
 
-    public static eventIsAMiss(accuracyEvent: AccuracyEvent | AccuracyRecordingEntry, config: Config) {
+    public static eventIsAMiss(accuracyEvent: { accuracyMillis: number }, config: Config) {
         let accuracies = config.accuracySettings;
         return accuracies[0].lowerBound === null &&
             accuracyEvent.accuracyMillis < accuracies[0].upperBound;

@@ -34,7 +34,7 @@ export class ScoreProvider {
         return this.numNotes * this.scoreHit(0);
     }
 
-    public scoreEntry(entry: AccuracyRecordingEntry): number {
+    public scoreEntry(entry: { accuracyMillis: number }): number {
         if (AccuracyUtil.eventIsAHit(entry, this.config)) {
             return this.scoreHit(entry.accuracyMillis);
         } else if (AccuracyUtil.eventIsAMiss(entry, this.config)) {

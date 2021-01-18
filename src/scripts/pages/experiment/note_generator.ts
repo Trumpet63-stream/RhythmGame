@@ -3,9 +3,10 @@ import {AccuracyObserver} from "../../accuracy_observer";
 import {Drawable} from "../../drawable";
 import {AccuracyEvent} from "../../accuracy_event";
 import {Note, NoteState, NoteType} from "../../note";
-import {getRandomIntInclusive, lerp, mapLinear} from "../../util";
+import {clampValueToRange, getRandomIntInclusive, lerp, mapLinear, mean} from "../../util";
 import {global} from "../../index";
 import * as p5 from "p5";
+import {ScoreProvider} from "../../score_provider";
 
 export class NoteGenerator implements AccuracyObserver, Drawable {
     private noteManager: NoteManager;
@@ -15,33 +16,46 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private targetNoteSpacingInSeconds: number;
     private currentNoteSpacingInSeconds: number;
     private lastDrawTimeInSeconds: number = 0;
-    private readonly spacingEasing: number = 0.4;
+    private readonly spacingEasing: number = 0.85;
     private lastNoteTrack: number = -1;
+    private scoreProvider: ScoreProvider;
+    private scoreMemory: number[];
 
     constructor(noteManager: NoteManager) {
         this.noteManager = noteManager;
         this.targetNoteSpacingInSeconds = this.maxNoteSpacingInSeconds;
         this.currentNoteSpacingInSeconds = this.maxNoteSpacingInSeconds;
+        this.scoreProvider = new ScoreProvider(global.config, undefined);
+        this.scoreMemory = [];
     }
 
     public update(accuracyEvent: AccuracyEvent): void {
-        let updateIncrement = this.targetNoteSpacingInSeconds * 0.2 * this.targetNoteSpacingInSeconds;
-        let incrementRatio;
-        let absoluteAccuracyMillis = Math.abs(accuracyEvent.accuracyMillis);
-        let worstAbsoluteAccuracyMillis = 100;
-        if (absoluteAccuracyMillis > worstAbsoluteAccuracyMillis) {
-            incrementRatio = 1;
-        } else {
-            incrementRatio = mapLinear(0, worstAbsoluteAccuracyMillis, -1, 1, absoluteAccuracyMillis);
+        let eventScore: number = this.scoreProvider.scoreEntry(accuracyEvent);
+        this.scoreMemory.push(eventScore);
+        let maxLength = 5;
+        if (this.scoreMemory.length > maxLength) {
+            this.scoreMemory.shift();
         }
+        let currentAverageScore = mean(this.scoreMemory);
+        let targetAverageScore = 48;
 
-        let extraReward = 1;
-        let extraPenalty = 2.2;
-        if (incrementRatio > 0) {
-            incrementRatio *= extraPenalty;
-        } else if (incrementRatio < 0) {
-            incrementRatio *= extraReward;
-        }
+        let maxPositive = this.scoreProvider.scoreEntry({accuracyMillis: 0}) - targetAverageScore;
+        let maxNegative = -10;
+        let averageScoreDifference = currentAverageScore - targetAverageScore;
+        averageScoreDifference = clampValueToRange(averageScoreDifference, maxNegative, maxPositive);
+        console.log(averageScoreDifference);
+
+        let updateIncrement = this.targetNoteSpacingInSeconds * 0.2 * this.targetNoteSpacingInSeconds;
+        let incrementRatio = mapLinear(maxPositive, maxNegative, -1, 1, averageScoreDifference);
+        console.log(incrementRatio);
+
+        // let extraReward = 1;
+        // let extraPenalty = 2.2;
+        // if (incrementRatio > 0) {
+        //     incrementRatio *= extraPenalty;
+        // } else if (incrementRatio < 0) {
+        //     incrementRatio *= extraReward;
+        // }
 
         this.targetNoteSpacingInSeconds += updateIncrement * incrementRatio;
         if (this.targetNoteSpacingInSeconds > this.maxNoteSpacingInSeconds) {
@@ -55,7 +69,7 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
         if (this.lastNoteTimeInSeconds - currentTimeInSeconds < 2) {
             let nextNoteTrack: number;
             do {
-                nextNoteTrack = getRandomIntInclusive(0, 3);
+                nextNoteTrack = getRandomIntInclusive(0, this.numTracks - 1);
             } while (nextNoteTrack == this.lastNoteTrack);
 
             this.addNote(nextNoteTrack, this.lastNoteTimeInSeconds + this.currentNoteSpacingInSeconds);

@@ -256,13 +256,13 @@ export function lerp(startValue: number, endValue: number, ratio: number) {
 }
 
 export function mapLinear(fromStart: number, fromEnd: number, toStart: number, toEnd: number, fromValue: number) {
-    if (fromValue < fromStart) {
-        return toStart;
-    } else if (fromValue > fromEnd) {
-        return toEnd;
+    let toValue = Math.abs(fromValue - fromStart) * Math.abs(toEnd - toStart) / Math.abs(fromEnd - fromStart);
+    if (toEnd > toStart) {
+        toValue = toValue + toStart;
     } else {
-        return fromValue / (fromEnd - fromStart) * (toEnd - toStart) + toStart;
+        toValue = -toValue + toStart;
     }
+    return clampValueToRange(toValue, Math.min(toStart, toEnd), Math.max(toStart, toEnd));
 }
 
 export function getTextWidth(text: string, textSize: number): number {
@@ -303,4 +303,18 @@ export function getRandomIntInclusive(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function mean(array: number[]) {
+    return array.reduce((sum, x) => sum + x) / array.length;
+}
+
+export function clampValueToRange(value: number, lowerBound: number, upperBound: number): number {
+    if (value < lowerBound) {
+        return lowerBound;
+    }
+    if (value > upperBound) {
+        return upperBound;
+    }
+    return value;
 }

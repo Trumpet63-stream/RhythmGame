@@ -8,6 +8,7 @@ import {Rectangle} from "./rectangle";
 import {NoteSkin} from "./note_skin";
 import {Point2D} from "./point_2d";
 import {Note, NoteState, NoteType} from "./note";
+import {clampValueToRange} from "./util";
 
 class NoteDisplay {
     private readonly centerX: number;
@@ -257,22 +258,12 @@ export class DisplayManager {
         } else {
             drawStartY = noteStartY;
         }
-        drawStartY = this.clampValueToRange(drawStartY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
+        drawStartY = clampValueToRange(drawStartY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
 
         let drawEndY = noteEndY
-        drawEndY = this.clampValueToRange(drawEndY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
+        drawEndY = clampValueToRange(drawEndY, this.bounds.topLeftY, this.bounds.topLeftY + this.bounds.height);
 
         new HoldConnector(centerX, drawStartY, drawEndY, noteStartY, noteEndY, this.displayConfig.getNoteSize()).draw();
-    }
-
-    private clampValueToRange(value: number, lowerBound: number, upperBound: number): number {
-        if (value < lowerBound) {
-            return lowerBound;
-        }
-        if (value > upperBound) {
-            return upperBound;
-        }
-        return value;
     }
 
     private drawReceptors() {
