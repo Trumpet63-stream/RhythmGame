@@ -9,6 +9,7 @@ import * as p5 from "p5";
 import {ScoreProvider} from "../../score_provider";
 import {AccuracyUtil} from "../../accuracy_util";
 import {Config} from "../../config";
+import {LineGraph} from "../../line_graph";
 
 /* Keep a record of the note spacing (or NPS) per track, so accuracy events can be associated with the instantaneous
  NPS. Then use that to update a player's expected NPS.
@@ -31,6 +32,7 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private tooEasyNps: number = 0.5;
     private tooHardNps: number = 0.5;
     private generatorState: number = 0;
+    private graph: LineGraph;
 
     constructor(noteManager: NoteManager) {
         this.noteManager = noteManager;
@@ -40,11 +42,13 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
         this.scoreMemory = [];
         this.npsMemory = getEmpty2dArray(this.numTracks);
         this.config = global.config;
+        this.graph = new LineGraph();
     }
 
     public update(accuracyEvent: AccuracyEvent): void {
         if (!AccuracyUtil.eventIsABoo(accuracyEvent, this.config)) {
             let eventNps: number = this.npsMemory[accuracyEvent.trackNumber].shift();
+            this.graph.addDataPoint(accuracyEvent.timeInSeconds, eventNps);
             let eventScore: number = this.scoreProvider.scoreEntry(accuracyEvent);
             // console.log(eventNps.toFixed(4) + "," + eventScore.toFixed(4));
             this.scoreMemory.push(eventScore);
@@ -126,6 +130,8 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
 
 
     public draw(currentTimeInSeconds: number): void {
+        this.graph.draw(currentTimeInSeconds);
+
         this.moveTowardsTargetNoteSpacing(currentTimeInSeconds);
         this.drawText();
         if (this.lastNoteTimeInSeconds - currentTimeInSeconds < 2) {
