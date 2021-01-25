@@ -12,7 +12,7 @@ export class LineGraph implements Drawable {
 
     constructor() {
         this.drawSpaceBounds = Rectangle.fromCenter(140, 320, 150, 100);
-        this.memory = []
+        this.memory = [];
         this.updateBounds(5);
     }
 

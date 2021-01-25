@@ -305,8 +305,14 @@ export function getRandomIntInclusive(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export function mean(array: number[]) {
+export function mean(array: number[]): number {
     return array.reduce((sum, x) => sum + x) / array.length;
+}
+
+export function stdDev(array: number[]): number {
+    let m: number = mean(array);
+    let distSum: number = array.reduce((sum, x) => sum + Math.pow(x - m, 2), 0);
+    return Math.sqrt(distSum / (array.length - 1));
 }
 
 export function clampValueToRange(value: number, lowerBound: number, upperBound: number): number {
