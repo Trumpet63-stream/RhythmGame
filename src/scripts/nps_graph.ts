@@ -5,7 +5,7 @@ import * as p5 from "p5";
 import {mapLinear} from "./util";
 import {Point2D} from "./point_2d";
 
-export class LineGraph implements Drawable {
+export class NpsGraph implements Drawable {
     private drawSpaceBounds: Rectangle;
     private numberSpaceBounds: Rectangle;
     private memory: { timeInSeconds: number, value: number }[];

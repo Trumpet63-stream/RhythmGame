@@ -3,18 +3,15 @@ import {AccuracyObserver} from "../../accuracy_observer";
 import {Drawable} from "../../drawable";
 import {AccuracyEvent} from "../../accuracy_event";
 import {Note, NoteState, NoteType} from "../../note";
-import {getEmpty2dArray, getRandomIntInclusive, mean, stdDev} from "../../util";
+import {clampValueToRange, getEmpty2dArray, getRandomIntInclusive, mean, stdDev} from "../../util";
 import {global} from "../../index";
 import * as p5 from "p5";
 import {ScoreProvider} from "../../score_provider";
 import {AccuracyUtil} from "../../accuracy_util";
 import {Config} from "../../config";
-import {LineGraph} from "../../line_graph";
+import {NpsGraph} from "../../nps_graph";
+import {ExponentialGraph} from "../../exponential_graph";
 
-/* Keep a record of the note spacing (or NPS) per track, so accuracy events can be associated with the instantaneous
- NPS. Then use that to update a player's expected NPS.
- From Elo: New rating = old rating + K * (actual score - expected score)
- */
 export class NoteGenerator implements AccuracyObserver, Drawable {
     private noteManager: NoteManager;
     private numTracks: number = 4;
@@ -23,9 +20,6 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private targetNoteSpacingInSeconds: number;
     private currentNoteSpacingInSeconds: number;
     private lastDrawTimeInSeconds: number = 0;
-    // private readonly spacingEasing: number = 0.85;
-    private readonly spacingEasing: number = 0.98;
-    private readonly maxPercentChangePerSecond: number = 10;
     private readonly maxNpsChangePerSecond: number = 0.3;
     private lastNoteTrack: number = -1;
     private scoreProvider: ScoreProvider;
@@ -33,10 +27,8 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private accuracyMemory: number[];
     private npsMemory: number[][]
     private config: Config;
-    private tooEasyNps: number = 0.5;
-    private tooHardNps: number = 0.5;
     private generatorState: number = 0;
-    private graph: LineGraph;
+    private graph: NpsGraph;
     private recording: any[];
     private generationMode = 1;
     private a: number = 20;
@@ -44,7 +36,8 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private c: number = -0.28;
     private dataBuckets: any[];
     private dataBucketStep: number = 1;
-    private maxBucketSize: number = 20;
+    private maxBucketSize: number = 40;
+    private exponentialModelGraph: ExponentialGraph;
 
     constructor(noteManager: NoteManager) {
         this.noteManager = noteManager;
@@ -55,10 +48,11 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
         this.accuracyMemory = [];
         this.npsMemory = getEmpty2dArray(this.numTracks);
         this.config = global.config;
-        this.graph = new LineGraph();
+        this.graph = new NpsGraph();
         this.recording = []
         global.saveToFile = this.saveToFile.bind(this);
         this.dataBuckets = [{range: {lowerBound: 0.5, upperBound: 0.5 + this.dataBucketStep}, data: []}];
+        this.exponentialModelGraph = new ExponentialGraph();
     }
 
     private saveToFile(filename = "temp.csv") {
@@ -101,9 +95,6 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
             let averageScore = mean(this.scoreMemory);
             let hardScore = 45;
 
-            // let updateIncrement = this.targetNoteSpacingInSeconds * 0.2 * this.targetNoteSpacingInSeconds;
-            // let incrementRatio = mapLinear(maxPositive, maxNegative, -1, 1, scoreDifference);
-            // let noteSpacingDelta = updateIncrement * incrementRatio;
             let noteSpacingDelta = 0;
 
             switch (this.generatorState) {
@@ -182,6 +173,8 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
             this.a = bestModel.a;
             this.b = bestModel.b;
             this.c = bestModel.c;
+            this.exponentialModelGraph.setDataBuckets(this.dataBuckets);
+            this.exponentialModelGraph.setModelParameters(this.a, this.b, this.c);
 
             let hardStdDev = 35;
             let targetNps = this.inverseModel(hardStdDev);
@@ -190,14 +183,12 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
                 let currentStdDev = stdDev(this.accuracyMemory);
                 let expectedStdDev = this.exponentialModel(eventNps);
                 if (currentStdDev != expectedStdDev) {
+                    console.log(targetNps, this.inverseModel(currentStdDev));
                     targetNps += (targetNps - this.inverseModel(currentStdDev)) / 2;
                 }
             }
+            targetNps = clampValueToRange(targetNps, 0.5, 30);
             this.targetNoteSpacingInSeconds = 1 / targetNps;
-
-            if (this.targetNoteSpacingInSeconds > this.maxNoteSpacingInSeconds) {
-                this.targetNoteSpacingInSeconds = this.maxNoteSpacingInSeconds;
-            }
         }
     }
 
@@ -241,7 +232,7 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     }
 
     private inverseModel(y: number, param = {a: this.a, b: this.b, c: this.c}): number {
-        return -1 / param.c * Math.log((y - param.a) / param.b);
+        return -1 / param.c * Math.log(Math.max(y - param.a, 0.01) / param.b);
     }
 
     private getResidual(x: number, targetValue: number, param = {a: this.a, b: this.b, c: this.c}) {
@@ -265,6 +256,7 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
 
     public draw(currentTimeInSeconds: number): void {
         this.graph.draw(currentTimeInSeconds);
+        this.exponentialModelGraph.draw(currentTimeInSeconds);
 
         this.moveTowardsTargetNoteSpacing(currentTimeInSeconds);
         this.drawText();
@@ -297,17 +289,6 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
                 this.currentNoteSpacingInSeconds = this.targetNoteSpacingInSeconds;
             }
         }
-        // if (this.targetNoteSpacingInSeconds > this.currentNoteSpacingInSeconds) {
-        //     this.currentNoteSpacingInSeconds *= Math.exp(this.maxPercentChangePerSecond / 100 * timeDifferenceInSeconds);
-        //     if (this.currentNoteSpacingInSeconds > this.targetNoteSpacingInSeconds) {
-        //         this.currentNoteSpacingInSeconds = this.targetNoteSpacingInSeconds;
-        //     }
-        // } else if (this.targetNoteSpacingInSeconds < this.currentNoteSpacingInSeconds) {
-        //     this.currentNoteSpacingInSeconds *= Math.exp(-this.maxPercentChangePerSecond / 100 * timeDifferenceInSeconds);
-        //     if (this.currentNoteSpacingInSeconds < this.targetNoteSpacingInSeconds) {
-        //         this.currentNoteSpacingInSeconds = this.targetNoteSpacingInSeconds;
-        //     }
-        // }
     }
 
     private drawText() {
