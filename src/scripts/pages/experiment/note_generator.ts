@@ -38,6 +38,9 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     private dataBucketStep: number = 1;
     private maxBucketSize: number = 40;
     private exponentialModelGraph: ExponentialGraph;
+    private currentPattern: number[] = [1, 2, 0, 3, 2];
+    private currentPatternIndex: number = -1;
+    private numPatternIterations = -1;
 
     constructor(noteManager: NoteManager) {
         this.noteManager = noteManager;
@@ -70,10 +73,16 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     }
 
     public update(accuracyEvent: AccuracyEvent): void {
-        if (this.generationMode === 0) {
-            this.mode0(accuracyEvent);
-        } else {
-            this.mode1(accuracyEvent);
+        switch (this.generationMode) {
+            case 0:
+                this.mode0(accuracyEvent);
+                break;
+            case 1:
+                this.mode1(accuracyEvent);
+                break;
+            case 2:
+                this.mode2(accuracyEvent);
+                break
         }
     }
 
@@ -129,6 +138,70 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
     }
 
     private mode1(accuracyEvent: AccuracyEvent): void {
+        if (!AccuracyUtil.eventIsABoo(accuracyEvent, this.config)) {
+            let eventNps: number = this.npsMemory[accuracyEvent.trackNumber].shift();
+            let eventScore: number = this.scoreProvider.scoreEntry(accuracyEvent);
+            let recordString = accuracyEvent.noteIndex + "," + accuracyEvent.trackNumber + "," +
+                accuracyEvent.timeInSeconds + "," + accuracyEvent.accuracyName + "," +
+                accuracyEvent.accuracyMillis + "," + eventScore + "," + eventNps;
+            this.recording.push(recordString);
+            this.graph.addDataPoint(accuracyEvent.timeInSeconds, eventNps);
+            let accuracyMillis: number = accuracyEvent.accuracyMillis;
+            if (accuracyMillis === -Infinity) {
+                accuracyMillis = AccuracyUtil.getLatestMillis(this.config);
+            }
+            this.addToBucket(eventNps, accuracyMillis);
+
+            this.scoreMemory.push(accuracyMillis);
+            let maxLength: number = 15;
+            if (this.scoreMemory.length > maxLength) {
+                this.scoreMemory.shift();
+            }
+
+            let modelsToTry = [
+                {a: this.a, b: this.b, c: this.c},
+                {a: this.a * 1.005, b: this.b, c: this.c},
+                {a: this.a, b: this.b * 1.005, c: this.c},
+                {a: this.a, b: this.b, c: this.c * 1.001},
+                {a: this.a * 0.995, b: this.b, c: this.c},
+                {a: this.a, b: this.b * 0.995, c: this.c},
+                {a: this.a, b: this.b, c: this.c * 0.999}
+            ]
+            let bestModel = modelsToTry[0];
+            let bestError = this.getError();
+            let bestIndex = 0;
+            for (let i = 1; i < modelsToTry.length; i++) {
+                let currentModel: any = modelsToTry[i];
+                let currentError: number = this.getError(currentModel);
+                if (currentError < bestError) {
+                    bestError = currentError;
+                    bestModel = currentModel;
+                    bestIndex = i;
+                }
+            }
+            this.a = bestModel.a;
+            this.b = bestModel.b;
+            this.c = bestModel.c;
+            this.exponentialModelGraph.setDataBuckets(this.dataBuckets);
+            this.exponentialModelGraph.setModelParameters(this.a, this.b, this.c);
+
+            let hardStdDev = 35;
+            let targetNps = this.inverseModel(hardStdDev);
+
+            if (this.accuracyMemory.length === maxLength) {
+                let currentStdDev = stdDev(this.accuracyMemory);
+                let expectedStdDev = this.exponentialModel(eventNps);
+                if (currentStdDev != expectedStdDev) {
+                    console.log(targetNps, this.inverseModel(currentStdDev));
+                    targetNps += (targetNps - this.inverseModel(currentStdDev)) / 2;
+                }
+            }
+            targetNps = clampValueToRange(targetNps, 0.5, 30);
+            this.targetNoteSpacingInSeconds = 1 / targetNps;
+        }
+    }
+
+    private mode2(accuracyEvent: AccuracyEvent): void {
         if (!AccuracyUtil.eventIsABoo(accuracyEvent, this.config)) {
             let eventNps: number = this.npsMemory[accuracyEvent.trackNumber].shift();
             let eventScore: number = this.scoreProvider.scoreEntry(accuracyEvent);
@@ -261,10 +334,23 @@ export class NoteGenerator implements AccuracyObserver, Drawable {
         this.moveTowardsTargetNoteSpacing(currentTimeInSeconds);
         this.drawText();
         if (this.lastNoteTimeInSeconds - currentTimeInSeconds < 2) {
-            let nextNoteTrack: number;
-            do {
-                nextNoteTrack = getRandomIntInclusive(0, this.numTracks - 1);
-            } while (nextNoteTrack == this.lastNoteTrack);
+            // do {
+            //     nextNoteTrack = getRandomIntInclusive(0, this.numTracks - 1);
+            // } while (nextNoteTrack == this.lastNoteTrack);
+            this.currentPatternIndex = (this.currentPatternIndex + 1) % this.currentPattern.length;
+            if (this.currentPatternIndex === 0) {
+                this.numPatternIterations++;
+            }
+            if (this.numPatternIterations === 8) {
+                this.numPatternIterations = 0;
+                let newPattern = [];
+                for (let i = 0; i < this.currentPattern.length; i++) {
+                    newPattern.push(getRandomIntInclusive(0, this.numTracks - 1));
+                }
+                this.currentPattern = newPattern;
+            }
+            let nextNoteTrack = this.currentPattern[this.currentPatternIndex];
+
 
             this.addNote(nextNoteTrack, this.lastNoteTimeInSeconds + this.currentNoteSpacingInSeconds);
             this.npsMemory[nextNoteTrack].push(1 / this.currentNoteSpacingInSeconds);

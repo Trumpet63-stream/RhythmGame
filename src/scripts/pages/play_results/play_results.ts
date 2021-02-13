@@ -7,10 +7,10 @@ import {PutResponse, PutResponseCode} from "../../database_client/put_response";
 import {OfflineStorageClient} from "../../offline_storage_client/offline_storage_client";
 import {AccuracyRecording} from "../../accuracy_recording";
 import {NoteManager} from "../../note_manager";
-import {StorageUtil} from "../../storage_util";
 import {DatabaseClient} from "../../database_client/database_client";
 import {disableButton, enableButton} from "../../util";
 import {ReplayCompressor} from "../../replay_compressor";
+import {StorageUtil} from "../../storage_util";
 import {PutRequest} from "../../database_client/put_request";
 
 export interface ResultsMessage {
@@ -63,7 +63,7 @@ export abstract class PlayResults {
                 this.submitScore()
                     .then(response => this.updateScoreSubmissionText(onlineScoreSubmitStatus.element, response))
                     .catch(reason => {
-                        console.error(reason)
+                        console.error(reason);
                         onlineScoreSubmitStatus.element.html("Score submission failed");
                     });
             }
@@ -77,7 +77,7 @@ export abstract class PlayResults {
     }
 
     private static submitScore(): Promise<PutResponse> {
-        return new Promise(() => new DatabaseClient(global.config.username, global.config.password))
+        return Promise.resolve(new DatabaseClient(global.config.username, global.config.password))
             .then((client: DatabaseClient) => {
                 let songhash: string = StorageUtil.getKeyFromTracks(this.messageFromLastPlay.noteManager.tracks);
                 let putRequest: PutRequest = {

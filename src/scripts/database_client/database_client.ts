@@ -73,7 +73,6 @@ export class DatabaseClient {
 
     public async putIfBetterScore(request: PutRequest): Promise<PutResponse> {
         let key: string = this.username.value + "_" + request.songhash;
-
         let params = {
             TableName: 'rhythm-scores',
             Item: {
