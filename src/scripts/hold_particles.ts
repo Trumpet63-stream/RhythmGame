@@ -19,7 +19,7 @@ export class HoldParticles {
         this.numTracks = numTracks;
         this.displayManager = displayManager;
         let p: p5 = global.p5Scene.sketchInstance;
-        this.gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
+        this.gravityDirection = config.scrollDirection === ScrollDirection.DOWN ? 1 : -1;
         let gravity: p5.Vector = p.createVector(0, 2000 * this.gravityDirection);
 
         this.particleSystems = [];

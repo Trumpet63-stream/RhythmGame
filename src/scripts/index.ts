@@ -10,3 +10,9 @@ global.onlinePlaylist = new OnlinePlaylist();
 OfflineStorageClient.loadConfig()
     .then((config) => global.config = config)
     .then(() => global.storageList = new StorageList(global.config))
+global.experimentConfig = {
+    hardStdDev: 35,
+    numTracks: 4,
+    chordSizeSequence: ["1A"],
+    patternSelected: "Stream",
+};

@@ -188,7 +188,7 @@ export class DisplayManager {
     public getNoteCenterY(noteTimeInSeconds: number, currentTimeInSeconds: number) {
         let noteYOffset = this.displayConfig.getPixelsPerSecond() * (noteTimeInSeconds - currentTimeInSeconds);
         let receptorYOffset = this.displayConfig.getReceptorYPercent() / 100 * this.bounds.height;
-        if (this.displayConfig.getScrollDirection() === ScrollDirection.Up) {
+        if (this.displayConfig.getScrollDirection() === ScrollDirection.UP) {
             return receptorYOffset + noteYOffset + this.bounds.topLeftY;
         } else {
             return this.bounds.height - (receptorYOffset + noteYOffset) + this.bounds.topLeftY;

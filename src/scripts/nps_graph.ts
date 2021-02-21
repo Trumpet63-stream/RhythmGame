@@ -26,7 +26,7 @@ export class NpsGraph implements Drawable {
     public addDataPoint(timeInSeconds: number, value: number): void {
         this.memory.push({timeInSeconds: timeInSeconds, value: value});
         if (this.memory.length > 0) {
-            if (timeInSeconds - this.memory[0].timeInSeconds > 60) {
+            while (timeInSeconds - this.memory[0].timeInSeconds > 60) {
                 this.memory.shift();
             }
         }

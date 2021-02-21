@@ -1,4 +1,8 @@
+import {getEnumReverseMap} from "./enum_util";
+
 export enum ScrollDirection {
-    Up,
-    Down,
+    UP = "Up",
+    DOWN = "Down",
 }
+
+export let ScrollDirectionReverseMap: Map<string, ScrollDirection> = getEnumReverseMap(ScrollDirection);

@@ -1,15 +1,12 @@
 import * as p5 from "p5";
-import {ScrollDirection} from "../../scroll_direction";
+import {ScrollDirection, ScrollDirectionReverseMap} from "../../scroll_direction";
 import {
-    booleanToYesNo,
     createLabeledInput,
     createLabeledSelect,
     createLabeledTextArea,
     createUserInput,
     drawHeading,
     setElementToBottom,
-    YesNo,
-    yesNoToBoolean
 } from "../../ui_util";
 import {global} from "../../index";
 import {Accuracy} from "../../accuracy_manager";
@@ -17,9 +14,10 @@ import {DOMWrapper} from "../../dom_wrapper";
 import {Config} from "../../config";
 import {KeyBindingsUi} from "./key_bindings_ui";
 import {Ticker, TickerState} from "./ticker";
-import {getEnum, getFloat} from "../../util";
+import {getFloat, isString} from "../../util";
 import {PageManager, Pages} from "../page_manager";
 import {OfflineStorageClient} from "../../offline_storage_client/offline_storage_client";
+import {booleanToYesNo, YesNo, YesNoReverseMap, yesNoToBoolean} from "../../enum_util";
 
 export abstract class Options {
     public static OPTIONS_CLASS: string = "options";
@@ -90,7 +88,8 @@ export abstract class Options {
             this.showScrollDirectionInfo.bind(this),
             this.showScrollDirectionError.bind(this),
             (input: number | string) => {
-                global.config.scrollDirection = getEnum(input, ScrollDirection);
+                global.config.scrollDirection = <string>input;
+                console.log(global.config.scrollDirection);
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -159,7 +158,7 @@ export abstract class Options {
             this.showAccuracyFlashInfo.bind(this),
             this.showAccuracyFlashError.bind(this),
             (input: number | string) => {
-                global.config.isAccuracyFlashEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isAccuracyFlashEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -171,7 +170,7 @@ export abstract class Options {
             this.showAccuracyParticlesInfo.bind(this),
             this.showAccuracyParticlesError.bind(this),
             (input: number | string) => {
-                global.config.isAccuracyParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isAccuracyParticlesEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -183,7 +182,7 @@ export abstract class Options {
             this.showAccuracyTextInfo.bind(this),
             this.showAccuracyTextError.bind(this),
             (input: number | string) => {
-                global.config.isAccuracyTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isAccuracyTextEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -195,7 +194,7 @@ export abstract class Options {
             this.showHoldParticlesInfo.bind(this),
             this.showHoldParticlesError.bind(this),
             (input: number | string) => {
-                global.config.isHoldParticlesEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isHoldParticlesEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -206,7 +205,7 @@ export abstract class Options {
             this.showHoldGlowInfo.bind(this),
             this.showHoldGlowError.bind(this),
             (input: number | string) => {
-                global.config.isHoldGlowEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isHoldGlowEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -218,7 +217,7 @@ export abstract class Options {
             this.showComboTextInfo.bind(this),
             this.showComboTextError.bind(this),
             (input: number | string) => {
-                global.config.isComboTextEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isComboTextEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -230,7 +229,7 @@ export abstract class Options {
             this.showLiveComparisonInfo.bind(this),
             this.showLiveComparisonError.bind(this),
             (input: number | string) => {
-                global.config.isLiveComparisonEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isLiveComparisonEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -242,7 +241,7 @@ export abstract class Options {
             this.showErrorBarInfo.bind(this),
             this.showErrorBarError.bind(this),
             (input: number | string) => {
-                global.config.isErrorBarEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isErrorBarEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -254,7 +253,7 @@ export abstract class Options {
             this.showErrorBarBackgroundInfo.bind(this),
             this.showErrorBarBackgroundError.bind(this),
             (input: number | string) => {
-                global.config.isErrorBarBackgroundEnabled = yesNoToBoolean(getEnum(input, YesNo));
+                global.config.isErrorBarBackgroundEnabled = yesNoToBoolean(YesNoReverseMap.get(<string>input));
                 OfflineStorageClient.saveConfig(<Config>global.config);
             },
             scrollDiv.element);
@@ -309,7 +308,11 @@ export abstract class Options {
     }
 
     private static isValidScrollDirection(value: string | number): boolean {
-        let enumValue: ScrollDirection = getEnum(value, ScrollDirection);
+        if (!isString(value)) {
+            return false;
+        }
+        let stringValue: string = <string>value;
+        let enumValue: ScrollDirection = ScrollDirectionReverseMap.get(stringValue);
         return enumValue !== undefined;
     }
 
@@ -328,7 +331,7 @@ export abstract class Options {
 
     private static showReceptorPositionInfo(): void {
         let oppositeDirection: string;
-        if (global.config.scrollDirection === ScrollDirection.Down) {
+        if (global.config.scrollDirection === ScrollDirection.DOWN) {
             oppositeDirection = "up";
         } else {
             oppositeDirection = "down";
@@ -536,8 +539,12 @@ export abstract class Options {
     }
 
     private static isValidYesNo(value: string | number) {
-        let enumValue: YesNo = getEnum(value, YesNo);
-        return enumValue !== undefined;
+        if (!isString(value)) {
+            return false;
+        }
+        let stringValue: string = <string>value;
+        let enumMember: YesNo = YesNoReverseMap.get(stringValue);
+        return enumMember !== undefined;
     }
 
     private static showSelectError() {

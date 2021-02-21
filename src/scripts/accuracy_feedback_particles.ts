@@ -37,7 +37,7 @@ export class AccuracyFeedbackParticles implements AccuracyObserver, Drawable {
         }
 
         let p: p5 = global.p5Scene.sketchInstance;
-        this.gravityDirection = config.scrollDirection === ScrollDirection.Down ? 1 : -1;
+        this.gravityDirection = config.scrollDirection === ScrollDirection.DOWN ? 1 : -1;
         let gravity: p5.Vector = p.createVector(0, 2000 * this.gravityDirection);
         this.particleSystems = [];
         for (let i = 0; i < this.numTracks; i++) {

@@ -23,7 +23,7 @@ export class ErrorBar implements AccuracyObserver, Drawable {
 
     constructor(config: Config) {
         this.config = config;
-        let y: number = this.config.scrollDirection === ScrollDirection.Down ? 440 : 40;
+        let y: number = this.config.scrollDirection === ScrollDirection.DOWN ? 440 : 40;
         this.bounds = Rectangle.fromCenter(360, y, 260, 16);
         let p: p5 = global.p5Scene.sketchInstance;
         this.spectrum = [

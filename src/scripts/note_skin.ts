@@ -158,7 +158,7 @@ export class NoteSkin {
         // The following block allows us to use the same drawing method for both upscroll and downscroll
         let bottomPartialTileHeight: number;
         let topPartialTileHeight: number;
-        if (global.config.scrollDirection === ScrollDirection.Up) {
+        if (global.config.scrollDirection === ScrollDirection.UP) {
             bottomPartialTileHeight = endPartialTileHeight;
             topPartialTileHeight = startPartialTileHeight;
         } else {
@@ -167,8 +167,8 @@ export class NoteSkin {
         }
         let drawMinY = Math.min(drawStartY, drawEndY);
         let drawMaxY = Math.max(drawStartY, drawEndY);
-        let isReversed = global.config.scrollDirection === ScrollDirection.Up;
-        let isDrawnFromBottom = global.config.scrollDirection === ScrollDirection.Up;
+        let isReversed = global.config.scrollDirection === ScrollDirection.UP;
+        let isDrawnFromBottom = global.config.scrollDirection === ScrollDirection.UP;
         if (endPartialTileHeight === connectorHeight) {
             isDrawnFromBottom = !isDrawnFromBottom;
         }
@@ -186,7 +186,7 @@ export class NoteSkin {
 
     public drawTail(image: p5.Image, trackNumber: number, numTracks: number, centerX: number, centerY: number, noteSize: number) {
         let p: p5 = global.p5Scene.sketchInstance;
-        if (global.config.scrollDirection === ScrollDirection.Up) {
+        if (global.config.scrollDirection === ScrollDirection.UP) {
             p.push();
             p.angleMode(p.DEGREES);
             p.translate(centerX, centerY);
@@ -200,7 +200,7 @@ export class NoteSkin {
 
     private getNoteEndOffset(noteEndY: number, drawEndY: number) {
         let offset: number;
-        if (global.config.scrollDirection === ScrollDirection.Up) {
+        if (global.config.scrollDirection === ScrollDirection.UP) {
             offset = noteEndY - drawEndY;
         } else {
             offset = drawEndY - noteEndY;

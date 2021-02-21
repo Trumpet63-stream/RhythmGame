@@ -60,13 +60,6 @@ export function setConfigKeyBinding(trackNumber: number, numTracks: number, keyB
     OfflineStorageClient.saveConfig(<Config>global.config);
 }
 
-// Expects e to be an enum
-export function enumToStringArray(e: any): string[] {
-    return Object.values(e).filter((value) => typeof value === "string").map((value) => {
-        return String(value)
-    });
-}
-
 function getIndexOfTrackNumberBinding(trackNumber: number, bindings: { trackNumber: number, keyCode: number, string: string }[]) {
     for (let i = 0; i < bindings.length; i++) {
         if (bindings[i].trackNumber === trackNumber) {
@@ -215,9 +208,6 @@ export function initExperimentDisplay(numTracks: number, returnPage: PageDescrip
     global.experimentDisplay = new ExperimentDisplay(tracks, global.config, global.p5Scene, returnPage, songTitle);
 }
 
-export function enumToString(TheEnum: any, value: any) {
-    return TheEnum[value as keyof typeof TheEnum].toString();
-}
 
 export function getFloat(value: string | number): number {
     if (typeof value === "string") {
@@ -231,11 +221,6 @@ export function getInt(value: string | number): number {
         return parseInt(value);
     }
     return value;
-}
-
-export function getEnum(value: string | number, EnumType: any): any {
-    let string: string = String(value);
-    return EnumType[string as keyof typeof EnumType];
 }
 
 export function logArray(array: any[]) {
@@ -323,4 +308,8 @@ export function clampValueToRange(value: number, lowerBound: number, upperBound:
         return upperBound;
     }
     return value;
+}
+
+export function isString(value: number | string) {
+    return typeof value === "string";
 }

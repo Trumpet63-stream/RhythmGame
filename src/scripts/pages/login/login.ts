@@ -5,6 +5,7 @@ import {DOMWrapper} from "../../dom_wrapper";
 import {Config} from "../../config";
 import {PageManager, Pages} from "../page_manager";
 import {OfflineStorageClient} from "../../offline_storage_client/offline_storage_client";
+import {isString} from "../../util";
 
 export abstract class Login {
     private static LOGIN_CLASS: string = "login";
@@ -37,7 +38,7 @@ export abstract class Login {
             submitButton.element.mouseClicked(() => {
                 let username: string | number = usernameInput.element.value();
                 let password: string | number = passwordInput.element.value();
-                if (this.isString(username) && this.isString(password)) {
+                if (isString(username) && isString(password)) {
                     config.username = <string>username;
                     if (!this.isObfuscated(<string>password)) {
                         config.password = <string>password;
@@ -65,10 +66,6 @@ export abstract class Login {
             return "";
         }
         return s;
-    }
-
-    private static isString(value: number | string) {
-        return typeof value === "string";
     }
 
     private static isObfuscated(s: string) {

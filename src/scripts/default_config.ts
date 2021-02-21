@@ -3,7 +3,7 @@ import {ScrollDirection} from "./scroll_direction";
 
 export let DEFAULT_CONFIG = {
     pixelsPerSecond: 550,
-    scrollDirection: ScrollDirection.Down,
+    scrollDirection: ScrollDirection.DOWN,
     receptorYPercent: 15,
     additionalOffsetInSeconds: 0,
     // This is a symmetrical version of FFR's accuracy

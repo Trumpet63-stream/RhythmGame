@@ -147,9 +147,11 @@ export abstract class OfflineStorageClient {
 
     private static stringifyKeyBindings(config: Config): string {
         let string = "[";
+        let trackKeyBindingSettings: string[] = [];
         config.keyBindings.forEach((value: KeyBinding[], key: number) => {
-            string += "[" + key + "," + JSON.stringify(value) + "]";
+            trackKeyBindingSettings.push("[" + key + "," + JSON.stringify(value) + "]");
         })
+        string += trackKeyBindingSettings.join(",");
         string += "]";
         return string;
     }
@@ -161,9 +163,9 @@ export abstract class OfflineStorageClient {
                 configJSON.keyBindings = new Map(configJSON.keyBindings);
                 let config: Config = new Config(configJSON);
                 console.log("Config loaded from offline storage");
-                console.log(config);
                 return config;
-            }).catch(() => {
+            }).catch((reason) => {
+                console.error(reason);
                 console.log("No valid offline storage config found, returning default config");
                 return new Config({});
             })

@@ -1,9 +1,10 @@
 import * as p5 from "p5";
 import {global} from "./index";
 import {PageManager, Pages} from "./pages/page_manager";
-import {enumToString, enumToStringArray, getFirstElementByTagName,} from "./util";
+import {getFirstElementByTagName,} from "./util";
 import {DOMWrapper} from "./dom_wrapper";
 import {Options} from "./pages/options/options";
+import {getEnumValues} from "./enum_util";
 
 export function drawHeading() {
     let p: p5 = global.p5Scene.sketchInstance;
@@ -147,7 +148,7 @@ function createCheckbox(p: p5, initialState: boolean): p5.Element {
 }
 
 // TODO: check that optionsEnum is actually an Enum, and initialEnumValue is a value for that enum
-export function createLabeledSelect(labelString: string, selectId: string, OptionsEnum: any, initialEnumValue: any,
+export function createLabeledSelect(labelString: string, selectId: string, OptionsEnum: any, initialEnumMember: any,
                                     customClass: string): { element: p5.Element, alreadyExists: boolean } {
     let p: p5 = global.p5Scene.sketchInstance;
 
@@ -176,13 +177,13 @@ export function createLabeledSelect(labelString: string, selectId: string, Optio
     }, selectId + "Container");
 
     if (!container.alreadyExists) {
-        let initialOptions = enumToStringArray(OptionsEnum);
+        let initialOptions = getEnumValues(OptionsEnum);
         for (let i = 0; i < initialOptions.length; i++) {
             // @ts-ignore
             select.option(initialOptions[i]);
         }
         // @ts-ignore
-        select.selected(enumToString(OptionsEnum, initialEnumValue));
+        select.selected(initialEnumMember);
 
         let options: HTMLCollection = select.elt.children;
         for (let i = 0; i < options.length; i++) {
@@ -298,27 +299,6 @@ export function createLabeledCheckbox(labelString: string, checkboxId: string, i
     }, checkboxId + "Container");
 
     return {element: checkbox, alreadyExists: container.alreadyExists};
-}
-
-export enum YesNo {
-    Yes,
-    No
-}
-
-export function booleanToYesNo(boolean: boolean): YesNo {
-    if (boolean) {
-        return YesNo.Yes;
-    } else {
-        return YesNo.No;
-    }
-}
-
-export function yesNoToBoolean(yesNo: YesNo): boolean {
-    if (yesNo === YesNo.Yes) {
-        return true;
-    } else {
-        return false;
-    }
 }
 
 // https://discourse.processing.org/t/how-to-organize-radio-buttons-in-separate-lines/10041/5

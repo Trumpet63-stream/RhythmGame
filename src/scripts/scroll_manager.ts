@@ -18,7 +18,7 @@ export class ScrollManager extends GameTimeManager {
             if (scrollingAllowed) {
                 let timeChangeInSeconds = (e.deltaY * 0.2) / 1000;
                 let currentTimeInSeconds = this.getCurrentTimeInSeconds();
-                if (this.config.scrollDirection === ScrollDirection.Down) {
+                if (this.config.scrollDirection === ScrollDirection.DOWN) {
                     this.setCurrentTimeInSeconds(currentTimeInSeconds - timeChangeInSeconds);
                 } else {
                     this.setCurrentTimeInSeconds(currentTimeInSeconds + timeChangeInSeconds);

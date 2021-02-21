@@ -77,7 +77,13 @@ export abstract class PlayResults {
     }
 
     private static submitScore(): Promise<PutResponse> {
-        return Promise.resolve(new DatabaseClient(global.config.username, global.config.password))
+        return new Promise((resolve, reject) => {
+            try {
+                resolve(new DatabaseClient(global.config.username, global.config.password));
+            } catch (e) {
+                reject(e);
+            }
+        })
             .then((client: DatabaseClient) => {
                 let songhash: string = StorageUtil.getKeyFromTracks(this.messageFromLastPlay.noteManager.tracks);
                 let putRequest: PutRequest = {
