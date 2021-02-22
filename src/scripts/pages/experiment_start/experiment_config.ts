@@ -143,15 +143,15 @@ export abstract class ExperimentConfig {
             case PatternOption.JUMPSTREAM_2_3:
                 return ["1A", "2A", "2A"];
             case PatternOption.LIGHT_HANDSTREAM:
-                return ["1A", "1A", "1A", "3A"]
+                return ["1A", "1A", "1A", "3A"];
             case PatternOption.HEAVY_HANDSTREAM:
                 return ["1A", "2A", "1A", "3A"];
             case PatternOption.LIGHT_CHORDJACKS:
                 return ["2"];
             case PatternOption.MEDIUM_CHORDJACKS:
-                return ["2", "2", "3"];
-            case PatternOption.HEAVY_CHORDJACKS:
                 return ["2", "3"];
+            case PatternOption.HEAVY_CHORDJACKS:
+                return ["3"];
         }
     }
 
